@@ -25,8 +25,14 @@ export interface LumaEvent {
   url: string;
 }
 
-/** Public Luma calendar — also the target of the /events embed. */
+/** Public Luma calendar — where every "reserve" link ultimately lands. */
 export const lumaCalendarUrl = 'https://lu.ma/gr8fulproject';
+
+/** Calendar this site is bound to. Drives the /events embed. */
+export const lumaCalendarId = 'cal-5Jvx9o7XeW0VVca';
+
+/** Luma's own calendar embed. Live — never built from the data below. */
+export const lumaEmbedUrl = `https://lu.ma/embed/calendar/${lumaCalendarId}/events`;
 
 const events: LumaEvent[] = [
   {
