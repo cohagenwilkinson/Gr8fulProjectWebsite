@@ -15,7 +15,25 @@ import { navLinks } from '../data/site';
     </a>
 
     <nav class="header__nav" aria-label="Primary">
-      {navLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+      {
+        navLinks.map((link) =>
+          link.children ? (
+            <div class="header__group">
+              <a href={link.href} class="header__parent">
+                {link.label}
+                <span class="header__caret" aria-hidden="true" />
+              </a>
+              <div class="header__dropdown">
+                {link.children.map((child) => (
+                  <a href={child.href}>{child.label}</a>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <a href={link.href}>{link.label}</a>
+          )
+        )
+      }
     </nav>
 
     <a href="/pledge" class="g8-btn g8-btn--primary g8-btn--sm g8-btn--shadow header__cta">
@@ -34,7 +52,18 @@ import { navLinks } from '../data/site';
   </div>
 
   <nav class="header__menu" id="header-menu" aria-label="Primary, compact" hidden>
-    {navLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+    {
+      navLinks.map((link) => (
+        <>
+          <a href={link.href}>{link.label}</a>
+          {link.children?.map((child) => (
+            <a href={child.href} class="header__menu-child">
+              {child.label}
+            </a>
+          ))}
+        </>
+      ))
+    }
   </nav>
 </header>
 
@@ -94,6 +123,76 @@ import { navLinks } from '../data/site';
   }
   .header__nav a:hover { color: var(--g8-ember); }
 
+  /* Parent items open on hover and on keyboard focus, so the dropdown is
+     reachable by tab as well as by mouse. The parent is still a real link,
+     which is what touch devices land on. */
+  .header__group { position: relative; }
+
+  .header__parent {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .header__caret {
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid currentColor;
+    transition: transform var(--g8-dur-fast) var(--g8-ease);
+  }
+  .header__group:hover .header__caret,
+  .header__group:focus-within .header__caret {
+    transform: rotate(180deg);
+  }
+
+  .header__dropdown {
+    position: absolute;
+    top: calc(100% + 17px);
+    left: 50%;
+    display: flex;
+    flex-direction: column;
+    min-width: 172px;
+    padding: 6px;
+    background: var(--g8-chalk);
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    border-radius: var(--g8-radius-md);
+    box-shadow: var(--g8-shadow-soft);
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -4px);
+    transition:
+      opacity var(--g8-dur-fast) var(--g8-ease),
+      transform var(--g8-dur-fast) var(--g8-ease),
+      visibility var(--g8-dur-fast);
+  }
+
+  /* Invisible bridge across the header padding, so travelling from the
+     parent down to the panel doesn't cross a dead zone and close it. */
+  .header__dropdown::before {
+    content: '';
+    position: absolute;
+    inset: -17px 0 100%;
+  }
+
+  .header__group:hover .header__dropdown,
+  .header__group:focus-within .header__dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+  }
+
+  .header__dropdown a {
+    padding: 9px 12px;
+    border-radius: var(--g8-radius-sm);
+    white-space: nowrap;
+    transition:
+      color var(--g8-dur-fast) var(--g8-ease),
+      background var(--g8-dur-fast) var(--g8-ease);
+  }
+  .header__dropdown a:hover { background: var(--g8-surface); }
+
   /* Compact nav — hidden until the bar runs out of room. */
   .header__cta { white-space: nowrap; }
 
@@ -131,6 +230,12 @@ import { navLinks } from '../data/site';
     border-bottom: 1px solid var(--g8-border);
   }
   .header__menu a:hover { color: var(--g8-ember); }
+
+  .header__menu-child {
+    padding-left: 18px;
+    font-size: 15px;
+    color: var(--g8-text-muted);
+  }
 
   @media (max-width: 900px) {
     .header__bar { gap: 20px; }

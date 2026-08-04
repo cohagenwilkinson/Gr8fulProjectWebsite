@@ -10,10 +10,27 @@ export const site = {
   contactEmail: 'hello@gr8fulproject.com',
 };
 
-export const navLinks = [
+export interface NavLink {
+  label: string;
+  href: string;
+  /**
+   * Programmes that live under a parent. The parent stays a real destination —
+   * the header opens these on hover and keyboard focus, and the compact menu
+   * lists them indented underneath.
+   */
+  children?: Array<{ label: string; href: string }>;
+}
+
+export const navLinks: NavLink[] = [
   { label: 'Podcast', href: '/podcast' },
-  { label: 'Jams', href: '/jams' },
-  { label: 'Events', href: '/events' },
+  {
+    label: 'Events',
+    href: '/events',
+    children: [
+      { label: 'Gr8ful Jams', href: '/jams' },
+      { label: 'PB&J Service', href: '/pbj' },
+    ],
+  },
   { label: 'The Van', href: '/van' },
   { label: 'About', href: '/about' },
 ];
