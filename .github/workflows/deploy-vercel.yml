@@ -38,6 +38,11 @@ jobs:
           fi
           if [ -n "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
             export VERCEL_PROJECT_ID="${{ secrets.VERCEL_PROJECT_ID }}"
+          else
+            # Without a project ID the CLI derives the project name from the
+            # checkout directory, which is rejected for containing uppercase
+            # letters. Link (creating on first run) an explicit lowercase name.
+            vercel link --yes --project gr8fulproject-site --token "${{ secrets.VERCEL_TOKEN }}"
           fi
           TARGET="${{ inputs.target || 'production' }}"
           if [ "$TARGET" = "production" ]; then
