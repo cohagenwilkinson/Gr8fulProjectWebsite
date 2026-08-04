@@ -3,9 +3,8 @@ import ColorRibbon from './ColorRibbon.astro';
 import { site, socialLinks } from '../data/site';
 
 /**
- * Shared chrome. One row: socials + email left, mobius center, pledge right.
- * Privacy sits alone at the very bottom. No form here by design — the
- * footer CTA links to /pledge.
+ * Shared chrome. One row: socials + email left, mobius center, Privacy and
+ * the pledge CTA right. No form here by design — the CTA links to /pledge.
  */
 ---
 
@@ -19,11 +18,10 @@ import { site, socialLinks } from '../data/site';
 
     <img class="footer__mobius" src="/mobius.png" alt="Gr8ful Project mobius mark" />
 
-    <a href="/pledge" class="g8-btn g8-btn--gold footer__pledge">Take the Pledge</a>
-  </div>
-
-  <div class="footer__base">
-    <a href="/privacy">Privacy</a>
+    <div class="footer__cta">
+      <a href="/privacy">Privacy</a>
+      <a href="/pledge" class="g8-btn g8-btn--gold">Take the Pledge</a>
+    </div>
   </div>
 </footer>
 
@@ -36,7 +34,7 @@ import { site, socialLinks } from '../data/site';
   }
 
   .footer__row {
-    padding-block: 44px 32px;
+    padding-block: 44px 48px;
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
@@ -58,15 +56,12 @@ import { site, socialLinks } from '../data/site';
     width: auto;
   }
 
-  .footer__pledge { justify-self: end; }
-
-  .footer__base {
+  .footer__cta {
+    justify-self: end;
     display: flex;
-    justify-content: center;
-    padding-bottom: 32px;
-    font-family: var(--g8-font-ui);
-    font-size: 13px;
-    letter-spacing: 0.04em;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 24px;
   }
 
   .footer a:not(.g8-btn) {
@@ -81,13 +76,12 @@ import { site, socialLinks } from '../data/site';
       grid-template-columns: 1fr;
       justify-items: center;
       text-align: center;
-      padding-block: 36px 24px;
+      padding-block: 36px 40px;
       gap: 24px;
     }
     .footer__links { justify-content: center; }
     .footer__mobius { order: -1; }
-    .footer__pledge { justify-self: center; }
-    .footer__base { padding-bottom: 28px; }
+    .footer__cta { justify-self: center; }
   }
 
   @media (max-width: 680px) {
