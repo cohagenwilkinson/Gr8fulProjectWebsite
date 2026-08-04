@@ -4,8 +4,14 @@ import ColorRibbon from '../components/ColorRibbon.astro';
 import EventCard from '../components/EventCard.astro';
 import PledgeQuote from '../components/PledgeQuote.astro';
 import PledgeForm from '../components/PledgeForm.astro';
-import { homeEvents } from '../data/events';
+import { eventsCacheControl, getHomeEvents } from '../data/events';
 import { latestEpisodeUrl } from '../data/site';
+
+// Rendered per request so the strip tracks the Luma calendar without a rebuild.
+export const prerender = false;
+
+const homeEvents = await getHomeEvents();
+Astro.response.headers.set('Cache-Control', eventsCacheControl);
 ---
 
 <BaseLayout
@@ -102,10 +108,22 @@ import { latestEpisodeUrl } from '../data/site';
         <a href="/events" class="g8-btn g8-btn--gold g8-btn--bordered">See what's coming up</a>
       </div>
 
-      <div class="g8-grid-3">
-        {homeEvents.map((event) => <EventCard event={event} />)}
-      </div>
-      <div class="g8-note g8-note--cool upcoming__note">Fed from Luma · no site edits</div>
+      {
+        homeEvents.length > 0 ? (
+          <>
+            <div class="g8-grid-3">
+              {homeEvents.map((event) => (
+                <EventCard event={event} />
+              ))}
+            </div>
+            <div class="g8-note g8-note--cool upcoming__note">Fed from Luma · no site edits</div>
+          </>
+        ) : (
+          <div class="g8-note g8-note--cool upcoming__note">
+            Nothing posted right now — <a href="/events">see the full calendar</a>.
+          </div>
+        )
+      }
     </div>
   </section>
 

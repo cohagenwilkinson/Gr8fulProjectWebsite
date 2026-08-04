@@ -1,7 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EventCard from '../components/EventCard.astro';
-import { upcomingJams } from '../data/events';
+import { eventsCacheControl, getJams } from '../data/events';
+
+// Rendered per request so jams track the Luma calendar without a rebuild.
+export const prerender = false;
+
+const upcomingJams = await getJams();
+Astro.response.headers.set('Cache-Control', eventsCacheControl);
 ---
 
 <BaseLayout
@@ -24,10 +30,22 @@ import { upcomingJams } from '../data/events';
   <div class="g8-band-teal">
     <div class="g8-container g8-page" style="--pt:56px; --pb:64px">
       <div class="g8-eyebrow g8-eyebrow--cool upcoming__label">Upcoming jams</div>
-      <div class="g8-grid-3">
-        {upcomingJams.map((event) => <EventCard event={event} />)}
-      </div>
-      <div class="g8-note g8-note--cool upcoming__note">Filtered from Luma · jams only</div>
+      {
+        upcomingJams.length > 0 ? (
+          <>
+            <div class="g8-grid-3">
+              {upcomingJams.map((event) => (
+                <EventCard event={event} />
+              ))}
+            </div>
+            <div class="g8-note g8-note--cool upcoming__note">Filtered from Luma · jams only</div>
+          </>
+        ) : (
+          <div class="g8-note g8-note--cool upcoming__note">
+            No jams on the calendar right now — <a href="/events">see the full calendar</a>.
+          </div>
+        )
+      }
     </div>
   </div>
 

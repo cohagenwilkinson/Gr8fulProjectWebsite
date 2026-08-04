@@ -1,8 +1,14 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EventCard from '../../components/EventCard.astro';
-import { nextEvent } from '../../data/events';
+import { eventsCacheControl, getNextEvent } from '../../data/events';
 import { socialLinks } from '../../data/site';
+
+// Rendered per request so the next event is genuinely the next one.
+export const prerender = false;
+
+const nextEvent = await getNextEvent();
+Astro.response.headers.set('Cache-Control', eventsCacheControl);
 ---
 
 <BaseLayout
@@ -35,7 +41,17 @@ import { socialLinks } from '../../data/site';
         <div>
           <div class="g8-eyebrow g8-eyebrow--cool thanks__label">Your first chance</div>
           {nextEvent && <EventCard event={nextEvent} padding={28} titleSize={30} />}
-          <div class="g8-note g8-note--cool thanks__note">Next event from Luma</div>
+          <div class="g8-note g8-note--cool thanks__note">
+            {
+              nextEvent ? (
+                'Next event from Luma'
+              ) : (
+                <Fragment>
+                  Nothing on the calendar yet — <a href="/events">check back here</a>.
+                </Fragment>
+              )
+            }
+          </div>
         </div>
       </div>
     </div>

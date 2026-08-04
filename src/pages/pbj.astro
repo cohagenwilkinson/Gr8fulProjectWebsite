@@ -1,6 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { upcomingService } from '../data/events';
+import { eventsCacheControl, getService } from '../data/events';
+
+// Rendered per request so dates track the Luma calendar without a rebuild.
+export const prerender = false;
+
+const upcomingService = await getService();
+Astro.response.headers.set('Cache-Control', eventsCacheControl);
 ---
 
 <BaseLayout
@@ -39,7 +45,17 @@ import { upcomingService } from '../data/events';
           ))
         }
       </div>
-      <div class="g8-note dates__note">Filtered from Luma · service only</div>
+      <div class="g8-note dates__note">
+        {
+          upcomingService.length > 0 ? (
+            'Filtered from Luma · service only'
+          ) : (
+            <Fragment>
+              No dates posted right now — <a href="/events">see the full calendar</a>.
+            </Fragment>
+          )
+        }
+      </div>
     </div>
   </div>
 </BaseLayout>
