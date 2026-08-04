@@ -32,6 +32,10 @@ jobs:
 
       - name: Deploy
         run: |
+          # Strip git metadata so Vercel treats this as a plain token deploy.
+          # With it present, Vercel blocks the deployment when the commit
+          # author's GitHub identity isn't linked to the Vercel account.
+          rm -rf .git
           npm install -g vercel@latest
           if [ -n "${{ secrets.VERCEL_ORG_ID }}" ]; then
             export VERCEL_ORG_ID="${{ secrets.VERCEL_ORG_ID }}"
