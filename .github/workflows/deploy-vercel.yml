@@ -1,0 +1,47 @@
+name: Deploy to Vercel
+
+# Deploys via the Vercel CLI using a token, so no GitHub<->Vercel account
+# link is required. Create a token in the target Vercel account
+# (vercel.com -> Settings -> Tokens) and add it as the VERCEL_TOKEN
+# repository secret. Optionally set VERCEL_ORG_ID and VERCEL_PROJECT_ID
+# secrets to deploy into an existing Vercel project; without them the
+# first deploy creates a new project in the token's default scope.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Deploy target"
+        type: choice
+        options:
+          - production
+          - preview
+        default: production
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Deploy
+        run: |
+          npm install -g vercel@latest
+          if [ -n "${{ secrets.VERCEL_ORG_ID }}" ]; then
+            export VERCEL_ORG_ID="${{ secrets.VERCEL_ORG_ID }}"
+          fi
+          if [ -n "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+            export VERCEL_PROJECT_ID="${{ secrets.VERCEL_PROJECT_ID }}"
+          fi
+          TARGET="${{ inputs.target || 'production' }}"
+          if [ "$TARGET" = "production" ]; then
+            vercel deploy --prod --yes --token "${{ secrets.VERCEL_TOKEN }}"
+          else
+            vercel deploy --yes --token "${{ secrets.VERCEL_TOKEN }}"
+          fi
