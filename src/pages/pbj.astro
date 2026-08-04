@@ -1,0 +1,115 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { upcomingService } from '../data/events';
+---
+
+<BaseLayout
+  title="PB&J Service — Gr8ful Project"
+  description="Most weeks in Boulder: gratitude reflections, then peanut butter and jelly sandwiches for our hungry and unhoused neighbors."
+>
+  <div class="g8-container g8-page g8-grid-2" style="--col-a:1.05fr; --col-b:1fr; --gap:56px">
+    <div>
+      <div class="g8-eyebrow intro__label">Most weeks · Boulder</div>
+      <h1 class="g8-display intro__headline">PB&amp;J Service</h1>
+      <p class="g8-lede intro__lede">
+        Most weeks we spend two hours together in Boulder. We start with gratitude reflections,
+        then make peanut butter and jelly sandwiches and hand them out to our hungry and unhoused
+        neighbors.
+      </p>
+      <p class="g8-lede intro__lede intro__lede--last">
+        It's the simplest practice we know. No experience needed — just hands.
+      </p>
+      <div class="g8-placeholder intro__photo">
+        <span class="g8-caption">Candid photo · sandwich line</span>
+      </div>
+    </div>
+
+    <!-- A weekly repeating event with no artist name reads better as a date
+         list than as cards. -->
+    <div class="g8-card dates">
+      <div class="g8-eyebrow dates__label">Upcoming</div>
+      <div class="dates__list">
+        {
+          upcomingService.map((event) => (
+            <a href={event.url} class="dates__row">
+              <span class="dates__when">{event.when}</span>
+              <span class="dates__title">{event.title}</span>
+              <span class="dates__cta">Reserve →</span>
+            </a>
+          ))
+        }
+      </div>
+      <div class="g8-note dates__note">Filtered from Luma · service only</div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .intro__label { display: block; margin-bottom: 16px; }
+  .intro__headline { margin-bottom: 20px; }
+  .intro__lede { margin-bottom: 16px; }
+  .intro__lede--last { margin-bottom: 32px; }
+
+  .intro__photo { height: 280px; }
+
+  .dates { padding: 36px; }
+  .dates__label { display: block; margin-bottom: 22px; }
+
+  .dates__list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dates__row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 0;
+    border-top: 1px solid var(--g8-border);
+    text-decoration: none;
+    color: var(--g8-midnight);
+    transition: color var(--g8-dur-fast) var(--g8-ease);
+  }
+  .dates__row:hover { color: var(--g8-ember); }
+
+  .dates__when {
+    flex: 0 0 108px;
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    font-size: 14px;
+    letter-spacing: var(--g8-track-ui);
+    text-transform: uppercase;
+    color: var(--g8-text-muted);
+  }
+
+  .dates__title {
+    flex: 1;
+    font-family: var(--g8-font-display);
+    font-weight: var(--g8-weight-display);
+    font-size: 24px;
+    line-height: 1.1;
+  }
+
+  .dates__cta {
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--g8-ember);
+  }
+
+  .dates__note { display: block; margin-top: 22px; }
+
+  @media (max-width: 680px) {
+    .intro__photo { height: 200px; }
+    .dates { padding: 28px 24px; }
+    .dates__row {
+      flex-wrap: wrap;
+      gap: 6px 16px;
+      padding: 18px 0;
+    }
+    .dates__when { flex: 0 0 100%; }
+    .dates__title { flex: 1 1 auto; font-size: 22px; }
+  }
+</style>

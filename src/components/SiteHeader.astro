@@ -1,0 +1,150 @@
+---
+import { navLinks } from '../data/site';
+
+/**
+ * Shared chrome — edit once, every page follows.
+ * Desktop matches SiteHeader.dc.html exactly. Below 900px the nav collapses
+ * behind a Menu toggle; the pledge CTA never leaves the bar.
+ */
+---
+
+<header class="header">
+  <div class="g8-container header__bar">
+    <a href="/" class="header__logo">
+      <img src="/gr8ful-logo.png" alt="Gr8ful Project" width="106" height="44" />
+    </a>
+
+    <nav class="header__nav" aria-label="Primary">
+      {navLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+    </nav>
+
+    <a href="/pledge" class="g8-btn g8-btn--primary g8-btn--sm g8-btn--shadow header__cta">
+      Take the Pledge
+    </a>
+
+    <button
+      type="button"
+      class="header__toggle"
+      aria-expanded="false"
+      aria-controls="header-menu"
+      data-menu-toggle
+    >
+      Menu
+    </button>
+  </div>
+
+  <nav class="header__menu" id="header-menu" aria-label="Primary, compact" hidden>
+    {navLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+  </nav>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.getElementById('header-menu');
+
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    toggle.textContent = open ? 'Menu' : 'Close';
+    menu?.toggleAttribute('hidden', open);
+  });
+</script>
+
+<style>
+  .header {
+    position: relative;
+    z-index: 5;
+    background: var(--g8-chalk);
+    border-bottom: var(--g8-stroke) solid var(--g8-border-strong);
+    font-family: var(--g8-font-body);
+  }
+
+  .header__bar {
+    padding-block: 16px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .header__logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  .header__logo img {
+    display: block;
+    height: 44px;
+    width: auto;
+  }
+
+  .header__nav {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-left: auto;
+    font-family: var(--g8-font-ui);
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+  }
+  .header__nav a {
+    color: var(--g8-midnight);
+    text-decoration: none;
+    transition: color var(--g8-dur-fast) var(--g8-ease);
+  }
+  .header__nav a:hover { color: var(--g8-ember); }
+
+  /* Compact nav — hidden until the bar runs out of room. */
+  .header__cta { white-space: nowrap; }
+
+  .header__toggle {
+    display: none;
+    margin-left: auto;
+    white-space: nowrap;
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    font-size: 14px;
+    letter-spacing: var(--g8-track-ui);
+    text-transform: uppercase;
+    color: var(--g8-midnight);
+    background: transparent;
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    border-radius: var(--g8-radius-pill);
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+
+  .header__menu {
+    display: none;
+    flex-direction: column;
+    border-top: 1px solid var(--g8-border);
+    padding: 8px var(--g8-page-gutter) 20px;
+    font-family: var(--g8-font-ui);
+    font-weight: 500;
+    font-size: 17px;
+    letter-spacing: 0.04em;
+  }
+  .header__menu a {
+    color: var(--g8-midnight);
+    text-decoration: none;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--g8-border);
+  }
+  .header__menu a:hover { color: var(--g8-ember); }
+
+  @media (max-width: 900px) {
+    .header__bar { gap: 20px; }
+    .header__nav { display: none; }
+    /* CTA and Menu group to the right once the nav collapses. */
+    .header__cta { margin-left: auto; }
+    .header__toggle { display: block; margin-left: 0; }
+    .header__menu:not([hidden]) { display: flex; }
+  }
+
+  @media (max-width: 520px) {
+    .header__bar { gap: 12px; }
+    .header__logo img { height: 36px; }
+    .header__cta { font-size: 12px; letter-spacing: 0.04em; padding: 10px 14px; }
+    .header__toggle { font-size: 12px; padding: 9px 14px; }
+  }
+</style>

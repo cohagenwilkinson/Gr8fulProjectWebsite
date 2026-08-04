@@ -1,0 +1,140 @@
+/* Gr8ful Project — design tokens
+   v1.0 · brand colors, type and texture are fixed. Do not add colors.
+   Ported verbatim from the design bundle (project/gr8ful-tokens.css);
+   only the --g8-paper URL is rewritten for the public/ asset root. */
+
+:root {
+  /* ── Brand color (fixed) ─────────────────────────────── */
+  --g8-midnight:      #010715;
+  --g8-deep-teal:     #2a687e;
+  --g8-open-water:    #079396;
+  --g8-sea-glass:     #94d2bd;
+  --g8-parchment:     #e9d8a6;
+  --g8-golden-hour:   #ed9c21;
+  --g8-mesa:          #c96928;
+  --g8-ember:         #b64618;
+  --g8-crimson:       #9c2327;
+  --g8-chalk:         #fbf6ea;  /* cream. replaces pure white everywhere */
+
+  /* Tints/shades for UI states only. Never for brand marks. */
+  --g8-midnight-80:   rgba(1, 7, 21, 0.80);
+  --g8-midnight-60:   rgba(1, 7, 21, 0.60);
+  --g8-parchment-70:  rgba(233, 216, 166, 0.70);
+  --g8-deep-teal-dk:  #1f4e5f;  /* hover only */
+  --g8-golden-dk:     #cf860f;  /* hover only */
+  --g8-crimson-dk:    #7d1b1e;  /* hover only */
+
+  /* ── Semantic roles ──────────────────────────────────── */
+  --g8-bg:              #f4ead6;  /* Paper — default page ground */
+  --g8-bg-alt:          var(--g8-parchment);
+  --g8-bg-dark:         var(--g8-midnight);
+  --g8-bg-brand:        var(--g8-deep-teal);
+  --g8-surface:         var(--g8-chalk);  /* raised card on paper */
+  --g8-surface-dark:    #0b1420;
+
+  --g8-text:            var(--g8-midnight);
+  --g8-text-muted:      #4a5560;
+  --g8-text-invert:     var(--g8-parchment);
+  --g8-text-invert-alt: var(--g8-chalk);
+
+  --g8-border:          rgba(1, 7, 21, 0.14);
+  --g8-border-strong:   var(--g8-midnight);
+  --g8-rule:            var(--g8-mesa);
+
+  --g8-action:          var(--g8-crimson);      /* primary CTA fill */
+  --g8-action-text:     var(--g8-parchment);
+  --g8-action-hover:    var(--g8-crimson-dk);
+  --g8-action-2:        var(--g8-golden-hour);  /* secondary CTA fill */
+  --g8-action-2-text:   var(--g8-midnight);
+  --g8-link:            var(--g8-ember);
+  --g8-link-hover:      var(--g8-crimson);
+  --g8-focus:           var(--g8-open-water);
+
+  --g8-accent-warm:     var(--g8-golden-hour);
+  --g8-accent-cool:     var(--g8-deep-teal);
+  --g8-accent-quiet:    var(--g8-sea-glass);
+
+  /* ── Type ────────────────────────────────────────────── */
+  /* All three are open font license. No purchase, no fallback drift. */
+  --g8-font-display: "Instrument Serif", Georgia, serif;   /* one weight only */
+  --g8-font-body:    "Poppins", "Century Gothic", system-ui, sans-serif;
+  --g8-font-ui:      "Jost", "Futura", "Century Gothic", sans-serif;
+  --g8-font-display-alt: "Yeseva One", Georgia, serif;     /* loud variant, 24px+ */
+
+  --g8-size-d1:      4.5rem;   /* 72 */
+  --g8-size-d2:      3rem;     /* 48 */
+  --g8-size-h1:      2.25rem;  /* 36 */
+  --g8-size-h2:      1.5rem;   /* 24 */
+  --g8-size-h3:      1.1875rem;/* 19 */
+  --g8-size-body-lg: 1.125rem; /* 18 */
+  --g8-size-body:    1rem;     /* 16 — floor for body copy */
+  --g8-size-sm:      0.875rem; /* 14 */
+  --g8-size-caption: 0.75rem;  /* 12 — floor for any text */
+  --g8-size-eyebrow: 0.75rem;
+
+  --g8-lh-display: 0.95;
+  --g8-lh-heading: 1.12;
+  --g8-lh-body:    1.6;
+  --g8-lh-long:    1.7;
+
+  --g8-track-display: -0.02em;
+  --g8-track-body:     0em;
+  --g8-track-caps:     0.16em;
+  --g8-track-ui:       0.06em;
+
+  --g8-weight-display: 400;  /* Instrument Serif has no bold. Do not synthesize. */
+  --g8-weight-body:    400;
+  --g8-weight-strong:  600;
+  --g8-weight-ui:      600;
+
+  /* ── Space (4px base) ────────────────────────────────── */
+  --g8-space-1: 4px;   --g8-space-2: 8px;   --g8-space-3: 12px;
+  --g8-space-4: 16px;  --g8-space-5: 24px;  --g8-space-6: 32px;
+  --g8-space-7: 48px;  --g8-space-8: 64px;  --g8-space-9: 96px;
+  --g8-space-10: 128px;
+
+  /* ── Radius ──────────────────────────────────────────── */
+  --g8-radius-xs:   4px;
+  --g8-radius-sm:   8px;
+  --g8-radius-md:   16px;
+  --g8-radius-lg:   28px;   /* card / photo frame */
+  --g8-radius-pill: 999px;  /* buttons, chips, tags */
+
+  /* ── Border ──────────────────────────────────────────── */
+  --g8-stroke:      2px;
+  --g8-stroke-bold: 3px;
+
+  /* ── Elevation — flat brand. Offset shadow, no blur. ─── */
+  --g8-shadow-none: none;
+  --g8-shadow-card: 6px 6px 0 var(--g8-midnight);
+  --g8-shadow-lift: 10px 10px 0 var(--g8-midnight);
+  --g8-shadow-soft: 0 2px 0 rgba(1, 7, 21, 0.18);
+
+  /* ── Texture ─────────────────────────────────────────
+     Paper is a 256px seamless noise tile of warm tan specks, set as the
+     background-image of the BACKMOST light ground only. Never under Midnight,
+     Deep Teal or any saturated fill, and never as an overlay above content. */
+  --g8-paper: url("/paper-light.png");
+  --g8-pattern-opacity:     0.12;  /* wallpaper behind text */
+  --g8-pattern-scale:       120px;
+
+  /* ── Video hero ──────────────────────────────────────── */
+  --g8-hero-filter:      grayscale(1) contrast(1.08) brightness(0.5);
+  --g8-hero-scrim:       linear-gradient(180deg, rgba(1,7,21,0.55) 0%, rgba(1,7,21,0.78) 100%);
+  --g8-hero-max-luma:    #414141; /* nothing behind type may exceed this */
+  --g8-hero-type-color:  var(--g8-golden-hour);
+
+  /* ── Motion ──────────────────────────────────────────── */
+  --g8-dur-fast: 120ms;
+  --g8-dur-med:  240ms;
+  --g8-dur-slow: 480ms;
+  --g8-ease:     cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /* ── Layout (implementation) ─────────────────────────── */
+  --g8-page-max:    1240px;
+  --g8-page-gutter: 40px;
+}
+
+@media (max-width: 680px) {
+  :root { --g8-page-gutter: 24px; }
+}

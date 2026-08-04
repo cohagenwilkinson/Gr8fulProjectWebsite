@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PledgeQuote from '../../components/PledgeQuote.astro';
+import PledgeForm from '../../components/PledgeForm.astro';
+---
+
+<BaseLayout
+  title="The Gr8ful Pledge — Gr8ful Project"
+  description="Gratitude is a practice, not a mood. Take the pledge — a promise you make to yourself, without guilt attached."
+>
+  <div class="g8-container g8-page">
+    <div class="intro">
+      <div class="g8-eyebrow">Take the pledge</div>
+      <h1 class="g8-display">The Gr8ful Pledge</h1>
+      <p class="g8-lede">
+        Gratitude is a practice, not a mood. This is a promise you make to yourself — and the
+        whole point is that it comes without guilt attached.
+      </p>
+    </div>
+
+    <div class="g8-grid-2" style="--col-a:1.05fr; --col-b:1fr; --gap:48px">
+      <PledgeQuote />
+      <PledgeForm />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .intro {
+    max-width: 640px;
+    margin-bottom: 48px;
+  }
+  .intro .g8-eyebrow { display: block; margin-bottom: 16px; }
+  .intro .g8-display { margin-bottom: 18px; }
+
+  @media (max-width: 680px) {
+    .intro { margin-bottom: 32px; }
+  }
+</style>

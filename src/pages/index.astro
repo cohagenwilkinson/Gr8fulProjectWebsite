@@ -1,0 +1,318 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ColorRibbon from '../components/ColorRibbon.astro';
+import EventCard from '../components/EventCard.astro';
+import PledgeQuote from '../components/PledgeQuote.astro';
+import PledgeForm from '../components/PledgeForm.astro';
+import { homeEvents } from '../data/events';
+import { latestEpisodeUrl } from '../data/site';
+---
+
+<BaseLayout
+  title="Gr8ful Project — Tomorrow can be better than today."
+  description="A podcast and a string of good excuses to get together — live tapings, rooftop shows, and a lot of peanut butter and jelly."
+>
+  <section class="hero" id="top">
+    <!--
+      B&W community video, client supplied. Drop it in here:
+      <video class="hero__plate" autoplay muted loop playsinline poster="/hero-poster.jpg">
+        <source src="/hero.mp4" type="video/mp4" />
+      </video>
+      The plate carries --g8-hero-filter (grayscale + brightness 0.5) and the
+      scrim below it holds type contrast over moving footage.
+    -->
+    <div class="hero__plate hero__plate--empty"></div>
+    <div class="hero__scrim"></div>
+
+    <div class="g8-container hero__body">
+      <div class="g8-eyebrow g8-eyebrow--cool">Boulder, Colorado · A podcast and a practice</div>
+      <h1 class="g8-display hero__headline" style="--fs:78px">
+        Tomorrow can be better than today.
+      </h1>
+      <p class="g8-lede g8-lede--invert hero__lede">
+        Gr8ful Project is a podcast and a string of good excuses to get together — live tapings,
+        rooftop shows, and a lot of peanut butter and jelly. All of it in service of one idea:
+        gratitude is a practice, and practice makes life better.
+      </p>
+      <div class="hero__actions">
+        <a href="#pledge" class="g8-btn g8-btn--primary g8-btn--lg">Take the Pledge</a>
+        <a href={latestEpisodeUrl} class="g8-link-quiet">Watch the latest episode</a>
+      </div>
+    </div>
+
+    <div class="hero__slug">B&amp;W community video · client supplied</div>
+    <div class="hero__ribbon"><ColorRibbon variant="page" /></div>
+  </section>
+
+  <section class="g8-container g8-page pledge" id="pledge" style="--pt:104px; --pb:104px">
+    <div class="pledge__head">
+      <div class="pledge__head-col">
+        <div class="g8-eyebrow pledge__label">The Pledge</div>
+        <h2 class="g8-display pledge__headline" style="--fs:56px; --lh:1">
+          Start with a promise.
+        </h2>
+        <p class="g8-lede pledge__lede">
+          The pledge is simple. Practice gratitude when you can. Skip the guilt when you can't.
+          Come back when you're able.
+        </p>
+      </div>
+    </div>
+
+    <div class="g8-grid-2" style="--col-a:1.05fr; --col-b:1fr; --gap:48px">
+      <PledgeQuote />
+      <PledgeForm validate />
+    </div>
+  </section>
+
+  <section class="g8-container g8-page show" style="--pt:24px; --pb:104px">
+    <div class="g8-card show__card g8-grid-2" style="--gap:56px; --align:center">
+      <div>
+        <div class="g8-eyebrow show__label">The Podcast</div>
+        <h2 class="g8-display show__headline" style="--fs:52px; --lh:1">
+          Musicians on gratitude.
+        </h2>
+        <p class="g8-lede show__lede">
+          We sit down with musicians and ask where gratitude shows up — in the work, the hard
+          seasons, the good ones — woven together with their live performances from our jams.
+        </p>
+        <a href={latestEpisodeUrl} class="g8-btn g8-btn--gold g8-btn--bordered">
+          Watch the latest episode
+        </a>
+      </div>
+      <div class="show__photo">
+        <span class="g8-caption">Candid photo · artist mid-taping<br />4:3</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deep Teal band: flat colour, no paper grain. -->
+  <section class="g8-band-teal" id="events">
+    <div class="g8-container g8-page upcoming" style="--pt:100px; --pb:104px">
+      <div class="upcoming__head">
+        <div class="upcoming__head-col">
+          <div class="g8-eyebrow g8-eyebrow--cool upcoming__label">Coming up</div>
+          <h2 class="g8-display upcoming__headline" style="--fs:56px; --lh:1">
+            Practice in person.
+          </h2>
+          <p class="g8-lede g8-lede--invert upcoming__lede">
+            A jam every couple of weeks. Sandwiches most weeks. Everything's free — just grab a
+            spot.
+          </p>
+        </div>
+        <a href="/events" class="g8-btn g8-btn--gold g8-btn--bordered">See what's coming up</a>
+      </div>
+
+      <div class="g8-grid-3">
+        {homeEvents.map((event) => <EventCard event={event} />)}
+      </div>
+      <div class="g8-note g8-note--cool upcoming__note">Fed from Luma · no site edits</div>
+    </div>
+  </section>
+
+  <section class="g8-container g8-page van" style="--pt:104px; --pb:104px">
+    <div class="van__card">
+      <div class="van__body">
+        <div class="g8-eyebrow g8-eyebrow--cool">The Van</div>
+        <h2 class="g8-display van__headline" style="--fs:52px; --lh:1">
+          You may have seen the van.
+        </h2>
+        <p class="g8-lede g8-lede--invert">It gets around. And it has stories.</p>
+        <a href="/van" class="g8-link-quiet van__link">Meet the van →</a>
+      </div>
+      <div class="van__photo">
+        <span class="g8-caption">Photo · the van, in the wild</span>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ── Hero ─────────────────────────────────────────────
+     B&W footage under Golden Hour type. The scrim is what holds 4.5:1 over
+     moving footage — nothing behind type may exceed --g8-hero-max-luma. */
+  .hero {
+    position: relative;
+    background: var(--g8-midnight);
+    overflow: hidden;
+  }
+
+  .hero__plate {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--g8-hero-filter);
+  }
+  .hero__plate--empty {
+    background: #232323;
+    filter: none;
+  }
+
+  .hero__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(1, 7, 21, 0.62) 0%, rgba(1, 7, 21, 0.86) 100%);
+  }
+
+  .hero__body {
+    position: relative;
+    padding-block: 150px 128px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .hero__headline {
+    max-width: 900px;
+    color: var(--g8-golden-hour);
+  }
+
+  .hero__lede { max-width: 640px; }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+    padding-top: 8px;
+  }
+
+  .hero__slug {
+    position: absolute;
+    right: var(--g8-page-gutter);
+    bottom: 52px;
+    font-family: var(--g8-font-ui);
+    font-size: var(--g8-size-caption);
+    letter-spacing: var(--g8-track-caps);
+    text-transform: uppercase;
+    color: #6a7176;
+    border: 1px dashed rgba(148, 210, 189, 0.35);
+    border-radius: var(--g8-radius-pill);
+    padding: 10px 20px;
+  }
+
+  .hero__ribbon {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  /* ── Pledge ───────────────────────────────────────── */
+  .pledge__head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: flex-end;
+    margin-bottom: 44px;
+  }
+  .pledge__head-col { flex: 1 1 520px; }
+  .pledge__label { display: block; margin-bottom: 16px; }
+  .pledge__headline { margin-bottom: 16px; }
+  .pledge__lede { max-width: 520px; }
+
+  /* ── Podcast ──────────────────────────────────────── */
+  .show__card { padding: 56px 52px; }
+  .show__label { display: block; margin-bottom: 16px; }
+  .show__headline { margin-bottom: 18px; }
+  .show__lede { margin-bottom: 32px; }
+
+  .show__photo {
+    aspect-ratio: 4 / 3;
+    border: var(--g8-stroke) dashed rgba(1, 7, 21, 0.35);
+    border-radius: 20px;
+    background: var(--g8-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+  }
+
+  /* ── Events ───────────────────────────────────────── */
+  .upcoming__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 28px;
+    margin-bottom: 44px;
+  }
+  .upcoming__head-col { flex: 1 1 480px; }
+  .upcoming__label { display: block; margin-bottom: 16px; }
+  .upcoming__headline {
+    color: var(--g8-chalk);
+    margin-bottom: 16px;
+  }
+  .upcoming__lede { max-width: 520px; }
+  .upcoming__note { display: block; margin-top: 20px; }
+
+  /* ── Van teaser ───────────────────────────────────── */
+  .van__card {
+    position: relative;
+    background: var(--g8-midnight);
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    border-radius: var(--g8-radius-lg);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .van__body {
+    padding: 64px 52px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-self: center;
+  }
+
+  .van__headline { color: var(--g8-golden-hour); }
+
+  .van__link {
+    align-self: flex-start;
+    margin-top: 10px;
+    font-weight: var(--g8-weight-ui);
+    letter-spacing: var(--g8-track-ui);
+    text-transform: uppercase;
+  }
+
+  .van__photo {
+    min-height: 340px;
+    border-left: var(--g8-stroke) solid var(--g8-border-strong);
+    background: #232323;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+  }
+  .van__photo .g8-caption { color: #5d5d5d; }
+
+  /* ── Responsive ───────────────────────────────────── */
+  @media (max-width: 1023px) {
+    .hero__body { padding-block: 112px 104px; }
+    .show__card { padding: 40px 36px; }
+  }
+
+  @media (max-width: 900px) {
+    .van__card { grid-template-columns: 1fr; }
+    .van__photo {
+      min-height: 260px;
+      border-left: 0;
+      border-top: var(--g8-stroke) solid var(--g8-border-strong);
+    }
+  }
+
+  @media (max-width: 680px) {
+    .hero__body { padding-block: 88px 96px; gap: 22px; }
+    .hero__slug {
+      position: static;
+      display: inline-block;
+      margin: 0 var(--g8-page-gutter) 40px;
+    }
+    .show__card { padding: 28px 24px; border-radius: var(--g8-radius-md); }
+    .show__photo { border-radius: var(--g8-radius-md); }
+    .van__card { border-radius: var(--g8-radius-md); }
+    .van__body { padding: 32px 26px; }
+  }
+</style>

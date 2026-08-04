@@ -1,0 +1,47 @@
+---
+/**
+ * The ribbon: thin horizontal colour bands, stacked. Comes straight off the
+ * van. Bands are always full-strength brand colour and never carry text.
+ *
+ * variant:
+ *   card     — 12px, four bands, caps a card
+ *   calendar — 14px, six bands, caps the Luma frame
+ *   page     — 26px, six bands, warm → cool (hero / 404 foot)
+ *   footer   — 26px, six bands, cool → warm (mirrors `page`)
+ */
+interface Props {
+  variant?: 'card' | 'calendar' | 'page' | 'footer';
+  class?: string;
+}
+
+const { variant = 'card', class: className } = Astro.props;
+
+const CRIMSON = '#9c2327';
+const EMBER = '#b64618';
+const MESA = '#c96928';
+const GOLDEN = '#ed9c21';
+const SEA_GLASS = '#94d2bd';
+const PARCHMENT = '#e9d8a6';
+
+const RIBBONS = {
+  card: { height: '12px', bands: [CRIMSON, MESA, GOLDEN, SEA_GLASS] },
+  calendar: { height: '14px', bands: [CRIMSON, EMBER, MESA, GOLDEN, SEA_GLASS, PARCHMENT] },
+  page: { height: '26px', bands: [CRIMSON, EMBER, MESA, GOLDEN, SEA_GLASS, PARCHMENT] },
+  footer: { height: '26px', bands: [PARCHMENT, SEA_GLASS, GOLDEN, MESA, EMBER, CRIMSON] },
+} as const;
+
+const { height, bands } = RIBBONS[variant];
+---
+
+<div class:list={['ribbon', className]} style={`--ribbon-height:${height}`} aria-hidden="true">
+  {bands.map((color) => <div class="ribbon__band" style={`background:${color}`} />)}
+</div>
+
+<style>
+  .ribbon {
+    height: var(--ribbon-height);
+    display: flex;
+    flex-direction: column;
+  }
+  .ribbon__band { flex: 1; }
+</style>

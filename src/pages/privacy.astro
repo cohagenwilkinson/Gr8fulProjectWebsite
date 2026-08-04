@@ -1,0 +1,82 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+
+/**
+ * Copy is the design bundle's draft boilerplate — flagged there as needing a
+ * real legal review before launch.
+ */
+const sections = [
+  {
+    heading: 'What we collect',
+    body: `Your email address, and whether you took the pledge. If you tell us you live around Boulder, we store that too, so we can let you know about events near you.`,
+  },
+  {
+    heading: 'What we do with it',
+    body: `We send an occasional note and event invites. That's it. We don't sell your information, we don't share it, and we don't run ads.`,
+  },
+  {
+    heading: 'Leaving',
+    body: `Every email has an unsubscribe link, and it works immediately. You can also write to us and we'll remove you by hand.`,
+  },
+];
+---
+
+<BaseLayout title="Privacy — Gr8ful Project" description="What we collect, what we do with it, and how to leave.">
+  <div class="g8-container g8-page">
+    <div class="wrap">
+      <div class="g8-eyebrow wrap__label">Last updated August 2026</div>
+      <h1 class="g8-display wrap__headline" style="--fs:60px; --lh:0.98">Privacy</h1>
+
+      <div class="g8-card policy">
+        {
+          sections.map((section) => (
+            <div>
+              <h2 class="policy__heading">{section.heading}</h2>
+              <p class="policy__body">{section.body}</p>
+            </div>
+          ))
+        }
+        <div>
+          <h2 class="policy__heading">Questions</h2>
+          <p class="policy__body">
+            Write to <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .wrap { max-width: 720px; }
+  .wrap__label { display: block; margin-bottom: 16px; }
+  .wrap__headline { margin-bottom: 28px; }
+
+  .policy {
+    padding: 44px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  .policy__heading {
+    margin: 0 0 10px;
+    font-family: var(--g8-font-display);
+    font-weight: var(--g8-weight-display);
+    font-size: 28px;
+    line-height: 1.15;
+  }
+
+  .policy__body {
+    margin: 0;
+    font-size: var(--g8-size-body);
+    line-height: var(--g8-lh-long);
+    color: var(--g8-text-muted);
+  }
+
+  @media (max-width: 680px) {
+    .policy { padding: 30px 24px; gap: 22px; }
+    .policy__heading { font-size: 24px; }
+  }
+</style>

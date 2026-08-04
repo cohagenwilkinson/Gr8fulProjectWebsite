@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ColorRibbon from '../components/ColorRibbon.astro';
+---
+
+<BaseLayout
+  title="Events — Gr8ful Project"
+  description="Jams, sandwiches, and the occasional rooftop show. Everything is free — just reserve a spot."
+>
+  <div class="g8-container g8-page">
+    <div class="intro">
+      <div class="g8-eyebrow intro__label">Calendar</div>
+      <h1 class="g8-display intro__headline">What's coming up</h1>
+      <p class="g8-lede">
+        Jams, sandwiches, and the occasional rooftop show. Everything is free — just reserve a
+        spot, since some events cap out.
+      </p>
+    </div>
+
+    <div class="calendar">
+      <ColorRibbon variant="calendar" />
+      <!-- Drop the Luma calendar iframe in here. Signup stays on Luma. -->
+      <div class="calendar__embed">
+        <span class="g8-caption">
+          Luma calendar embed · jams + PB&amp;J Service<br />signup happens on Luma
+        </span>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .intro {
+    max-width: 660px;
+    margin-bottom: 44px;
+  }
+  .intro__label { display: block; margin-bottom: 16px; }
+  .intro__headline { margin-bottom: 20px; }
+
+  .calendar {
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    border-radius: var(--g8-radius-lg);
+    overflow: hidden;
+  }
+
+  .calendar__embed {
+    height: 680px;
+    background: var(--g8-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .intro { margin-bottom: 32px; }
+    .calendar__embed { height: 540px; }
+  }
+
+  @media (max-width: 680px) {
+    .calendar { border-radius: var(--g8-radius-md); }
+    .calendar__embed { height: 460px; }
+  }
+</style>

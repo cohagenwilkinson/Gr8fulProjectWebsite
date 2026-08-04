@@ -1,0 +1,172 @@
+---
+/**
+ * The pledge form. Submitting routes to /pledge/thanks.
+ *
+ * No backend is wired: the submit handler is the seam — POST the payload to
+ * the list provider there, then navigate. Without JS the form still posts and
+ * the browser's own validation holds the required fields.
+ *
+ * `validate` mirrors the home-page prototype: the CTA stays dimmed and
+ * disabled until the pledge box is checked and the email parses. The /pledge
+ * page renders the plain variant, as drawn.
+ */
+interface Props {
+  validate?: boolean;
+}
+
+const { validate = false } = Astro.props;
+---
+
+<form
+  class="pledge g8-card"
+  method="post"
+  action="/pledge/thanks"
+  data-pledge-form
+  data-validate={validate ? 'true' : undefined}
+>
+  <label class="pledge__check">
+    <input type="checkbox" name="pledged" required data-pledge-check />
+    <span class="pledge__check-label">I take the pledge.</span>
+  </label>
+
+  <div class="pledge__field">
+    <span class="g8-label">Email</span>
+    <input
+      type="email"
+      name="email"
+      placeholder="you@email.com"
+      required
+      autocomplete="email"
+      data-pledge-email
+    />
+  </div>
+
+  <label class="pledge__check">
+    <input type="checkbox" name="nearBoulder" class="pledge__check--teal" />
+    <span class="pledge__check-label pledge__check-label--quiet">
+      I live around Boulder, Colorado.
+    </span>
+  </label>
+
+  <button type="submit" class="pledge__submit" data-pledge-submit>Take the Pledge</button>
+
+  <p class="pledge__fine">
+    We'll send an occasional note and event invites. Easy to leave anytime.
+  </p>
+</form>
+
+<script>
+  const EMAIL = /.+@.+\..+/;
+
+  document.querySelectorAll<HTMLFormElement>('[data-pledge-form]').forEach((form) => {
+    const check = form.querySelector<HTMLInputElement>('[data-pledge-check]');
+    const email = form.querySelector<HTMLInputElement>('[data-pledge-email]');
+    const submit = form.querySelector<HTMLButtonElement>('[data-pledge-submit]');
+    const gated = form.dataset.validate === 'true';
+
+    const sync = () => {
+      if (!gated || !submit) return;
+      const ready = Boolean(check?.checked) && EMAIL.test(email?.value ?? '');
+      submit.disabled = !ready;
+      submit.style.opacity = ready ? '1' : '0.45';
+    };
+
+    if (gated) {
+      check?.addEventListener('change', sync);
+      email?.addEventListener('input', sync);
+      sync();
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      // TODO: POST { pledged, email, nearBoulder } to the list provider here.
+      window.location.assign('/pledge/thanks');
+    });
+  });
+</script>
+
+<style>
+  .pledge {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .pledge__check {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    cursor: pointer;
+  }
+
+  .pledge__check input[type='checkbox'] {
+    width: 22px;
+    height: 22px;
+    margin: 1px 0 0;
+    accent-color: var(--g8-crimson);
+    flex: 0 0 auto;
+  }
+  .pledge__check input.pledge__check--teal { accent-color: var(--g8-deep-teal); }
+
+  .pledge__check-label {
+    font-size: 17px;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+  .pledge__check-label--quiet {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--g8-text-muted);
+  }
+
+  .pledge__field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pledge__field input {
+    font-family: var(--g8-font-body);
+    font-size: 16px;
+    padding: 15px 18px;
+    background: var(--g8-bg);
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    border-radius: 12px;
+    color: var(--g8-midnight);
+    outline: none;
+  }
+  .pledge__field input::placeholder { color: #7c848d; }
+  .pledge__field input:focus-visible {
+    outline: 2px solid var(--g8-focus);
+    outline-offset: 2px;
+  }
+
+  .pledge__submit {
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    font-size: 16px;
+    letter-spacing: var(--g8-track-ui);
+    text-transform: uppercase;
+    background: var(--g8-action);
+    color: var(--g8-action-text);
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    border-radius: var(--g8-radius-pill);
+    padding: 17px 28px;
+    cursor: pointer;
+    transition: background-color var(--g8-dur-fast) var(--g8-ease);
+  }
+  .pledge__submit:hover:not(:disabled) { background: var(--g8-action-hover); }
+  .pledge__submit:disabled { cursor: not-allowed; }
+
+  .pledge__fine {
+    margin: 0;
+    font-size: 13px;
+    line-height: var(--g8-lh-body);
+    color: var(--g8-text-muted);
+  }
+
+  @media (max-width: 680px) {
+    .pledge { padding: 28px 24px; }
+  }
+</style>

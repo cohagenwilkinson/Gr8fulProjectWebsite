@@ -1,0 +1,78 @@
+---
+import ColorRibbon from './ColorRibbon.astro';
+import type { LumaEvent } from '../data/events';
+
+/**
+ * Luma event card. Everything below the ribbon is feed content: `kind` is the
+ * program, `title` and `when` come from Luma. Titles clamp at three lines so
+ * a long real-world title can't blow the card open, and the date always
+ * renders — it's fixed structure, not decoration.
+ */
+interface Props {
+  event: LumaEvent;
+  /** 26px in card grids, 28px for the single card on /pledge/thanks. */
+  padding?: number;
+  titleSize?: number;
+}
+
+const { event, padding = 26, titleSize = 28 } = Astro.props;
+---
+
+<article class="card g8-card g8-card--clip" style={`--pad:${padding}px; --title:${titleSize}px`}>
+  <ColorRibbon variant="card" />
+  <div class="card__body">
+    <div class="g8-eyebrow card__kind">{event.kind}</div>
+    <h3 class="g8-serif card__title" style={`--fs:${titleSize}px; --lh:1.08`}>{event.title}</h3>
+    <div class="card__when">{event.when}</div>
+    {event.where && <div class="card__where">{event.where}</div>}
+    <a href={event.url} class="g8-link-caps card__cta">Reserve on Luma →</a>
+  </div>
+</article>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card__body {
+    padding: var(--pad);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .card__kind { letter-spacing: 0.14em; }
+
+  .card__title {
+    margin: 0;
+    /* Three-line clamp: real Luma titles run long. */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  .card__when {
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: var(--g8-midnight);
+  }
+
+  .card__where {
+    font-size: 15px;
+    line-height: var(--g8-lh-body);
+    color: var(--g8-text-muted);
+  }
+
+  /* Pinned to the foot so CTAs line up across a row of uneven titles. */
+  .card__cta {
+    margin-top: auto;
+    padding-top: 14px;
+  }
+</style>

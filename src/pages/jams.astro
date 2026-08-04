@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EventCard from '../components/EventCard.astro';
+import { upcomingJams } from '../data/events';
+---
+
+<BaseLayout
+  title="Gr8ful Jams — Gr8ful Project"
+  description="Every couple of weeks we tape the music portion of the podcast live in Boulder. Free — reserve a seat."
+>
+  <div class="g8-container g8-page" style="--pt:88px; --pb:40px">
+    <div class="intro">
+      <div class="g8-eyebrow intro__label">Biweekly · free</div>
+      <h1 class="g8-display intro__headline">Gr8ful Jams</h1>
+      <p class="g8-lede intro__lede">
+        Every couple of weeks we tape the music portion of the podcast live. An artist plays, we
+        talk about gratitude, and you're in the room while it happens.
+      </p>
+      <p class="g8-lede">It's free. Reserve a seat — some jams fill up.</p>
+    </div>
+  </div>
+
+  <!-- Deep Teal band: flat colour, no paper grain. -->
+  <div class="g8-band-teal">
+    <div class="g8-container g8-page" style="--pt:56px; --pb:64px">
+      <div class="g8-eyebrow g8-eyebrow--cool upcoming__label">Upcoming jams</div>
+      <div class="g8-grid-3">
+        {upcomingJams.map((event) => <EventCard event={event} />)}
+      </div>
+      <div class="g8-note g8-note--cool upcoming__note">Filtered from Luma · jams only</div>
+    </div>
+  </div>
+
+  <div class="g8-container g8-page" style="--pt:72px; --pb:96px">
+    <div class="g8-eyebrow past__label">Past jams</div>
+    <h2 class="g8-display past__headline" style="--fs:40px; --lh:1">
+      Every jam gets filmed. Watch what you missed.
+    </h2>
+    <!-- Drop the YouTube playlist iframe in here. -->
+    <div class="g8-placeholder g8-placeholder--embed past__embed">
+      <span class="g8-caption">YouTube playlist embed · past jams</span>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .intro { max-width: 640px; }
+  .intro__label { display: block; margin-bottom: 16px; }
+  .intro__headline { margin-bottom: 20px; }
+  .intro__lede { margin-bottom: 16px; }
+
+  .upcoming__label { display: block; margin-bottom: 24px; }
+  .upcoming__note { display: block; margin-top: 18px; }
+
+  .past__label { display: block; margin-bottom: 12px; }
+  .past__headline { margin-bottom: 24px; }
+
+  .past__embed { height: 520px; }
+
+  @media (max-width: 900px) {
+    .past__embed { height: 380px; }
+  }
+
+  @media (max-width: 680px) {
+    .past__embed { height: 260px; }
+  }
+</style>

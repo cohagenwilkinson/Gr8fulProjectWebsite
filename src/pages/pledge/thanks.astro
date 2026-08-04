@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EventCard from '../../components/EventCard.astro';
+import { nextEvent } from '../../data/events';
+import { socialLinks } from '../../data/site';
+---
+
+<BaseLayout
+  title="You're in — Gr8ful Project"
+  description="You took the pledge. Here's what's next, and where to follow along."
+>
+  <!-- Midnight ground: no paper grain under darkness. -->
+  <div class="g8-band-dark">
+    <div class="g8-container g8-page thanks" style="--pt:96px; --pb:88px">
+      <div class="g8-grid-2" style="--col-a:1.1fr; --col-b:1fr; --gap:56px">
+        <div>
+          <h1 class="g8-display thanks__headline" style="--fs:88px; --lh:0.92">You're in.</h1>
+          <p class="g8-lede g8-lede--invert thanks__lede">
+            You just made a promise to yourself. We'll help you keep it — a note now and then,
+            and plenty of chances to practice in person.
+          </p>
+
+          <div class="g8-eyebrow g8-eyebrow--cool thanks__label">Follow along</div>
+          <div class="thanks__socials">
+            {
+              socialLinks.map((link) => (
+                <a href={link.href} class="g8-btn g8-btn--quiet g8-btn--sm">
+                  {link.label}
+                </a>
+              ))
+            }
+          </div>
+        </div>
+
+        <div>
+          <div class="g8-eyebrow g8-eyebrow--cool thanks__label">Your first chance</div>
+          {nextEvent && <EventCard event={nextEvent} padding={28} titleSize={30} />}
+          <div class="g8-note g8-note--cool thanks__note">Next event from Luma</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .thanks__headline {
+    color: var(--g8-golden-hour);
+    margin-bottom: 20px;
+  }
+
+  .thanks__lede {
+    max-width: 520px;
+    margin-bottom: 36px;
+  }
+
+  .thanks__label {
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  .thanks__socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .thanks__note { margin-top: 14px; }
+</style>

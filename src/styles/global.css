@@ -1,0 +1,274 @@
+/* Gr8ful Project — shared design-language primitives.
+   Every value here comes from the design bundle. Desktop values are exact;
+   the media queries below extend the system to smaller screens (the
+   prototypes were drawn desktop-only). */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--g8-bg);
+  color: var(--g8-text);
+  font-family: var(--g8-font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--g8-link);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:hover { color: var(--g8-link-hover); }
+
+::selection { background: var(--g8-golden-hour); color: var(--g8-midnight); }
+
+img { max-width: 100%; }
+
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--g8-focus);
+  outline-offset: 3px;
+}
+
+/* ── Ground ──────────────────────────────────────────────
+   Paper grain lives on the BACKMOST light ground only — never under
+   Midnight, Deep Teal or any saturated fill, and never as an overlay. */
+.g8-ground {
+  background-color: var(--g8-bg);
+  background-image: var(--g8-paper);
+}
+
+.g8-band-dark  { background: var(--g8-midnight); }
+.g8-band-teal  { background: var(--g8-deep-teal); }
+
+/* ── Layout ──────────────────────────────────────────── */
+.g8-container {
+  max-width: var(--g8-page-max);
+  margin: 0 auto;
+  padding-inline: var(--g8-page-gutter);
+}
+
+.g8-page {
+  padding-block: var(--pt, 88px) var(--pb, 96px);
+}
+
+.g8-grid-2 {
+  display: grid;
+  grid-template-columns: var(--col-a, 1fr) var(--col-b, 1fr);
+  gap: var(--gap, 48px);
+  align-items: var(--align, start);
+}
+
+.g8-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap, 24px);
+}
+
+.g8-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap, 28px);
+}
+
+/* ── Type ────────────────────────────────────────────── */
+.g8-eyebrow {
+  font-family: var(--g8-font-ui);
+  font-weight: var(--g8-weight-ui);
+  font-size: var(--g8-size-eyebrow);
+  letter-spacing: var(--g8-track-caps);
+  text-transform: uppercase;
+  color: var(--g8-ember);
+}
+.g8-eyebrow--cool   { color: var(--g8-sea-glass); }
+.g8-eyebrow--muted  { color: var(--g8-text-muted); }
+
+/* Instrument Serif has a single weight — never synthesize bold. */
+.g8-display {
+  margin: 0;
+  font-family: var(--g8-font-display);
+  font-weight: var(--g8-weight-display);
+  font-size: var(--fs, 68px);
+  line-height: var(--lh, 0.95);
+  letter-spacing: var(--g8-track-display);
+  text-wrap: pretty;
+}
+
+.g8-serif {
+  font-family: var(--g8-font-display);
+  font-weight: var(--g8-weight-display);
+  font-size: var(--fs, 30px);
+  line-height: var(--lh, 1.1);
+}
+
+.g8-lede {
+  margin: 0;
+  font-size: var(--g8-size-body-lg);
+  line-height: var(--g8-lh-body);
+  color: var(--g8-text-muted);
+  text-wrap: pretty;
+}
+.g8-lede--invert { color: var(--g8-chalk); }
+.g8-lede--cool   { color: var(--g8-sea-glass); }
+
+.g8-body {
+  margin: 0;
+  font-size: 17px;
+  line-height: var(--g8-lh-long);
+  color: var(--g8-text);
+}
+
+.g8-caption {
+  font-family: var(--g8-font-ui);
+  font-size: var(--g8-size-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--g8-text-muted);
+}
+
+/* Feed-provenance note under Luma-fed content. */
+.g8-note {
+  font-family: var(--g8-font-ui);
+  font-size: var(--g8-size-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--g8-text-muted);
+}
+.g8-note--cool { color: var(--g8-sea-glass); }
+
+.g8-label {
+  font-family: var(--g8-font-ui);
+  font-weight: var(--g8-weight-ui);
+  font-size: var(--g8-size-caption);
+  letter-spacing: var(--g8-track-caps);
+  text-transform: uppercase;
+  color: var(--g8-text-muted);
+}
+
+/* ── Buttons ─────────────────────────────────────────── */
+.g8-btn {
+  display: inline-block;
+  font-family: var(--g8-font-ui);
+  font-weight: var(--g8-weight-ui);
+  font-size: 15px;
+  letter-spacing: var(--g8-track-ui);
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 0;
+  border-radius: var(--g8-radius-pill);
+  padding: 16px 30px;
+  cursor: pointer;
+  transition: background-color var(--g8-dur-fast) var(--g8-ease),
+              color var(--g8-dur-fast) var(--g8-ease);
+}
+
+.g8-btn--lg { font-size: 16px; padding: 17px 34px; }
+.g8-btn--sm { font-size: 14px; padding: 13px 24px; }
+.g8-btn--xs { font-size: 13px; padding: 11px 20px; }
+
+.g8-btn--primary { background: var(--g8-action); color: var(--g8-action-text); }
+.g8-btn--primary:hover { background: var(--g8-action-hover); color: var(--g8-action-text); }
+
+.g8-btn--gold { background: var(--g8-action-2); color: var(--g8-action-2-text); }
+.g8-btn--gold:hover { background: var(--g8-golden-dk); color: var(--g8-action-2-text); }
+
+.g8-btn--quiet { background: var(--g8-sea-glass); color: var(--g8-midnight); }
+.g8-btn--quiet:hover { background: var(--g8-golden-hour); color: var(--g8-midnight); }
+
+/* Chip on a light ground — paper fill, hard stroke. */
+.g8-btn--chip {
+  background: var(--g8-bg);
+  color: var(--g8-midnight);
+  border: var(--g8-stroke) solid var(--g8-border-strong);
+}
+.g8-btn--chip:hover { background: var(--g8-sea-glass); color: var(--g8-midnight); }
+
+.g8-btn--bordered { border: var(--g8-stroke) solid var(--g8-border-strong); }
+.g8-btn--shadow   { box-shadow: var(--g8-shadow-soft); }
+
+.g8-btn[disabled] { cursor: not-allowed; }
+
+/* ── Links ───────────────────────────────────────────── */
+/* Quiet link on dark grounds: sea glass, hairline rule, golden on hover. */
+.g8-link-quiet {
+  font-family: var(--g8-font-ui);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  color: var(--g8-sea-glass);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(148, 210, 189, 0.5);
+  padding-bottom: 2px;
+  transition: color var(--g8-dur-fast) var(--g8-ease);
+}
+.g8-link-quiet:hover { color: var(--g8-golden-hour); }
+
+/* Small caps link — "Reserve on Luma →" */
+.g8-link-caps {
+  font-family: var(--g8-font-ui);
+  font-weight: var(--g8-weight-ui);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+/* ── Surfaces ────────────────────────────────────────── */
+.g8-card {
+  background: var(--g8-surface);
+  border: var(--g8-stroke) solid var(--g8-border-strong);
+  border-radius: var(--g8-radius-lg);
+}
+.g8-card--teal      { background: var(--g8-bg-brand); }
+.g8-card--parchment { background: var(--g8-parchment); }
+.g8-card--shadow    { box-shadow: var(--g8-shadow-card); }
+.g8-card--clip      { overflow: hidden; }
+
+/* Asset still to come — dashed frame, never a hard stroke. */
+.g8-placeholder {
+  border: var(--g8-stroke) dashed rgba(1, 7, 21, 0.35);
+  border-radius: var(--g8-radius-lg);
+  background: var(--g8-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+.g8-placeholder--dark {
+  background: #232323;
+  border: var(--g8-stroke) solid var(--g8-sea-glass);
+}
+.g8-placeholder--dark .g8-caption { color: #5d5d5d; }
+.g8-placeholder--embed {
+  background: var(--g8-midnight);
+  border: var(--g8-stroke) solid var(--g8-border-strong);
+}
+.g8-placeholder--embed .g8-caption { color: var(--g8-sea-glass); }
+
+/* ── Responsive ──────────────────────────────────────────
+   Desktop (>=1024px) renders the prototype values exactly. Below that the
+   grids stack and display type steps down; nothing else changes. */
+@media (max-width: 1023px) {
+  .g8-page { padding-block: calc(var(--pt, 88px) * 0.78) calc(var(--pb, 96px) * 0.78); }
+  .g8-display { font-size: calc(var(--fs, 68px) * 0.82); }
+  .g8-serif   { font-size: calc(var(--fs, 30px) * 0.9); }
+  .g8-grid-3  { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .g8-grid-2 { grid-template-columns: 1fr; gap: 32px; }
+}
+
+@media (max-width: 680px) {
+  .g8-page { padding-block: calc(var(--pt, 88px) * 0.6) calc(var(--pb, 96px) * 0.6); }
+  .g8-display { font-size: calc(var(--fs, 68px) * 0.6); }
+  .g8-serif   { font-size: calc(var(--fs, 30px) * 0.8); }
+  .g8-grid-3  { grid-template-columns: 1fr; }
+  .g8-card    { border-radius: var(--g8-radius-md); }
+  .g8-placeholder { border-radius: var(--g8-radius-md); }
+  .g8-btn--lg { font-size: 15px; padding: 15px 26px; }
+}

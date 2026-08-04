@@ -1,0 +1,117 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+---
+
+<BaseLayout
+  title="About — Gr8ful Project"
+  description="Gr8ful Project exists to help people live happier lives by making gratitude a bigger part of them."
+>
+  <div class="g8-container g8-page">
+    <div class="intro">
+      <div class="g8-eyebrow intro__label">About</div>
+      <h1 class="g8-display intro__headline">About Gr8ful Project</h1>
+      <p class="g8-lede">
+        Gr8ful Project exists to help people live happier lives by making gratitude a bigger part
+        of them. We're not a charity and we're not selling anything. We're a podcast, some events,
+        and a promise.
+      </p>
+    </div>
+
+    <div class="g8-grid-2" style="--col-a:1.15fr; --col-b:1fr; --gap:48px">
+      <div class="g8-card letter">
+        <div class="g8-eyebrow letter__label">From Rob</div>
+        <p class="g8-body letter__para">
+          In 2023, I was crumbling. I didn't know what to do — but I knew if something didn't
+          change, I wasn't going to make it. So I did a radical reset, converted a van, and hit
+          the road. Not in celebration, but in desperation.
+        </p>
+        <p class="g8-body letter__para">
+          Getting metaphorically (and sometimes literally) lost changed everything. I found a deep
+          gratitude practice — and it saved my life. Proactively managing my mental health grew
+          from there.
+        </p>
+        <p class="g8-body letter__para letter__para--last">
+          The Gr8ful Project will likely be my last chapter as an entrepreneur. But this time,
+          it's not about profit. It's about building a lasting community — and helping each other
+          live happier. Simple as that.
+        </p>
+        <p class="letter__pullquote">I'm gr8ful you're here.</p>
+        <div class="letter__sign">
+          Rob Daley<br />Founder, The Gr8ful Project<br />Dad to Camden and Hayden
+        </div>
+      </div>
+
+      <div class="g8-stack">
+        <div class="g8-placeholder aside__photo">
+          <span class="g8-caption">Candid photo · Rob and the van</span>
+        </div>
+
+        <div class="g8-card g8-card--teal aside__hello">
+          <div class="g8-eyebrow g8-eyebrow--cool aside__label">Say hello</div>
+          <a href={`mailto:${site.contactEmail}`} class="aside__email">{site.contactEmail}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .intro {
+    max-width: 680px;
+    margin-bottom: 56px;
+  }
+  .intro__label { display: block; margin-bottom: 16px; }
+  .intro__headline { margin-bottom: 20px; }
+
+  .letter { padding: 48px 44px; }
+  .letter__label { display: block; margin-bottom: 22px; }
+  .letter__para { margin-bottom: 20px; }
+  .letter__para--last { margin-bottom: 28px; }
+
+  .letter__pullquote {
+    margin: 0 0 26px;
+    font-family: var(--g8-font-display);
+    font-weight: var(--g8-weight-display);
+    font-size: 34px;
+    line-height: 1.15;
+    color: var(--g8-ember);
+  }
+
+  .letter__sign {
+    padding-top: 22px;
+    border-top: 1px solid var(--g8-border);
+    font-family: var(--g8-font-ui);
+    font-size: 14px;
+    line-height: var(--g8-lh-long);
+    letter-spacing: 0.04em;
+    color: var(--g8-text-muted);
+  }
+
+  .aside__photo { height: 320px; }
+
+  .aside__hello { padding: 36px; }
+  .aside__label { display: block; margin-bottom: 14px; }
+
+  .aside__email {
+    font-family: var(--g8-font-display);
+    font-weight: var(--g8-weight-display);
+    font-size: 30px;
+    line-height: 1.15;
+    color: var(--g8-chalk);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(251, 246, 234, 0.5);
+    overflow-wrap: anywhere;
+    transition: color var(--g8-dur-fast) var(--g8-ease);
+  }
+  .aside__email:hover { color: var(--g8-golden-hour); }
+
+  @media (max-width: 680px) {
+    .intro { margin-bottom: 36px; }
+    .letter { padding: 32px 26px; }
+    .letter__pullquote { font-size: 28px; }
+    .aside__photo { height: 240px; }
+    .aside__hello { padding: 28px 24px; }
+    .aside__email { font-size: 24px; }
+  }
+</style>

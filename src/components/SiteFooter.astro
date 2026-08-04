@@ -1,0 +1,66 @@
+---
+import ColorRibbon from './ColorRibbon.astro';
+import { site, socialLinks } from '../data/site';
+
+/**
+ * Shared chrome. Single row: pledge button, socials, email, Privacy.
+ * No form here by design — the footer CTA links to /pledge.
+ */
+---
+
+<footer class="footer">
+  <ColorRibbon variant="footer" />
+  <div class="g8-container footer__row">
+    <a href="/pledge" class="g8-btn g8-btn--gold">Take the Pledge</a>
+
+    <div class="footer__socials">
+      {socialLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+    </div>
+
+    <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>
+
+    <a href="/privacy" class="footer__privacy">Privacy</a>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    background: var(--g8-midnight);
+    overflow: hidden;
+    font-family: var(--g8-font-body);
+  }
+
+  .footer__row {
+    padding-block: 44px 56px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 28px;
+    font-family: var(--g8-font-ui);
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+
+  .footer__socials {
+    display: flex;
+    gap: 20px;
+  }
+
+  .footer__row a:not(.g8-btn) {
+    color: var(--g8-sea-glass);
+    text-decoration: none;
+    transition: color var(--g8-dur-fast) var(--g8-ease);
+  }
+  .footer__row a:not(.g8-btn):hover { color: var(--g8-golden-hour); }
+
+  .footer__privacy { margin-left: auto; }
+
+  @media (max-width: 680px) {
+    .footer__row {
+      padding-block: 32px 40px;
+      gap: 20px;
+    }
+    .footer__privacy { margin-left: 0; }
+  }
+</style>

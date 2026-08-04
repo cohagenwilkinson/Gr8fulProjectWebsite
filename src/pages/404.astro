@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ColorRibbon from '../components/ColorRibbon.astro';
+---
+
+<BaseLayout title="Nothing here — Gr8ful Project" description="That page doesn't exist. Tomorrow can be better than today.">
+  <div class="g8-band-dark notfound">
+    <div class="g8-container g8-page" style="--pt:120px; --pb:128px">
+      <h1 class="g8-display notfound__headline" style="--fs:88px; --lh:0.92">Nothing here.</h1>
+      <p class="notfound__lede">That's okay. Tomorrow can be better than today.</p>
+      <div class="notfound__actions">
+        <a href="/pledge" class="g8-btn g8-btn--primary g8-btn--lg">Take the Pledge</a>
+        <a href="/" class="g8-link-quiet">Go home</a>
+      </div>
+    </div>
+    <ColorRibbon variant="page" />
+  </div>
+</BaseLayout>
+
+<style>
+  .notfound { overflow: hidden; }
+
+  .notfound__headline {
+    color: var(--g8-golden-hour);
+    margin-bottom: 20px;
+  }
+
+  .notfound__lede {
+    margin: 0 0 36px;
+    max-width: 520px;
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--g8-chalk);
+  }
+
+  .notfound__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+  }
+</style>
