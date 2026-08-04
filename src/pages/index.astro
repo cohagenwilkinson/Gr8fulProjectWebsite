@@ -120,7 +120,10 @@ import { latestEpisodeUrl } from '../data/site';
         <a href="/van" class="g8-link-quiet van__link">Meet the van →</a>
       </div>
       <div class="van__photo">
-        <span class="g8-caption">Photo · the van, in the wild</span>
+        <img
+          src="/van-photo.jpg"
+          alt="The Gr8ful Project van parked in the desert — a white-and-orange VW bus wrapped in flowers, peace signs, and rainbow swirls"
+        />
       </div>
     </div>
   </section>
@@ -277,16 +280,18 @@ import { latestEpisodeUrl } from '../data/site';
   }
 
   .van__photo {
+    position: relative;
     min-height: 340px;
     border-left: var(--g8-stroke) solid var(--g8-border-strong);
     background: #232323;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 24px;
   }
-  .van__photo .g8-caption { color: #5d5d5d; }
+  .van__photo img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
   /* ── Responsive ───────────────────────────────────── */
   @media (max-width: 1023px) {
