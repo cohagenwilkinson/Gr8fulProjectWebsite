@@ -21,6 +21,10 @@ import { site, socialLinks } from '../data/site';
 
     <a href="/privacy" class="footer__privacy">Privacy</a>
   </div>
+
+  <div class="footer__mobius">
+    <img src="/mobius.png" alt="Gr8ful Project mobius mark" />
+  </div>
 </footer>
 
 <style>
@@ -32,7 +36,7 @@ import { site, socialLinks } from '../data/site';
   }
 
   .footer__row {
-    padding-block: 44px 56px;
+    padding-block: 44px 36px;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -56,11 +60,23 @@ import { site, socialLinks } from '../data/site';
 
   .footer__privacy { margin-left: auto; }
 
+  .footer__mobius {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 44px;
+  }
+  .footer__mobius img {
+    height: 96px;
+    width: auto;
+  }
+
   @media (max-width: 680px) {
     .footer__row {
-      padding-block: 32px 40px;
+      padding-block: 32px 28px;
       gap: 20px;
     }
     .footer__privacy { margin-left: 0; }
+    .footer__mobius { padding-bottom: 36px; }
+    .footer__mobius img { height: 72px; }
   }
 </style>
