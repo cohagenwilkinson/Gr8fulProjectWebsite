@@ -35,10 +35,15 @@ export const navLinks: NavLink[] = [
   { label: 'About', href: '/about' },
 ];
 
+/** The channel handle is the same everywhere except Instagram. */
+export const youtubeUrl = 'https://www.youtube.com/@gr8fulproject';
+export const instagramUrl = 'https://www.instagram.com/thegr8fulproject';
+export const tiktokUrl = 'https://www.tiktok.com/@gr8fulproject';
+
 export const socialLinks = [
-  { label: 'YouTube', href: 'https://youtube.com' },
-  { label: 'Instagram', href: 'https://instagram.com' },
-  { label: 'TikTok', href: 'https://tiktok.com' },
+  { label: 'YouTube', href: youtubeUrl },
+  { label: 'Instagram', href: instagramUrl },
+  { label: 'TikTok', href: tiktokUrl },
 ];
 
 /**
@@ -51,7 +56,7 @@ export const latestEpisodeUrl = '/api/latest-episode';
  * Past jams, embedded on /jams. nocookie keeps YouTube from setting tracking
  * cookies until a visitor actually presses play.
  */
-export const jamsPlaylistId = 'PLZDEEGZX2e-w';
+export const jamsPlaylistId = 'PLJNrF11lrZ3g';
 export const jamsPlaylistUrl = `https://www.youtube.com/playlist?list=${jamsPlaylistId}`;
 export const jamsPlaylistEmbedUrl = `https://www.youtube-nocookie.com/embed/videoseries?list=${jamsPlaylistId}`;
 
@@ -60,7 +65,7 @@ export const jamsPlaylistEmbedUrl = `https://www.youtube-nocookie.com/embed/vide
  * TODO: swap the hrefs for the real show URLs once the feeds are live.
  */
 export const podcastPlatforms = [
-  { label: 'YouTube', href: 'https://youtube.com' },
+  { label: 'YouTube', href: youtubeUrl },
   { label: 'Spotify', href: 'https://open.spotify.com' },
   { label: 'Apple Podcasts', href: 'https://podcasts.apple.com' },
   { label: 'Pocket Casts', href: 'https://pocketcasts.com' },

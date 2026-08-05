@@ -1,10 +1,11 @@
 ---
 /**
- * The pledge form. Submitting routes to /pledge/thanks.
+ * The pledge form. Posts to /api/pledge, which adds the contact to Brevo.
  *
- * No backend is wired: the submit handler is the seam — POST the payload to
- * the list provider there, then navigate. Without JS the form still posts and
- * the browser's own validation holds the required fields.
+ * With JavaScript the submit is intercepted so a failure can be shown inline
+ * without losing what was typed. Without it the browser posts natively and
+ * the route redirects; either way the browser's own validation holds the
+ * required fields.
  *
  * `validate` mirrors the home-page prototype: the CTA stays dimmed and
  * disabled until the pledge box is checked and the email parses. The /pledge
@@ -20,7 +21,7 @@ const { validate = false } = Astro.props;
 <form
   class="pledge g8-card"
   method="post"
-  action="/pledge/thanks"
+  action="/api/pledge"
   data-pledge-form
   data-validate={validate ? 'true' : undefined}
 >
@@ -48,7 +49,17 @@ const { validate = false } = Astro.props;
     </span>
   </label>
 
+  {/* Honeypot: off-screen and skipped by tab, so only bots fill it. */}
+  <div class="pledge__trap" aria-hidden="true">
+    <label>
+      Website
+      <input type="text" name="website" tabindex="-1" autocomplete="off" />
+    </label>
+  </div>
+
   <button type="submit" class="pledge__submit" data-pledge-submit>Take the Pledge</button>
+
+  <p class="pledge__error" data-pledge-error hidden role="alert"></p>
 
   <p class="pledge__fine">
     We'll send an occasional note and event invites. Easy to leave anytime.
@@ -77,10 +88,57 @@ const { validate = false } = Astro.props;
       sync();
     }
 
-    form.addEventListener('submit', (event) => {
+    const error = form.querySelector<HTMLElement>('[data-pledge-error]');
+    const trap = form.querySelector<HTMLInputElement>('input[name="website"]');
+    const label = submit?.textContent ?? 'Take the Pledge';
+
+    const showError = (message: string) => {
+      if (!error) return;
+      error.textContent = message;
+      error.hidden = false;
+    };
+
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      // TODO: POST { pledged, email, nearBoulder } to the list provider here.
-      window.location.assign('/pledge/thanks');
+      if (error) error.hidden = true;
+
+      if (submit) {
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+      }
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            pledged: Boolean(check?.checked),
+            email: email?.value ?? '',
+            nearBoulder: Boolean(
+              form.querySelector<HTMLInputElement>('input[name="nearBoulder"]')?.checked
+            ),
+            website: trap?.value ?? '',
+          }),
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (response.ok && result?.ok) {
+          window.location.assign('/pledge/thanks');
+          return;
+        }
+
+        showError(result?.message ?? 'Something went wrong. Please try again.');
+      } catch {
+        // Offline or the request never landed — keep their input, let them retry.
+        showError('We couldn’t reach the server. Please check your connection and try again.');
+      }
+
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = label;
+        sync();
+      }
     });
   });
 </script>
@@ -158,6 +216,23 @@ const { validate = false } = Astro.props;
   }
   .pledge__submit:hover:not(:disabled) { background: var(--g8-action-hover); }
   .pledge__submit:disabled { cursor: not-allowed; }
+
+  /* Out of sight and out of the tab order, but not display:none — some bots
+     skip hidden fields, which would defeat the point. */
+  .pledge__trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .pledge__error {
+    margin: 0;
+    font-size: 15px;
+    line-height: var(--g8-lh-body);
+    color: var(--g8-crimson);
+  }
 
   .pledge__fine {
     margin: 0;

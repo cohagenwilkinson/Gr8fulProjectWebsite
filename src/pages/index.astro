@@ -119,14 +119,11 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
 
       {
         homeEvents.length > 0 ? (
-          <>
-            <div class="g8-grid-3">
-              {homeEvents.map((event) => (
-                <EventCard event={event} />
-              ))}
-            </div>
-            <div class="g8-note g8-note--cool upcoming__note">Fed from Luma · no site edits</div>
-          </>
+          <div class="g8-grid-3">
+            {homeEvents.map((event) => (
+              <EventCard event={event} />
+            ))}
+          </div>
         ) : (
           <div class="g8-note g8-note--cool upcoming__note">
             Nothing posted right now — <a href="/events">see the full calendar</a>.
