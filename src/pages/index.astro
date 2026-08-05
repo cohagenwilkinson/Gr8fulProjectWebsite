@@ -20,14 +20,24 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
 >
   <section class="hero" id="top">
     <!--
-      B&W community video, client supplied. Drop it in here:
-      <video class="hero__plate" autoplay muted loop playsinline poster="/hero-poster.jpg">
-        <source src="/hero.mp4" type="video/mp4" />
-      </video>
-      The plate carries --g8-hero-filter (grayscale + brightness 0.5) and the
-      scrim below it holds type contrast over moving footage.
+      B&W community video. The plate carries --g8-hero-filter (grayscale +
+      brightness 0.5) and the scrim below it holds type contrast over moving
+      footage. Decorative, so it's hidden from assistive tech; the script
+      below pauses it when the visitor prefers reduced motion.
     -->
-    <div class="hero__plate hero__plate--empty"></div>
+    <video
+      class="hero__plate"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      aria-hidden="true"
+      tabindex="-1"
+      data-hero-video
+    >
+      <source src="/hero.mp4" type="video/mp4" />
+    </video>
     <div class="hero__scrim"></div>
 
     <div class="g8-container hero__body">
@@ -46,7 +56,6 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
       </div>
     </div>
 
-    <div class="hero__slug">B&amp;W community video · client supplied</div>
     <div class="hero__ribbon"><ColorRibbon variant="page" /></div>
   </section>
 
@@ -147,6 +156,26 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
   </section>
 </BaseLayout>
 
+<script>
+  // Autoplay is decorative, so honour a reduced-motion preference — CSS alone
+  // can't pause a video. Tracks the setting live, not just on load.
+  const video = document.querySelector<HTMLVideoElement>('[data-hero-video]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  const applyMotionPreference = () => {
+    if (!video) return;
+    if (reduceMotion.matches) {
+      video.pause();
+    } else {
+      // Rejects when a browser blocks autoplay; the scrim reads fine either way.
+      video.play().catch(() => {});
+    }
+  };
+
+  applyMotionPreference();
+  reduceMotion.addEventListener('change', applyMotionPreference);
+</script>
+
 <style>
   /* ── Hero ─────────────────────────────────────────────
      B&W footage under Golden Hour type. The scrim is what holds 4.5:1 over
@@ -165,11 +194,6 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
     object-fit: cover;
     filter: var(--g8-hero-filter);
   }
-  .hero__plate--empty {
-    background: #232323;
-    filter: none;
-  }
-
   .hero__scrim {
     position: absolute;
     inset: 0;
@@ -197,20 +221,6 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
     align-items: center;
     gap: 18px;
     padding-top: 8px;
-  }
-
-  .hero__slug {
-    position: absolute;
-    right: var(--g8-page-gutter);
-    bottom: 52px;
-    font-family: var(--g8-font-ui);
-    font-size: var(--g8-size-caption);
-    letter-spacing: var(--g8-track-caps);
-    text-transform: uppercase;
-    color: #6a7176;
-    border: 1px dashed rgba(148, 210, 189, 0.35);
-    border-radius: var(--g8-radius-pill);
-    padding: 10px 20px;
   }
 
   .hero__ribbon {
@@ -328,11 +338,6 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
 
   @media (max-width: 680px) {
     .hero__body { padding-block: 88px 96px; gap: 22px; }
-    .hero__slug {
-      position: static;
-      display: inline-block;
-      margin: 0 var(--g8-page-gutter) 40px;
-    }
     .show__card { padding: 28px 24px; border-radius: var(--g8-radius-md); }
     .show__photo { border-radius: var(--g8-radius-md); }
     .van__card { border-radius: var(--g8-radius-md); }
