@@ -56,14 +56,24 @@ async function readSubmission(request: Request): Promise<Submission> {
   };
 }
 
+/** Brevo list IDs are whole numbers; anything else is a misconfiguration. */
+function listId(value: string | undefined): number | undefined {
+  if (!value) return undefined;
+  const parsed = Number(value.trim());
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+}
+
 async function addToBrevo(submission: Submission): Promise<void> {
-  if (!BREVO_API_KEY || !BREVO_LIST_ID) {
+  const mainList = listId(BREVO_LIST_ID);
+
+  if (!BREVO_API_KEY || !mainList) {
     throw new Error('Brevo is not configured (BREVO_API_KEY / BREVO_LIST_ID)');
   }
 
-  const listIds = [BREVO_LIST_ID];
-  if (submission.nearBoulder && BREVO_BOULDER_LIST_ID) {
-    listIds.push(BREVO_BOULDER_LIST_ID);
+  const listIds = [mainList];
+  const boulderList = listId(BREVO_BOULDER_LIST_ID);
+  if (submission.nearBoulder && boulderList) {
+    listIds.push(boulderList);
   }
 
   const response = await fetch('https://api.brevo.com/v3/contacts', {

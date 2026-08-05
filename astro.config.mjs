@@ -28,14 +28,18 @@ export default defineConfig({
         access: 'secret',
         optional: true,
       }),
+      // Deliberately strings, not numbers. Astro validates this whole schema
+      // at startup, so a mistyped number here would 500 every server-rendered
+      // page — including ones that never touch Brevo. Parsed in the route
+      // instead, where a bad value only costs the pledge form.
       /** The list every pledge joins. */
-      BREVO_LIST_ID: envField.number({
+      BREVO_LIST_ID: envField.string({
         context: 'server',
         access: 'secret',
         optional: true,
       }),
       /** Optional second list for people who said they're near Boulder. */
-      BREVO_BOULDER_LIST_ID: envField.number({
+      BREVO_BOULDER_LIST_ID: envField.string({
         context: 'server',
         access: 'secret',
         optional: true,
