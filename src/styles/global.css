@@ -261,6 +261,16 @@ img { max-width: 100%; }
 
 @media (max-width: 900px) {
   .g8-grid-2 { grid-template-columns: 1fr; gap: 32px; }
+
+  /* Side by side, a cast shadow falls harmlessly into the column gap. Stacked
+     full width it spills into the right gutter instead, so the card reads as
+     sitting left of centre and out of line with the plain card above or below
+     it. Inset the whole stack by the shadow offset (matching
+     --g8-shadow-card) so card plus shadow sits square between the gutters,
+     its shadow landing flush with the plain card's edge above or below.
+     Three classes deep to outrank a component's own scoped `margin` reset;
+     padding on the grid can't be used, since some grids are the container. */
+  .g8-grid-2 > .g8-card.g8-card--shadow { margin-right: 6px; }
 }
 
 @media (max-width: 680px) {
