@@ -218,13 +218,20 @@ const { validate = false } = Astro.props;
   .pledge__submit:disabled { cursor: not-allowed; }
 
   /* Out of sight and out of the tab order, but not display:none — some bots
-     skip hidden fields, which would defeat the point. */
+     skip hidden fields, which would defeat the point. Clipped in place rather
+     than flung off-canvas: the form is unpositioned, so a negative `left`
+     would resolve against the document and hand the page a box thousands of
+     pixels wide. */
   .pledge__trap {
     position: absolute;
-    left: -9999px;
     width: 1px;
     height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
     overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
   .pledge__error {
