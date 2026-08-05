@@ -48,6 +48,14 @@ export const socialLinks = [
 export const latestEpisodeUrl = '/api/latest-episode';
 
 /**
+ * Past jams, embedded on /jams. nocookie keeps YouTube from setting tracking
+ * cookies until a visitor actually presses play.
+ */
+export const jamsPlaylistId = 'PLZDEEGZX2e-w';
+export const jamsPlaylistUrl = `https://www.youtube.com/playlist?list=${jamsPlaylistId}`;
+export const jamsPlaylistEmbedUrl = `https://www.youtube-nocookie.com/embed/videoseries?list=${jamsPlaylistId}`;
+
+/**
  * Where listeners can find the show. Order is intentional — YouTube first.
  * TODO: swap the hrefs for the real show URLs once the feeds are live.
  */

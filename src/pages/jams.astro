@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EventCard from '../components/EventCard.astro';
 import { eventsCacheControl, getJams } from '../data/events';
+import { jamsPlaylistEmbedUrl } from '../data/site';
 
 // Rendered per request so jams track the Luma calendar without a rebuild.
 export const prerender = false;
@@ -54,10 +55,14 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
     <h2 class="g8-display past__headline" style="--fs:40px; --lh:1">
       Every jam gets filmed. Watch what you missed.
     </h2>
-    <!-- Drop the YouTube playlist iframe in here. -->
-    <div class="g8-placeholder g8-placeholder--embed past__embed">
-      <span class="g8-caption">YouTube playlist embed · past jams</span>
-    </div>
+    <iframe
+      class="past__embed"
+      src={jamsPlaylistEmbedUrl}
+      title="Past Gr8ful Jams — YouTube playlist"
+      loading="lazy"
+      allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+    ></iframe>
   </div>
 </BaseLayout>
 
@@ -73,13 +78,23 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
   .past__label { display: block; margin-bottom: 12px; }
   .past__headline { margin-bottom: 24px; }
 
-  .past__embed { height: 520px; }
+  .past__embed {
+    display: block;
+    width: 100%;
+    height: 520px;
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    border-radius: var(--g8-radius-lg);
+    background: var(--g8-midnight);
+  }
 
   @media (max-width: 900px) {
     .past__embed { height: 380px; }
   }
 
   @media (max-width: 680px) {
-    .past__embed { height: 260px; }
+    .past__embed {
+      height: 260px;
+      border-radius: var(--g8-radius-md);
+    }
   }
 </style>
