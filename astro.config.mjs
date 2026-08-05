@@ -20,6 +20,26 @@ export default defineConfig({
         access: 'secret',
         optional: true,
       }),
+
+      // Pledge signups. Optional for the same reason — a missing key makes the
+      // form report a failure honestly rather than breaking the build.
+      BREVO_API_KEY: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+      }),
+      /** The list every pledge joins. */
+      BREVO_LIST_ID: envField.number({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+      }),
+      /** Optional second list for people who said they're near Boulder. */
+      BREVO_BOULDER_LIST_ID: envField.number({
+        context: 'server',
+        access: 'secret',
+        optional: true,
+      }),
     },
   },
 });
