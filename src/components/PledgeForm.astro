@@ -185,6 +185,10 @@ const { validate = false } = Astro.props;
   }
 
   .pledge__field input {
+    /* Without this an <input> refuses to shrink below its default ~20
+       characters, setting a floor on how narrow the form can be. */
+    width: 100%;
+    min-width: 0;
     font-family: var(--g8-font-body);
     font-size: 16px;
     padding: 15px 18px;

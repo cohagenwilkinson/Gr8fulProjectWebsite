@@ -55,6 +55,16 @@ img { max-width: 100%; }
   padding-block: var(--pt, 88px) var(--pb, 96px);
 }
 
+/* Grid items default to min-width:auto, so a single stubborn child — an
+   <input> holding its ~20-character intrinsic width, an unbreakable word —
+   can force its track wider than the container. The row then overflows to
+   the right while the left edge stays pinned to the page gutter, which reads
+   as the whole block sitting off-centre. Let tracks shrink instead. */
+.g8-grid-2 > *,
+.g8-grid-3 > * {
+  min-width: 0;
+}
+
 .g8-grid-2 {
   display: grid;
   grid-template-columns: var(--col-a, 1fr) var(--col-b, 1fr);
