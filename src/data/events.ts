@@ -40,9 +40,13 @@ export const lumaEmbedUrl = `https://lu.ma/embed/calendar/${lumaCalendarId}/even
 /**
  * Sent by the pages that render events. Vercel's CDN serves a cached copy for
  * five minutes and keeps serving the stale one while it refreshes, so a
- * visitor never waits on Luma and we never hammer it.
+ * visitor never waits on Luma and we never hammer it. `max-age=0,
+ * must-revalidate` keeps that caching on the CDN where we control it —
+ * without it a browser is free to guess a freshness lifetime and keep showing
+ * yesterday's markup after a deploy.
  */
-export const eventsCacheControl = 'public, s-maxage=300, stale-while-revalidate=3600';
+export const eventsCacheControl =
+  'public, max-age=0, must-revalidate, s-maxage=300, stale-while-revalidate=3600';
 
 /**
  * Luma has served the public API from two hosts. Trying the current one
