@@ -32,11 +32,28 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
       loop
       playsinline
       preload="metadata"
+      poster="/hero-poster.jpg"
       aria-hidden="true"
       tabindex="-1"
       data-hero-video
     >
-      <source src="/hero.mp4" type="video/mp4" />
+      {/*
+        Ordered smallest-viable first. Codec strings are exact, read off the
+        files themselves — a browser without AV1 skips the WebM outright
+        rather than pulling megabytes before failing over to H.264.
+      */}
+      <source
+        src="/hero-540.webm"
+        type='video/webm; codecs="av01.0.04M.08"'
+        media="(max-width: 767px)"
+      />
+      <source
+        src="/hero-540.mp4"
+        type='video/mp4; codecs="avc1.64001F"'
+        media="(max-width: 767px)"
+      />
+      <source src="/hero-720.webm" type='video/webm; codecs="av01.0.05M.08"' />
+      <source src="/hero-720.mp4" type='video/mp4; codecs="avc1.640028"' />
     </video>
     <div class="hero__scrim"></div>
 
