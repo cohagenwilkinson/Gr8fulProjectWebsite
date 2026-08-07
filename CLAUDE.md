@@ -49,6 +49,11 @@ MCP is signed into — see Tooling access gaps). The deployment URL is
 `https://gr8fulproject.com`, so confirm with the operator which domain is actually serving
 before assuming.
 
+**It is deployed but not launched.** Nobody is being sent to it yet, so a rough edge costs
+nothing today and there's room to leave things visibly unfinished. Don't argue for urgency
+on that basis — but do treat the list below as the launch checklist, because the day it
+opens to the public those gaps stop being free.
+
 Mostly prerendered. **Four pages are server-rendered** because they show live Luma events —
 they carry `export const prerender = false`:
 
