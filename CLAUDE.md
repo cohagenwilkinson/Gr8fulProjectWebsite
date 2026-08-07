@@ -95,7 +95,6 @@ one gets closed.
 | **Guest book** | `/van` has a "Coming soon" panel with nothing behind it. Would need storage and moderation — a real feature, not a stub to fill in. |
 | **Luma calendar slug** | `lumaCalendarUrl` assumes `lu.ma/gr8fulproject`. Unverified — it's the fallback when an event has no page of its own. |
 | **Custom domain** | `gr8fulproject.com` is **not attached** to the Vercel project yet. Until it is, the site is only reachable at the `.vercel.app` URL. |
-| **H.264 hero fallback** | Verified by codec string, never actually played — this environment can't decode H.264, and most iPhones take that path. To close this: on an iPhone, open `/hero-540.mp4` and `/hero-720.mp4` directly. If both play, the files are good and the row can go. |
 
 ## Commands
 
@@ -146,7 +145,10 @@ The consequences are easy to miss:
 
 **Chromium here has no H.264.** MP4 video will not play in tests and reports
 `readyState: 0`. AV1/WebM does work. This is a codec limitation, not a site bug — check
-`canPlayType` before concluding anything about video.
+`canPlayType` before concluding anything about video. The hero's H.264 fallbacks have been
+played on a real iPhone and are fine, so a `readyState: 0` on those files is the
+environment, not a regression. If you need to test an MP4, have the operator open the file
+URL directly on a phone — that skips source selection and tests the file itself.
 
 **No ffmpeg/ffprobe**, and `apt-get install ffmpeg` fails. To inspect media, parse the
 containers directly (the AV1 config lives in the WebM `CodecPrivate`; H.264 profile/level in
