@@ -1,0 +1,324 @@
+---
+/*
+  Preview-only control panel for the hero video's darkness. Rendered by
+  index.astro only when the URL carries ?tune, so it costs a normal visitor
+  nothing — no markup, no script.
+
+  Two things darken the hero and they compound, so both get a knob:
+    1. brightness() inside --g8-hero-filter, applied to the video itself
+    2. the .hero__scrim gradient sitting on top of it
+
+  The readout measures the real thing rather than guessing: it samples the
+  live frame, re-applies the filter chain and the scrim in JS, and reports the
+  worst-case contrast between the headline colour and the brightest pixel
+  behind it. --g8-hero-max-luma exists for this reason — the type has to stay
+  legible over moving footage, and brightening the plate is what puts that at
+  risk.
+*/
+---
+
+<div class="tuner" data-hero-tuner>
+  <button class="tuner__toggle" type="button" data-tuner-toggle aria-expanded="true">
+    Hero brightness
+  </button>
+
+  <div class="tuner__body" data-tuner-body>
+    <label class="tuner__row">
+      <span class="tuner__label">
+        Video brightness
+        <b data-out="brightness">0.50</b>
+      </span>
+      <input type="range" min="0.2" max="1.2" step="0.01" value="0.5" data-tune="brightness" />
+    </label>
+
+    <label class="tuner__row">
+      <span class="tuner__label">
+        Dark overlay
+        <b data-out="scrim">100%</b>
+      </span>
+      <input type="range" min="0" max="130" step="1" value="100" data-tune="scrim" />
+    </label>
+
+    <div class="tuner__verdict" data-verdict>
+      <span class="tuner__dot" data-dot></span>
+      <span data-verdict-text>Reading the frame…</span>
+    </div>
+
+    <div class="tuner__actions">
+      <button type="button" data-tuner-reset>Reset</button>
+      <button type="button" data-tuner-copy>Copy values</button>
+    </div>
+
+    <p class="tuner__hint" data-hint>
+      Slide until it looks right, then screenshot this panel — the numbers at
+      the top are what I need to make it permanent.
+    </p>
+  </div>
+</div>
+
+<script>
+  // Defaults mirror the shipped values: brightness(0.5) in --g8-hero-filter,
+  // and the scrim's 0.62 → 0.86 stops at full strength.
+  const BASE_BRIGHTNESS = 0.5;
+  const SCRIM_TOP = 0.62;
+  const SCRIM_BOTTOM = 0.86;
+  const CONTRAST = 1.08; // fixed; the sliders don't touch it
+  const HEADLINE = [0xed, 0x9c, 0x21]; // --g8-golden-hour
+  const SCRIM_RGB = [1, 7, 21]; // --g8-midnight
+  const TARGET_RATIO = 4.5;
+
+  const hero = document.querySelector<HTMLElement>('.hero');
+  const video = document.querySelector<HTMLVideoElement>('[data-hero-video]');
+  const headline = document.querySelector<HTMLElement>('.hero__headline');
+  const panel = document.querySelector<HTMLElement>('[data-hero-tuner]');
+  if (hero && video && headline && panel) {
+    const brightnessInput = panel.querySelector<HTMLInputElement>('[data-tune="brightness"]')!;
+    const scrimInput = panel.querySelector<HTMLInputElement>('[data-tune="scrim"]')!;
+    const brightnessOut = panel.querySelector<HTMLElement>('[data-out="brightness"]')!;
+    const scrimOut = panel.querySelector<HTMLElement>('[data-out="scrim"]')!;
+    const verdictText = panel.querySelector<HTMLElement>('[data-verdict-text]')!;
+    const dot = panel.querySelector<HTMLElement>('[data-dot]')!;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 96;
+    canvas.height = 54;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    // A still of the poster, used when the video hasn't decoded a frame yet
+    // (blocked autoplay, reduced motion before first paint, slow network).
+    const poster = new Image();
+    poster.src = '/hero-poster.jpg';
+
+    const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+
+    // sRGB channel → linear, for the WCAG relative-luminance formula.
+    const linear = (c: number) => {
+      const s = c / 255;
+      return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+    };
+    const luminance = ([r, g, b]: number[]) =>
+      0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b);
+
+    const ratio = (a: number, b: number) =>
+      (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+
+    const headlineLuma = luminance(HEADLINE);
+
+    const apply = () => {
+      const brightness = Number(brightnessInput.value);
+      const scrim = Number(scrimInput.value) / 100;
+
+      hero.style.setProperty(
+        '--g8-hero-filter',
+        `grayscale(1) contrast(${CONTRAST}) brightness(${brightness})`,
+      );
+      hero.style.setProperty('--hero-scrim-top', String(clamp01(SCRIM_TOP * scrim)));
+      hero.style.setProperty('--hero-scrim-bottom', String(clamp01(SCRIM_BOTTOM * scrim)));
+
+      brightnessOut.textContent = brightness.toFixed(2);
+      scrimOut.textContent = `${Math.round(scrim * 100)}%`;
+      measure(brightness, scrim);
+    };
+
+    // Re-runs the whole visual stack on the pixels themselves: CSS filter
+    // chain first (grayscale → contrast → brightness, in declaration order),
+    // then the scrim composited over it at that row's gradient alpha.
+    const measure = (brightness: number, scrim: number) => {
+      if (!ctx) return;
+
+      const source =
+        video.readyState >= 2 ? video : poster.complete && poster.naturalWidth ? poster : null;
+      if (!source) {
+        verdictText.textContent = 'Waiting for the video…';
+        return;
+      }
+
+      try {
+        ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+      } catch {
+        verdictText.textContent = "Couldn't read the frame.";
+        return;
+      }
+
+      // Only the band the headline actually sits in matters.
+      const heroBox = hero.getBoundingClientRect();
+      const typeBox = headline.getBoundingClientRect();
+      const yTop = clamp01((typeBox.top - heroBox.top) / heroBox.height);
+      const yBottom = clamp01((typeBox.bottom - heroBox.top) / heroBox.height);
+      const rowStart = Math.floor(yTop * canvas.height);
+      const rowEnd = Math.max(rowStart + 1, Math.ceil(yBottom * canvas.height));
+
+      const { data } = ctx.getImageData(0, rowStart, canvas.width, rowEnd - rowStart);
+      let worst = 0;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const row = Math.floor(i / 4 / canvas.width);
+        const y = (rowStart + row) / canvas.height;
+        const alpha = clamp01((SCRIM_TOP + (SCRIM_BOTTOM - SCRIM_TOP) * y) * scrim);
+
+        // grayscale(1) — the same luminance matrix CSS uses.
+        let v = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+        v = clamp01(((v / 255 - 0.5) * CONTRAST + 0.5) * brightness) * 255;
+
+        const px = SCRIM_RGB.map((s) => v * (1 - alpha) + s * alpha);
+        const l = luminance(px);
+        if (l > worst) worst = l;
+      }
+
+      const r = ratio(headlineLuma, worst);
+      const pass = r >= TARGET_RATIO;
+      dot.dataset.state = pass ? 'pass' : 'fail';
+      verdictText.textContent = pass
+        ? `Headline still readable (${r.toFixed(1)}:1)`
+        : `Too bright — headline is getting lost (${r.toFixed(1)}:1)`;
+    };
+
+    brightnessInput.addEventListener('input', apply);
+    scrimInput.addEventListener('input', apply);
+
+    panel.querySelector('[data-tuner-reset]')?.addEventListener('click', () => {
+      brightnessInput.value = String(BASE_BRIGHTNESS);
+      scrimInput.value = '100';
+      apply();
+    });
+
+    panel.querySelector('[data-tuner-copy]')?.addEventListener('click', (event) => {
+      const button = event.currentTarget as HTMLButtonElement;
+      const text = `brightness ${Number(brightnessInput.value).toFixed(2)} · overlay ${scrimInput.value}%`;
+      navigator.clipboard?.writeText(text).then(
+        () => {
+          button.textContent = 'Copied';
+          setTimeout(() => (button.textContent = 'Copy values'), 1600);
+        },
+        () => {
+          button.textContent = text;
+        },
+      );
+    });
+
+    panel.querySelector('[data-tuner-toggle]')?.addEventListener('click', (event) => {
+      const button = event.currentTarget as HTMLButtonElement;
+      const open = panel.toggleAttribute('data-collapsed');
+      button.setAttribute('aria-expanded', String(!open));
+    });
+
+    apply();
+    // The frame keeps moving, so the contrast reading has to keep up with it.
+    video.addEventListener('loadeddata', apply);
+    poster.addEventListener('load', apply);
+    setInterval(apply, 900);
+  }
+</script>
+
+<style>
+  .tuner {
+    position: fixed;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%);
+    z-index: 90;
+    width: min(420px, calc(100vw - 24px));
+    background: rgba(1, 7, 21, 0.94);
+    color: var(--g8-chalk);
+    border: 1px solid rgba(251, 246, 234, 0.22);
+    border-radius: 16px;
+    padding: 12px 16px 14px;
+    font-family: var(--g8-font-ui);
+    box-shadow: 0 10px 40px rgba(1, 7, 21, 0.5);
+  }
+
+  .tuner__toggle {
+    width: 100%;
+    background: none;
+    border: 0;
+    padding: 0 0 10px;
+    color: var(--g8-golden-hour);
+    font: inherit;
+    font-size: 13px;
+    letter-spacing: var(--g8-track-caps);
+    text-transform: uppercase;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .tuner[data-collapsed] .tuner__body {
+    display: none;
+  }
+  .tuner[data-collapsed] .tuner__toggle {
+    padding-bottom: 0;
+  }
+
+  .tuner__row {
+    display: block;
+    padding-block: 8px;
+  }
+
+  .tuner__label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding-bottom: 8px;
+  }
+  .tuner__label b {
+    color: var(--g8-golden-hour);
+    font-weight: 500;
+  }
+
+  /* Chunky enough to drag with a thumb on a phone. */
+  .tuner input[type='range'] {
+    width: 100%;
+    height: 28px;
+    accent-color: var(--g8-golden-hour);
+  }
+
+  .tuner__verdict {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    padding-top: 6px;
+  }
+  .tuner__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #6b7280;
+    flex: none;
+  }
+  .tuner__dot[data-state='pass'] {
+    background: #43d17c;
+  }
+  .tuner__dot[data-state='fail'] {
+    background: #ff6b57;
+  }
+
+  .tuner__actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 12px;
+  }
+  .tuner__actions button {
+    flex: 1;
+    background: none;
+    border: 1px solid rgba(251, 246, 234, 0.3);
+    border-radius: var(--g8-radius-pill);
+    color: var(--g8-chalk);
+    font: inherit;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 9px 0;
+    cursor: pointer;
+  }
+
+  .tuner__hint {
+    margin: 10px 0 0;
+    font-size: 11px;
+    line-height: 1.45;
+    color: rgba(251, 246, 234, 0.62);
+    letter-spacing: 0.01em;
+    text-transform: none;
+  }
+</style>

@@ -257,6 +257,14 @@ Match the surrounding code's comment density and naming.
 **Naming rule:** always "Gr8ful Project", never "Gr8ful" alone. Product names keep their
 form: The Gr8ful Pledge, The Gr8ful Podcast, Gr8ful Jams, PB&J Service.
 
+**The hero's darkness comes from two places, not one.** `--g8-hero-filter`'s `brightness()`
+dims the video itself, and `.hero__scrim` lays a gradient over it. Changing either alone
+gives half the effect, which is why "make the video less dark" is never a one-value edit.
+`/?tune` renders `HeroTuner.astro` — sliders for both, plus a live contrast readout that
+samples the actual frame and flags when the headline drops under 4.5:1. It's opt-in on the
+query string, so it costs a normal visitor no markup and no script; leave it in, it's the
+only way the operator can judge this on a real screen with real webfonts.
+
 Two bugs bit repeatedly. Both are fixed globally — don't reintroduce them:
 
 - **Grid items default to `min-width: auto`.** One stubborn child (an `<input>` holding its

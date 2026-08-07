@@ -4,6 +4,7 @@ import ColorRibbon from '../components/ColorRibbon.astro';
 import EventCard from '../components/EventCard.astro';
 import PledgeQuote from '../components/PledgeQuote.astro';
 import PledgeForm from '../components/PledgeForm.astro';
+import HeroTuner from '../components/HeroTuner.astro';
 import { eventsCacheControl, getHomeEvents } from '../data/events';
 import { latestEpisodeUrl } from '../data/site';
 
@@ -12,6 +13,10 @@ export const prerender = false;
 
 const homeEvents = await getHomeEvents();
 Astro.response.headers.set('Cache-Control', eventsCacheControl);
+
+// ?tune shows the hero brightness panel. Opt-in so it stays out of the page
+// for everyone else — see HeroTuner.
+const showHeroTuner = Astro.url.searchParams.has('tune');
 ---
 
 <BaseLayout
@@ -75,6 +80,8 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
 
     <div class="hero__ribbon"><ColorRibbon variant="page" /></div>
   </section>
+
+  {showHeroTuner && <HeroTuner />}
 
   <section class="g8-container g8-page pledge" id="pledge" style="--pt:104px; --pb:104px">
     <div class="pledge__head">
@@ -208,10 +215,16 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
     object-fit: cover;
     filter: var(--g8-hero-filter);
   }
+  /* Stops are variables so the ?tune panel can drive them live. The defaults
+     are the shipped values — nothing changes without the panel. */
   .hero__scrim {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(1, 7, 21, 0.62) 0%, rgba(1, 7, 21, 0.86) 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(1, 7, 21, var(--hero-scrim-top, 0.62)) 0%,
+      rgba(1, 7, 21, var(--hero-scrim-bottom, 0.86)) 100%
+    );
   }
 
   .hero__body {
