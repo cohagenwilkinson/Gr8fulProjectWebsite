@@ -1,5 +1,10 @@
 # Gr8ful Project — site implementation
 
+> **Start with [`CLAUDE.md`](./CLAUDE.md).** This file records the original design handoff
+> and the route-to-mockup mapping, which is still accurate. Some of the rest has aged:
+> the Luma feed is live rather than sample data, `npm run preview` no longer works, and the
+> seams listed at the end are wired. `CLAUDE.md` describes the site as it stands.
+
 The Claude Design handoff in `project/` built as an Astro static site. Design files are
 left in place, untouched, as the reference.
 
