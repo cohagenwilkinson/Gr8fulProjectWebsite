@@ -8,9 +8,8 @@ cost real time to diagnose. Reading takes a minute; rediscovering them does not.
 a tool that isn't available, a service that behaves unexpectedly, a decision and its
 reasoning — add it here in the same change. Treat that as part of the work, not a chore.
 
-`IMPLEMENTATION.md` documents the original design handoff and the route-to-mockup mapping.
-It is still useful for that, but parts have gone stale: the Luma feed is no longer sample
-data, and `npm run preview` no longer works (see Commands).
+`README.md` is the human-facing version — what the site is, how to run it, where the content
+lives. This file is the one for you.
 
 ---
 
@@ -70,6 +69,26 @@ src/
   data/events.ts         Luma types, config, fetch, and the per-page selectors
   pages/api/pledge.ts    Brevo signup endpoint
 ```
+
+## Not finished yet
+
+The site is live and working, but it was built from a design handoff and some seams were
+never wired. **None of these are bugs to fix on sight** — most need content or credentials
+only the operator can supply. Ask before assuming they're oversights, and update this list
+when one gets closed.
+
+| Gap | State |
+| --- | --- |
+| **Latest-episode resolver** | The design wanted `/api/latest-episode` to read the podcast feed and redirect to the newest episode. Never built; the href pointed at a nonexistent route, so all three CTAs 404'd. Now points at the YouTube channel as an honest stopgap. |
+| **Podcast platform links** | Only YouTube is real. Spotify, Apple Podcasts, and Pocket Casts point at each service's *homepage*, not the show. An RSS chip pointing at an ungenerated `/feed.xml` was removed. |
+| **Three photos** | `/about` ("Rob and the van"), `/pbj` ("sandwich line"), and the homepage podcast card ("artist mid-taping") still render dashed `g8-placeholder` frames. Waiting on real images. |
+| **The van's story** | `/van` says "the real story is coming" over deliberately fake lore. Awaiting real copy. |
+| **Guest book** | `/van` has a "Coming soon" panel with nothing behind it. Would need storage and moderation — a real feature, not a stub to fill in. |
+| **Luma calendar slug** | `lumaCalendarUrl` assumes `lu.ma/gr8fulproject`. Unverified — it's the fallback when an event has no page of its own. |
+| **`BREVO_BOULDER_LIST_ID`** | Optional. If unset, "I live around Boulder" is collected but routes nowhere different. |
+| **Custom domain** | Unconfirmed whether `gr8fulproject.com` is attached to the Vercel project. |
+| **H.264 hero fallback** | Verified by codec string, never played — this environment can't decode H.264, and most iPhones will take that path. |
+| **No branch protection** | Any push to `main` deploys straight to production. |
 
 ## Commands
 

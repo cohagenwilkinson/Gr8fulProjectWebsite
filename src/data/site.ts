@@ -47,10 +47,15 @@ export const socialLinks = [
 ];
 
 /**
- * Both "Watch the latest episode" CTAs resolve to the same dynamic link, fed
- * by the podcast RSS feed. Swap this for the real resolver endpoint.
+ * Every "Watch the latest episode" CTA points here.
+ *
+ * The design called for a resolver endpoint that reads the podcast feed and
+ * redirects to the newest episode. That was never built, and the placeholder
+ * href pointed at a route that doesn't exist, so all three CTAs 404'd. Until
+ * a resolver exists, the channel is the honest destination — the newest
+ * episode is the first thing on it.
  */
-export const latestEpisodeUrl = '/api/latest-episode';
+export const latestEpisodeUrl = youtubeUrl;
 
 /**
  * Past jams, embedded on /jams. nocookie keeps YouTube from setting tracking
@@ -62,12 +67,16 @@ export const jamsPlaylistEmbedUrl = `https://www.youtube-nocookie.com/embed/vide
 
 /**
  * Where listeners can find the show. Order is intentional — YouTube first.
- * TODO: swap the hrefs for the real show URLs once the feeds are live.
+ *
+ * Only YouTube is real. The rest point at each service's homepage rather than
+ * the show, and need swapping once the feeds are live — see "Not finished
+ * yet" in CLAUDE.md. An RSS entry was listed here too, pointing at a
+ * /feed.xml that was never generated; it's out until a feed exists, since a
+ * dead chip is worse than a missing one.
  */
 export const podcastPlatforms = [
   { label: 'YouTube', href: youtubeUrl },
   { label: 'Spotify', href: 'https://open.spotify.com' },
   { label: 'Apple Podcasts', href: 'https://podcasts.apple.com' },
   { label: 'Pocket Casts', href: 'https://pocketcasts.com' },
-  { label: 'RSS', href: '/feed.xml' },
 ];

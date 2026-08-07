@@ -94,7 +94,6 @@ img { max-width: 100%; }
   color: var(--g8-ember);
 }
 .g8-eyebrow--cool   { color: var(--g8-sea-glass); }
-.g8-eyebrow--muted  { color: var(--g8-text-muted); }
 
 /* Instrument Serif has a single weight — never synthesize bold. */
 .g8-display {
@@ -237,7 +236,8 @@ img { max-width: 100%; }
 .g8-card--shadow    { box-shadow: var(--g8-shadow-card); }
 .g8-card--clip      { overflow: hidden; }
 
-/* Asset still to come — dashed frame, never a hard stroke. */
+/* Photo still to come — dashed frame, never a hard stroke. Used on /about
+   and /pbj, which are both waiting on a real image. */
 .g8-placeholder {
   border: var(--g8-stroke) dashed rgba(1, 7, 21, 0.35);
   border-radius: var(--g8-radius-lg);
@@ -248,16 +248,6 @@ img { max-width: 100%; }
   text-align: center;
   padding: 24px;
 }
-.g8-placeholder--dark {
-  background: #232323;
-  border: var(--g8-stroke) solid var(--g8-sea-glass);
-}
-.g8-placeholder--dark .g8-caption { color: #5d5d5d; }
-.g8-placeholder--embed {
-  background: var(--g8-midnight);
-  border: var(--g8-stroke) solid var(--g8-border-strong);
-}
-.g8-placeholder--embed .g8-caption { color: var(--g8-sea-glass); }
 
 /* ── Responsive ──────────────────────────────────────────
    Desktop (>=1024px) renders the prototype values exactly. Below that the
