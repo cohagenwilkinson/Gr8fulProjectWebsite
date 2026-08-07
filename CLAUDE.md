@@ -8,8 +8,9 @@ cost real time to diagnose. Reading takes a minute; rediscovering them does not.
 a tool that isn't available, a service that behaves unexpectedly, a decision and its
 reasoning — add it here in the same change. Treat that as part of the work, not a chore.
 
-`README.md` is the human-facing version — what the site is, how to run it, where the content
-lives. This file is the one for you.
+**This is the only documentation, by design.** There is no README and there shouldn't be —
+every change to this site goes through an agent, so anything a human needs to know belongs
+here where you'll actually read it. Don't add one.
 
 ---
 
@@ -73,14 +74,17 @@ src/
 ## Not finished yet
 
 The site is live and working, but it was built from a design handoff and some seams were
-never wired. **None of these are bugs to fix on sight** — most need content or credentials
-only the operator can supply. Ask before assuming they're oversights, and update this list
-when one gets closed.
+never wired. **None of these are bugs to fix on sight.** Most need content or credentials
+only the operator can supply, and some are deliberately left broken so the gap stays
+visible — a dead link here can be a placeholder holding its position, not an oversight.
+Routing around one hides work that still needs doing. Ask first, and update this list when
+one gets closed.
 
 | Gap | State |
 | --- | --- |
-| **Latest-episode resolver** | The design wanted `/api/latest-episode` to read the podcast feed and redirect to the newest episode. Never built; the href pointed at a nonexistent route, so all three CTAs 404'd. Now points at the YouTube channel as an honest stopgap. |
-| **Podcast platform links** | Only YouTube is real. Spotify, Apple Podcasts, and Pocket Casts point at each service's *homepage*, not the show. An RSS chip pointing at an ungenerated `/feed.xml` was removed. |
+| **Podcast RSS feed** | Not published. Several things below wait on it. |
+| **Latest-episode resolver** | `/api/latest-episode` should read the feed and redirect to the newest episode. Not built, so the three "Watch the latest episode" CTAs 404 today. **This is deliberate** — the operator chose to leave the gap visible rather than paper it over with a link elsewhere. Don't "fix" it by repointing the href; build the resolver once the feed exists. |
+| **Podcast platform links** | Only YouTube is real. Spotify, Apple Podcasts, and Pocket Casts point at each service's *homepage*, not the show, and the RSS chip points at an ungenerated `/feed.xml`. Same reasoning as above — left visible on purpose. |
 | **Three photos** | `/about` ("Rob and the van"), `/pbj` ("sandwich line"), and the homepage podcast card ("artist mid-taping") still render dashed `g8-placeholder` frames. Waiting on real images. |
 | **The van's story** | `/van` says "the real story is coming" over deliberately fake lore. Awaiting real copy. |
 | **Guest book** | `/van` has a "Coming soon" panel with nothing behind it. Would need storage and moderation — a real feature, not a stub to fill in. |
@@ -191,6 +195,10 @@ feature instead of breaking the build): `LUMA_API_KEY`, `BREVO_API_KEY`, `BREVO_
 ---
 
 ## Integrations
+
+Most of what looks like site content isn't in this repo. Events live in Luma, signups in
+Brevo, past jams on YouTube — so adding an event is a Luma task, not a deploy. Say so when
+the operator asks how to change something; it's often not a code change at all.
 
 **Luma** (`src/data/events.ts`) — events are fetched at request time on the four SSR pages.
 Calendar `cal-5Jvx9o7XeW0VVca`. Two API hosts are tried in order. `kind` (Gr8ful Jam vs PB&J
