@@ -190,6 +190,22 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
   reduceMotion.addEventListener('change', applyMotionPreference);
 </script>
 
+<!--
+  Front-page-only font override: swap every g8 font token for Arial. This ships
+  only in the homepage bundle, so it repoints the display / body / ui / alt
+  tokens here without touching any other page. Every font-family on the page
+  reads one of these vars, so the whole front page — hero, buttons, header,
+  footer — renders in Arial. Preview experiment; remove to restore the type system.
+-->
+<style is:global>
+  :root {
+    --g8-font-display: Arial, Helvetica, sans-serif;
+    --g8-font-body: Arial, Helvetica, sans-serif;
+    --g8-font-ui: Arial, Helvetica, sans-serif;
+    --g8-font-display-alt: Arial, Helvetica, sans-serif;
+  }
+</style>
+
 <style>
   /* ── Hero ─────────────────────────────────────────────
      B&W footage under Golden Hour type. The scrim is what holds 4.5:1 over
