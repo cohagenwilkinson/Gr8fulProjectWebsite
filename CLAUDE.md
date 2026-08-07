@@ -186,9 +186,25 @@ Two consequences that matter:
   not GitHub secrets.** GitHub only holds `VERCEL_TOKEN`. Getting this backwards will waste
   the operator's time.
 
-Every push to `main` deploys to production. There is no staging, and there is **no branch
-protection by design** — the operator wants a push to `main` to ship. Don't propose adding
-it. Note the flip side: nothing stands between a mistake and production, so the
+**Pushing `main` ships to production. Pushing any other branch builds a preview.** Both run
+the same workflow; the branch decides the target.
+
+**Default to a branch and offer the preview link.** Push your work to a branch, wait for
+the run, pull the deployment URL out of it, and give it to the operator so they can look at
+the change on their phone before it ships. That matters more here than on most projects,
+because they can see things you can't — the live site and real webfonts are both unreachable
+from your container.
+
+Getting the URL: the deploy step prints a `DEPLOY_URL=` line and writes the same URL to the
+run summary. Read it with `get_job_logs`. Hand over the link itself, not instructions for
+finding it.
+
+**But it's their call, and "push to main" means push to main.** Don't insist on a preview,
+don't re-ask, don't treat it as a safety issue to be negotiated. There is **no branch
+protection, by design** — the operator wants a push to `main` to ship, and asked for it
+explicitly. Don't propose adding protection.
+
+The flip side is real, though: nothing stands between a mistake and production, so the
 verification bar in "Before you commit" is the only safety net there is.
 
 **Env vars** — all in Vercel, and all four are set and working. They're optional in the
@@ -270,8 +286,11 @@ silently. Neither shows up in naive measurements.
 
 ## Git
 
-Work on a branch, open a PR, squash-merge to `main`. Note that squash-merging leaves your
-local branch diverged — reset onto `origin/main` before the next change rather than stacking
-onto the pre-squash commit.
+Work on a branch — that also gets you a preview deploy to show the operator (see Deploys).
+Open a PR and squash-merge to `main` when they're happy, or push straight to `main` if
+that's what they ask for.
+
+Squash-merging leaves your local branch diverged — reset onto `origin/main` before the next
+change rather than stacking onto the pre-squash commit.
 
 Write PR bodies that explain **cause**, not just the change, and state what wasn't verified.

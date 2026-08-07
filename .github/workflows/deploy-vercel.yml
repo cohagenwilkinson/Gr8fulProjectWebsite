@@ -6,6 +6,12 @@ name: Deploy to Vercel
 # repository secret. Optionally set VERCEL_ORG_ID and VERCEL_PROJECT_ID
 # secrets to deploy into an existing Vercel project; without them the
 # first deploy creates a new project in the token's default scope.
+#
+# main            -> production
+# any other branch -> preview, so a change can be looked at before it ships
+# manual run       -> whichever target you pick
+#
+# The deployment URL is printed to the log and written to the run summary.
 
 on:
   workflow_dispatch:
@@ -18,7 +24,7 @@ on:
           - preview
         default: production
   push:
-    branches: [main]
+    branches: ["**"]
 
 jobs:
   deploy:
@@ -48,9 +54,24 @@ jobs:
             # letters. Link (creating on first run) an explicit lowercase name.
             vercel link --yes --project gr8fulproject-site --token "${{ secrets.VERCEL_TOKEN }}"
           fi
-          TARGET="${{ inputs.target || 'production' }}"
-          if [ "$TARGET" = "production" ]; then
-            vercel deploy --prod --yes --token "${{ secrets.VERCEL_TOKEN }}"
+
+          # A manual run picks its own target. Otherwise main ships and every
+          # other branch gets a preview.
+          if [ -n "${{ inputs.target }}" ]; then
+            TARGET="${{ inputs.target }}"
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            TARGET="production"
           else
-            vercel deploy --yes --token "${{ secrets.VERCEL_TOKEN }}"
+            TARGET="preview"
           fi
+
+          if [ "$TARGET" = "production" ]; then
+            URL=$(vercel deploy --prod --yes --token "${{ secrets.VERCEL_TOKEN }}" | tail -1)
+          else
+            URL=$(vercel deploy --yes --token "${{ secrets.VERCEL_TOKEN }}" | tail -1)
+          fi
+
+          # Marker line so an agent can lift the URL straight out of the log.
+          echo "DEPLOY_URL=$URL"
+          echo "### $TARGET deploy" >> "$GITHUB_STEP_SUMMARY"
+          echo "$URL" >> "$GITHUB_STEP_SUMMARY"
