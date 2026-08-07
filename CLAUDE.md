@@ -94,10 +94,8 @@ one gets closed.
 | **The van's story** | `/van` says "the real story is coming" over deliberately fake lore. Awaiting real copy. |
 | **Guest book** | `/van` has a "Coming soon" panel with nothing behind it. Would need storage and moderation — a real feature, not a stub to fill in. |
 | **Luma calendar slug** | `lumaCalendarUrl` assumes `lu.ma/gr8fulproject`. Unverified — it's the fallback when an event has no page of its own. |
-| **`BREVO_BOULDER_LIST_ID`** | Optional. If unset, "I live around Boulder" is collected but routes nowhere different. |
-| **Custom domain** | Unconfirmed whether `gr8fulproject.com` is attached to the Vercel project. |
-| **H.264 hero fallback** | Verified by codec string, never played — this environment can't decode H.264, and most iPhones will take that path. |
-| **No branch protection** | Any push to `main` deploys straight to production. |
+| **Custom domain** | `gr8fulproject.com` is **not attached** to the Vercel project yet. Until it is, the site is only reachable at the `.vercel.app` URL. |
+| **H.264 hero fallback** | Verified by codec string, never actually played — this environment can't decode H.264, and most iPhones take that path. To close this: on an iPhone, open `/hero-540.mp4` and `/hero-720.mp4` directly. If both play, the files are good and the row can go. |
 
 ## Commands
 
@@ -186,11 +184,15 @@ Two consequences that matter:
   not GitHub secrets.** GitHub only holds `VERCEL_TOKEN`. Getting this backwards will waste
   the operator's time.
 
-Every push to `main` deploys to production. There is no staging.
+Every push to `main` deploys to production. There is no staging, and there is **no branch
+protection by design** — the operator wants a push to `main` to ship. Don't propose adding
+it. Note the flip side: nothing stands between a mistake and production, so the
+verification bar in "Before you commit" is the only safety net there is.
 
-**Env vars** (all in Vercel, all optional in the schema so a missing one degrades one
-feature instead of breaking the build): `LUMA_API_KEY`, `BREVO_API_KEY`, `BREVO_LIST_ID`,
-`BREVO_BOULDER_LIST_ID`.
+**Env vars** — all in Vercel, and all four are set and working. They're optional in the
+schema so a missing one degrades a single feature instead of breaking the build:
+`LUMA_API_KEY`, `BREVO_API_KEY`, `BREVO_LIST_ID`, and `BREVO_BOULDER_LIST_ID` (which is
+live — "I live around Boulder" really does route to its own Brevo list).
 
 > **Declare optional config as `envField.string`, never `envField.number`.** Astro validates
 > the entire env schema at startup, so one mistyped numeric value returns 500 on *every*
