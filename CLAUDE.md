@@ -93,7 +93,6 @@ one gets closed.
 | **Three photos** | `/about` ("Rob and the van"), `/pbj` ("sandwich line"), and the homepage podcast card ("artist mid-taping") still render dashed `g8-placeholder` frames. Waiting on real images. |
 | **The van's story** | `/van` says "the real story is coming" over deliberately fake lore. Awaiting real copy. |
 | **Guest book** | `/van` has a "Coming soon" panel with nothing behind it. Would need storage and moderation — a real feature, not a stub to fill in. |
-| **Luma calendar slug** | `lumaCalendarUrl` assumes `lu.ma/gr8fulproject`. Unverified — it's the fallback when an event has no page of its own. |
 | **Custom domain** | `gr8fulproject.com` is **not attached** to the Vercel project yet. Until it is, the site is only reachable at the `.vercel.app` URL. |
 
 ## Commands
