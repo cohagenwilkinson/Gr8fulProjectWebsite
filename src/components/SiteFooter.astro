@@ -1,29 +1,191 @@
 ---
 import ColorRibbon from './ColorRibbon.astro';
 import { site, socialLinks } from '../data/site';
+import { privacyLastUpdated, privacySections } from '../data/privacy';
 
 /**
- * Shared chrome. One row: socials + email left, mobius center, Privacy and
- * the pledge CTA right. No form here by design — the CTA links to /pledge.
+ * Shared chrome. One row: social icons + email left, mobius center, Privacy
+ * right. No form here by design.
+ *
+ * The "Take the Pledge" CTA that used to sit here has been removed — the
+ * Join section, its own CTA, and the pledge flow are unchanged, this was
+ * only the redundant footer shortcut to it.
+ *
+ * Icons use the verified URLs already in data/site.ts (socialLinks) —
+ * nothing invented here. Minimal inline SVGs, not brand assets, so no
+ * separate icon files/dependency; keyed by label since socialLinks is
+ * {label, href} pairs.
+ *
+ * Privacy is a button that opens an on-site modal, not a link to /privacy —
+ * per instruction, visitors should never leave the current page for it.
+ * NOTE: /privacy itself was already a local page in this project, not an
+ * external redirect to an old site (see data/privacy.ts) — its content is
+ * what the modal below reuses verbatim. The standalone /privacy route is
+ * left in place untouched, for any direct link/bookmark to it.
  */
+const socialIcons: Record<string, string> = {
+  YouTube:
+    'M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.5V8.5L15.8 12l-6.2 3.5Z',
+  TikTok:
+    'M16.5 2h-3.1v13.6a2.9 2.9 0 1 1-2.9-2.9c.2 0 .5 0 .7.1v-3.2a6.1 6.1 0 1 0 5.3 6V9.3a7.7 7.7 0 0 0 4.6 1.5V7.7a4.6 4.6 0 0 1-4.6-4.6V2Z',
+};
 ---
 
 <footer class="footer">
   <ColorRibbon variant="footer" />
   <div class="g8-container footer__row">
     <div class="footer__links">
-      {socialLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+      <div class="footer__socials">
+        {
+          socialLinks.map((link) => (
+            <a
+              href={link.href}
+              class="footer__social-link"
+              aria-label={`${site.name} on ${link.label}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {link.label === 'Instagram' ? (
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="5" />
+                  <circle cx="12" cy="12" r="4.2" />
+                  <circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+                  <path d={socialIcons[link.label]} />
+                </svg>
+              )}
+            </a>
+          ))
+        }
+      </div>
       <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>
     </div>
 
     <img class="footer__mobius" src="/mobius.png" alt="Gr8ful Project mobius mark" />
 
     <div class="footer__cta">
-      <a href="/privacy">Privacy</a>
-      <a href="/pledge" class="g8-btn g8-btn--gold">Take the Pledge</a>
+      <button type="button" class="footer__privacy-trigger" data-privacy-open aria-haspopup="dialog">
+        Privacy
+      </button>
+    </div>
+  </div>
+
+  <div class="privacy-modal" data-privacy-modal hidden>
+    <div class="privacy-modal__backdrop" data-privacy-close aria-hidden="true"></div>
+    <div
+      class="privacy-modal__panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="privacy-modal-heading"
+      tabindex="-1"
+    >
+      <div class="privacy-modal__header">
+        <div>
+          <div class="g8-eyebrow privacy-modal__label">{privacyLastUpdated}</div>
+          <h2 id="privacy-modal-heading" class="privacy-modal__heading">Privacy</h2>
+        </div>
+        <button
+          type="button"
+          class="privacy-modal__close"
+          data-privacy-close
+          aria-label="Close privacy policy"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="privacy-modal__body">
+        {
+          privacySections.map((section) => (
+            <div class="privacy-modal__section">
+              <h3 class="privacy-modal__section-heading">{section.heading}</h3>
+              <p class="privacy-modal__section-body">{section.body}</p>
+            </div>
+          ))
+        }
+        <div class="privacy-modal__section">
+          <h3 class="privacy-modal__section-heading">Questions</h3>
+          <p class="privacy-modal__section-body">
+            Write to <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>.
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 </footer>
+
+<script>
+  // Accessible dialog: focus moves into the panel on open and back to the
+  // Privacy button on close, Tab is trapped inside while open, Escape and
+  // backdrop-click both close it, and the background can't scroll while
+  // it's open. Present on every page (SiteFooter renders on all of them),
+  // so this one script covers the homepage and every other route.
+  const openBtn = document.querySelector<HTMLButtonElement>('[data-privacy-open]');
+  const modal = document.querySelector<HTMLDivElement>('[data-privacy-modal]');
+  const panel = modal?.querySelector<HTMLElement>('.privacy-modal__panel') ?? null;
+  const closeEls = document.querySelectorAll<HTMLElement>('[data-privacy-close]');
+
+  let lastFocused: HTMLElement | null = null;
+
+  function getFocusable(): HTMLElement[] {
+    if (!panel) return [];
+    return Array.from(
+      panel.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')
+    );
+  }
+
+  function onKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeModal();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const focusable = getFocusable();
+    if (focusable.length === 0) {
+      event.preventDefault();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function openModal() {
+    lastFocused = document.activeElement as HTMLElement;
+    modal?.removeAttribute('hidden');
+    document.body.style.overflow = 'hidden';
+    // Focus the panel itself (tabindex="-1", programmatically focusable
+    // only) rather than the close button — this is a read-heavy dialog, so
+    // a screen reader announcing the dialog + its title first, before
+    // landing on a control, reads better than jumping straight to "Close".
+    panel?.focus();
+    document.addEventListener('keydown', onKeydown);
+  }
+
+  function closeModal() {
+    modal?.setAttribute('hidden', '');
+    document.body.style.overflow = '';
+    document.removeEventListener('keydown', onKeydown);
+    lastFocused?.focus();
+  }
+
+  openBtn?.addEventListener('click', openModal);
+  closeEls.forEach((el) => {
+    el.addEventListener('click', (event) => {
+      event.preventDefault();
+      closeModal();
+    });
+  });
+</script>
 
 <style>
   .footer {
@@ -51,6 +213,22 @@ import { site, socialLinks } from '../data/site';
     gap: 20px;
   }
 
+  .footer__socials {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Icon can stay visually small (18px) while the link itself keeps a
+     comfortable ~30px touch/click target via padding, per instruction.
+     Color/hover/focus already come from the shared .footer a rules below. */
+  .footer__social-link {
+    display: grid;
+    place-items: center;
+    padding: 6px;
+    border-radius: var(--g8-radius-sm);
+  }
+
   .footer__mobius {
     height: 96px;
     width: auto;
@@ -71,6 +249,20 @@ import { site, socialLinks } from '../data/site';
   }
   .footer a:not(.g8-btn):hover { color: var(--g8-golden-hour); }
 
+  /* Button, not a link — opens the modal instead of navigating. Same visual
+     treatment as the other footer text links, since nothing about how it
+     looks should signal "this one behaves differently". */
+  .footer__privacy-trigger {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: var(--g8-sea-glass);
+    cursor: pointer;
+    transition: color var(--g8-dur-fast) var(--g8-ease);
+  }
+  .footer__privacy-trigger:hover { color: var(--g8-golden-hour); }
+
   @media (max-width: 900px) {
     .footer__row {
       grid-template-columns: 1fr;
@@ -86,5 +278,140 @@ import { site, socialLinks } from '../data/site';
 
   @media (max-width: 680px) {
     .footer__mobius { height: 72px; }
+  }
+
+  /* ── Privacy modal ────────────────────────────────────── */
+  .privacy-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    padding: clamp(16px, 4vw, 40px);
+  }
+  /* :not([hidden]) — an author display rule on this class would otherwise
+     outrank the UA [hidden] { display:none } rule at equal specificity and
+     render the modal open by default (same fix used on .header__menu and
+     the Join modal elsewhere in this project). */
+  .privacy-modal:not([hidden]) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .privacy-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(1, 7, 21, 0.6);
+  }
+
+  .privacy-modal__panel {
+    position: relative;
+    width: min(620px, 100%);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--g8-parchment);
+    border: var(--g8-stroke-bold) solid var(--g8-border-strong);
+    border-radius: var(--g8-radius-lg);
+    /* Hard, zero-blur offset shadow — same flat-offset language used
+       everywhere else on the site, kept modest since this is legal copy,
+       not a hero moment. */
+    box-shadow: var(--g8-shadow-card);
+    overflow: hidden;
+  }
+  .privacy-modal__panel:focus-visible { outline: none; }
+
+  .privacy-modal__header {
+    flex: none;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: clamp(24px, 4vw, 36px) clamp(24px, 4vw, 36px) 0;
+  }
+
+  .privacy-modal__label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--g8-mesa);
+  }
+
+  .privacy-modal__heading {
+    margin: 0;
+    font-family: var(--g8-font-display);
+    font-weight: var(--g8-weight-display);
+    font-size: clamp(30px, 4vw, 40px);
+    line-height: 1;
+    color: var(--g8-open-water);
+  }
+
+  .privacy-modal__close {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-content: center;
+    border-radius: 999px;
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    background: transparent;
+    color: var(--g8-midnight);
+    font-family: var(--g8-font-ui);
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .privacy-modal__close:hover {
+    background: var(--g8-open-water);
+    border-color: var(--g8-open-water);
+    color: var(--g8-chalk);
+  }
+
+  .privacy-modal__body {
+    flex: 1;
+    /* The classic flexbox scroll gotcha: without min-height:0, a flex child
+       refuses to shrink below its content size, and overflow-y:auto never
+       gets the chance to kick in — the panel would just grow past
+       max-height instead of scrolling internally. */
+    min-height: 0;
+    overflow-y: auto;
+    padding: 20px clamp(24px, 4vw, 36px) clamp(24px, 4vw, 36px);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .privacy-modal__section-heading {
+    margin: 0 0 8px;
+    font-family: var(--g8-font-display);
+    font-weight: var(--g8-weight-display);
+    font-size: 22px;
+    line-height: 1.15;
+    color: var(--g8-midnight);
+  }
+
+  .privacy-modal__section-body {
+    margin: 0;
+    font-size: var(--g8-size-body);
+    line-height: var(--g8-lh-long);
+    color: var(--g8-midnight);
+  }
+  .privacy-modal__section-body a {
+    color: var(--g8-ember);
+  }
+  .privacy-modal__section-body a:hover {
+    color: var(--g8-crimson);
+  }
+
+  @media (max-width: 680px) {
+    .privacy-modal { padding: 0; }
+    .privacy-modal__panel {
+      width: 100%;
+      height: 100%;
+      max-height: 100vh;
+      border-radius: 0;
+      border-width: 0;
+      box-shadow: none;
+    }
+    .privacy-modal__header { padding: 20px 20px 0; }
+    .privacy-modal__heading { font-size: 26px; }
+    .privacy-modal__body { padding: 16px 20px 32px; }
   }
 </style>

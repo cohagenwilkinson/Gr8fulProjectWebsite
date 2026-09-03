@@ -1,36 +1,25 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { site } from '../data/site';
+import { privacyLastUpdated, privacySections } from '../data/privacy';
 
 /**
- * Copy is the design bundle's draft boilerplate — flagged there as needing a
- * real legal review before launch.
+ * Copy now lives in data/privacy.ts — shared with the footer's Privacy
+ * modal (SiteFooter.astro) so the two can't drift apart. Still the design
+ * bundle's draft boilerplate, flagged there as needing a real legal review
+ * before launch.
  */
-const sections = [
-  {
-    heading: 'What we collect',
-    body: `Your email address, and whether you took the pledge. If you tell us you live around Boulder, we store that too, so we can let you know about events near you.`,
-  },
-  {
-    heading: 'What we do with it',
-    body: `We send an occasional note and event invites. That's it. We don't sell your information, we don't share it, and we don't run ads.`,
-  },
-  {
-    heading: 'Leaving',
-    body: `Every email has an unsubscribe link, and it works immediately. You can also write to us and we'll remove you by hand.`,
-  },
-];
 ---
 
 <BaseLayout title="Privacy — Gr8ful Project" description="What we collect, what we do with it, and how to leave.">
   <div class="g8-container g8-page">
     <div class="wrap">
-      <div class="g8-eyebrow wrap__label">Last updated August 2026</div>
+      <div class="g8-eyebrow wrap__label">{privacyLastUpdated}</div>
       <h1 class="g8-display wrap__headline" style="--fs:60px; --lh:0.98">Privacy</h1>
 
       <div class="g8-card policy">
         {
-          sections.map((section) => (
+          privacySections.map((section) => (
             <div>
               <h2 class="policy__heading">{section.heading}</h2>
               <p class="policy__body">{section.body}</p>

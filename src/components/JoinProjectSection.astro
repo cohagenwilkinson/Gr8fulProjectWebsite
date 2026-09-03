@@ -1,0 +1,795 @@
+---
+/**
+ * Join the Project — pages 5, 6, 7 of the approved redesign. One interactive
+ * homepage section, not three routes: the teal sunburst background (page 5)
+ * stays mounted the whole time, and a single modal switches between the
+ * pledge view (page 6) and the welcome view (page 7) on top of it.
+ *
+ * PROTOTYPE NOTE — the form here is local-only. It validates and advances
+ * state client-side but never submits anywhere; it does not touch
+ * /api/pledge, Brevo, or the existing /pledge and /pledge/thanks routes,
+ * which keep working exactly as before. Field set intentionally differs
+ * from PledgeForm.astro (First Name/Email/Zipcode vs. the production
+ * contract), so this is deliberately a separate component rather than a
+ * reuse of that one.
+ *
+ * Media: the video-preview stills are cropped straight from pages 5 and 7
+ * of the PDF — temporary, not final assets (see the "prototype" filenames).
+ * The welcome card's signature is the real supplied asset
+ * (join-robbiedob-sig-large.png), not baked into the crop, so the crop for
+ * that card stops above the caption/signature line on purpose.
+ */
+---
+
+<section class="join" id="join">
+  <img
+    src="/join-wallpaper-burst-deepteal.png"
+    alt=""
+    aria-hidden="true"
+    class="join__bg"
+  />
+
+  <div class="g8-container join__body">
+    <h2 class="join__headline">Join the Project</h2>
+    <p class="join__subhead">Take the pledge. Get invites. Stay in touch.</p>
+
+    <div class="join__media">
+      {/* TEMPORARY PROTOTYPE MEDIA — cropped from page 5 of the PDF, play mark baked in (same treatment as the Podcast/Jams cards). Replace with real video once it exists. */}
+      <img
+        src="/join-still-pledge-prototype.jpg"
+        alt="Robbie Dob — video preview placeholder, not final"
+        class="join__media-img"
+      />
+    </div>
+
+    <button type="button" class="g8-btn g8-btn--gold join__cta" data-join-open>
+      Take the pledge
+    </button>
+  </div>
+
+  <div class="join-modal" data-join-modal hidden>
+    <div class="join-modal__backdrop" data-join-close aria-hidden="true"></div>
+
+    <div class="join-modal__panel" role="dialog" aria-modal="true" aria-label="Join the Gr8ful Project">
+      <div class="join-modal__view" data-join-view="pledge">
+        <button type="button" class="join-modal__close" data-join-close aria-label="Close">✕</button>
+        <h3 class="join-modal__heading">The Gr8ful Pledge</h3>
+
+        <form class="join-modal__grid" data-join-form novalidate>
+          <div class="join-modal__col">
+            <h4 class="join-modal__col-heading">I promise:</h4>
+            <p class="join-modal__promise">
+              To practice when I can.<br />
+              Be kind to myself when I can't.<br />
+              Return when I'm able - without guilt.
+            </p>
+            <p class="join-modal__promise">
+              This is my project.<br />
+              This is my promise.
+            </p>
+            <p class="join-modal__promise join-modal__promise--em">
+              I don't need perfect attendance to make progress.<br />
+              I believe tomorrow can be better than today.
+            </p>
+            <label class="join-modal__checkbox">
+              <input type="checkbox" name="promise" required />
+              <span>I hereby promise</span>
+            </label>
+          </div>
+
+          <div class="join-modal__col">
+            <h4 class="join-modal__col-heading">Subscribe</h4>
+            <label class="join-modal__field">
+              <span class="join-modal__label">First name</span>
+              <input type="text" name="firstName" autocomplete="given-name" required />
+            </label>
+            <label class="join-modal__field">
+              <span class="join-modal__label">Email</span>
+              <input type="email" name="email" autocomplete="email" required />
+            </label>
+            <label class="join-modal__field">
+              <span class="join-modal__label">Zipcode</span>
+              <input type="text" name="zip" autocomplete="postal-code" inputmode="numeric" required />
+            </label>
+            <label class="join-modal__checkbox">
+              <input type="checkbox" name="invites" />
+              <span>Get invites and stay in touch</span>
+            </label>
+          </div>
+
+          <button type="submit" class="g8-btn g8-btn--gold join-modal__submit">Make it official</button>
+        </form>
+      </div>
+
+      <div class="join-modal__view" data-join-view="welcome" hidden>
+        <button
+          type="button"
+          class="join-modal__close join-modal__close--welcome"
+          data-join-close
+          aria-label="Close"
+        >
+          ✕
+        </button>
+        <h3 class="join-modal__heading">Welcome to The Gr8ful Project</h3>
+
+        <div class="join-modal__welcome-card">
+          {/*
+            TEMPORARY PROTOTYPE MEDIA — cropped from page 7 of the PDF. The
+            source crop stops just above where the PDF bakes in the caption
+            and signature so those can render as live content instead; a
+            wash gradient + object-fit:cover let the photo fill the whole
+            card rather than splitting it into a photo region and a solid
+            panel, matching the approved design.
+          */}
+          <img
+            src="/join-still-welcome-prototype.jpg"
+            alt="Robbie Dob — video preview placeholder, not final"
+            class="join-modal__welcome-photo"
+          />
+          <div class="join-modal__welcome-wash" aria-hidden="true"></div>
+          {/*
+            Coded, not baked into the crop — a baked icon would land at
+            whatever position the cover-fit crop happens to leave it at
+            (unreliable across crop/zoom changes) and would sit under the
+            wash. This paints above both.
+          */}
+          <span class="join-modal__welcome-replay" aria-hidden="true">
+            {/*
+              viewBox is cropped to this path's own measured geometry
+              (getBBox: x=1 y=3 w=20 h=18 in the icon library's stock 0-24
+              box, plus half the stroke width as margin), not the stock
+              "0 0 24 24" — that box has ~2 units more empty space on the
+              right than the left, which is what was reading as the mark
+              sitting off-center in the circle. Cropped this way, the path
+              fills its own viewport edge-to-edge, so centering the SVG
+              element (below) centers the mark itself.
+            */}
+            <svg
+              viewBox="-0.2 1.8 22.4 20.4"
+              width="24"
+              height="24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"
+                stroke="#010715"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          <div class="join-modal__welcome-copy">
+            <p class="join-modal__welcome-text">
+              I am Gr8ful for you.<br />
+              Even if we haven't met yet.
+            </p>
+            <img
+              src="/join-robbiedob-sig-large.png"
+              alt="Robbie Dob"
+              class="join-modal__welcome-sig"
+            />
+          </div>
+        </div>
+
+        <button type="button" class="join-modal__return" data-join-close>Return to site</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const joinSection = document.querySelector<HTMLElement>('.join');
+  const openBtn = document.querySelector<HTMLButtonElement>('[data-join-open]');
+  const modal = document.querySelector<HTMLDivElement>('[data-join-modal]');
+  const closeEls = document.querySelectorAll<HTMLElement>('[data-join-close]');
+  const form = document.querySelector<HTMLFormElement>('[data-join-form]');
+  const pledgeView = document.querySelector<HTMLElement>('[data-join-view="pledge"]');
+  const welcomeView = document.querySelector<HTMLElement>('[data-join-view="welcome"]');
+
+  function showPledgeView() {
+    pledgeView?.removeAttribute('hidden');
+    welcomeView?.setAttribute('hidden', '');
+  }
+
+  function showWelcomeView() {
+    welcomeView?.removeAttribute('hidden');
+    pledgeView?.setAttribute('hidden', '');
+  }
+
+  function openModal() {
+    showPledgeView();
+    modal?.removeAttribute('hidden');
+    document.body.style.overflow = 'hidden';
+    // Hides the page-5 "Take the pledge" CTA and blocks pointer interaction
+    // with everything else in the base section while a modal is open — the
+    // section itself (heading/subhead/media card) stays visible, dimmed by
+    // the modal backdrop, so it still reads as the same layered section.
+    joinSection?.classList.add('join--modal-open');
+  }
+
+  function closeModal() {
+    modal?.setAttribute('hidden', '');
+    document.body.style.overflow = '';
+    joinSection?.classList.remove('join--modal-open');
+    // Next open always starts at the pledge step, not wherever it was left.
+    showPledgeView();
+    form?.reset();
+  }
+
+  openBtn?.addEventListener('click', openModal);
+
+  closeEls.forEach((el) => {
+    el.addEventListener('click', (event) => {
+      event.preventDefault();
+      closeModal();
+    });
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !modal?.hasAttribute('hidden')) {
+      closeModal();
+    }
+  });
+
+  // Local prototype only — this never sends data anywhere. It just advances
+  // to the welcome view once the required fields pass native validation.
+  // The production signup form remains PledgeForm.astro / /api/pledge.
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (form.checkValidity()) {
+      showWelcomeView();
+    } else {
+      form.reportValidity();
+    }
+  });
+</script>
+
+<style>
+  .join {
+    /* Vertical rhythm below is measured directly off page 5 of the PDF
+       (1920×1080 canvas) and expressed in vw — using the canvas WIDTH as
+       the reference for vertical gaps too, so the whole composition scales
+       together and keeps the PDF's proportions regardless of viewport
+       aspect ratio, the same technique used for every horizontal measure
+       on this page. Canvas top to headline top measured at 75px = 3.9vw;
+       CTA bottom to canvas bottom at 38px = 2.0vw. */
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(40px, 3.9vw, 88px) clamp(20px, 2vw, 48px);
+  }
+
+  .join__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .join__body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .join__headline {
+    /* Confirmed directly from the PDF's embedded font resources (not a
+       visual approximation): the actual text run "Join the Project" on
+       page 5 is set in JostRoman-Bold. Jost is already loaded sitewide
+       (var(--g8-font-ui)) at weight 700. */
+    margin: 0;
+    font-family: var(--g8-font-ui);
+    font-weight: 700;
+    /* Jost is measurably narrower than the Poppins this replaced — the
+       previous size (right for Poppins) rendered ~12.5% under the PDF's
+       measured width once swapped to the correct font. Bumped to match. */
+    font-size: clamp(34px, 4.7vw, 68px);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--g8-golden-hour);
+    /* Hard, zero-blur offset shadow — measured off the PDF, same flat-offset
+       language used for every other headline/CTA on this page. */
+    text-shadow: 3px 3px 0 var(--g8-midnight);
+  }
+
+  .join__subhead {
+    /* Also JostRoman-Bold per the PDF's embedded fonts — same face as the
+       headline, not the light body-copy treatment used for prose
+       elsewhere. Gap to headline measured at 26px/1920 = 1.35vw. */
+    margin: clamp(8px, 1.35vw, 20px) 0 0;
+    font-family: var(--g8-font-ui);
+    font-weight: 700;
+    /* Same ~12.5% correction as the headline above, for the same reason. */
+    font-size: clamp(22px, 2.15vw, 30px);
+    color: var(--g8-chalk);
+    text-shadow: 2px 2px 0 var(--g8-midnight);
+  }
+
+  .join__media {
+    /* Square in the PDF (683×683 measured on the 1920px canvas, ratio
+       exactly 1.0) — sized as a share of viewport width, not the container,
+       so the proportion holds at every desktop width instead of tracking
+       the container's own max-width. */
+    width: clamp(240px, 35.6vw, 520px);
+    aspect-ratio: 1 / 1;
+    /* Gap above (subhead bottom to card top, 42px/1920) and below (card
+       bottom to CTA top, 23px/1920), both measured off the PDF and much
+       tighter than a guessed value — this is what pulls the card and CTA
+       up together as one block. */
+    margin: clamp(20px, 2.19vw, 42px) 0 clamp(10px, 1.2vw, 23px);
+    border-radius: var(--g8-radius-lg);
+    border: var(--g8-stroke-bold) solid var(--g8-border-strong);
+    overflow: hidden;
+  }
+
+  .join__media-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .join__cta {
+    /* Slightly smaller than before — the CTA pill measures 349×68 on the
+       1920 canvas (18.2% of width, 6.3% of height), a touch tighter than
+       the original pass. Font per the PDF's embedded resources:
+       HelveticaNeue-Medium, not the Jost the sitewide .g8-btn base applies —
+       overridden here to the system Helvetica Neue stack at weight 500. */
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    text-transform: none;
+    font-size: 15px;
+    padding: 14px 32px;
+    border: var(--g8-stroke-bold) solid var(--g8-border-strong);
+    box-shadow: var(--g8-shadow-card);
+  }
+  .join__cta:hover { background: var(--g8-golden-dk); }
+
+  /* While a modal is open: hide the CTA outright (not just dim it — the
+     backdrop already dims everything, but the CTA sitting right at the
+     modal's lower edge kept peeking out below it, reading as a second,
+     still-clickable button) and block pointer interaction with the rest of
+     the base section. Heading/subhead/media card stay visible, dimmed by
+     the modal backdrop, so the section still reads as layered underneath
+     rather than swapped out. */
+  .join--modal-open .join__cta {
+    visibility: hidden;
+  }
+  .join--modal-open .join__body {
+    pointer-events: none;
+  }
+
+  /* ── Modal shell ──────────────────────────────────────
+     Fixed overlay so it sits on top of the still-mounted section above,
+     not a separate page/route. */
+  .join-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    padding: clamp(16px, 4vw, 40px);
+  }
+  /* :not([hidden]) — an author display rule on this class would otherwise
+     outrank the UA [hidden] { display:none } rule at equal specificity and
+     render the modal open by default. Same fix as .header__menu in
+     SiteHeader.astro. */
+  .join-modal:not([hidden]) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .join-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(1, 7, 21, 0.6);
+  }
+
+  .join-modal__panel {
+    /* Outer bounds measured directly off page 6 of the PDF: 1368×779 on the
+       1920 canvas — 71.25% of canvas width, 72.1% of canvas height, an
+       outer ratio of 1.756:1. Setting width AND height independently (one
+       as vw, one as vh) only reproduces that ratio at one specific
+       viewport aspect ratio; at any other aspect it drifts, which is how
+       the previous pass (79.25vw wide, capped at 80vh tall) ended up
+       reading as nearly full-screen on shorter/narrower desktop windows.
+       min(vw, vh-scaled-by-the-ratio) plus a locked aspect-ratio keeps the
+       PDF's shape exact and guarantees the box never exceeds ~71% width
+       OR ~72% height, on any desktop viewport. Tablet/mobile override this
+       back to flexible sizing below — this exact shape is a desktop-only
+       target, same as the rest of the PDF comp. */
+    position: relative;
+    /* No max-width cap — the previous pass's 1180px ceiling under-shot the
+       target at 1920×1080 (a common desktop size, and the PDF's own canvas
+       resolution), rendering the modal at only ~61% instead of ~71%. The
+       percentage is the target at every desktop size, matching the PDF. */
+    width: min(71vw, calc(72vh * 1.7561));
+    aspect-ratio: 1368 / 779;
+    overflow-y: auto;
+    background: var(--g8-parchment);
+    border: var(--g8-stroke-bold) solid var(--g8-border-strong);
+    border-radius: var(--g8-radius-lg);
+    box-shadow: var(--g8-shadow-lift);
+  }
+
+  .join-modal__view {
+    position: relative;
+    /* Tightened further from the previous pass so content fits the
+       smaller, PDF-accurate shell above without relying on scroll at
+       ordinary desktop sizes — proportional scaling of the same spacing,
+       not a redesign. */
+    padding: clamp(10px, 1.4vw, 26px) clamp(20px, 4vw, 56px) clamp(10px, 2vw, 38px);
+  }
+
+  .join-modal__close {
+    position: absolute;
+    top: clamp(12px, 1.5vw, 22px);
+    right: clamp(12px, 1.5vw, 22px);
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-content: center;
+    border-radius: 999px;
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    background: transparent;
+    color: var(--g8-midnight);
+    font-family: var(--g8-font-ui);
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .join-modal__close:hover { background: var(--g8-chalk); }
+
+  /* Welcome state only (page 7) — the PDF's close mark is teal there, not
+     the dark stroke used on the pledge state (page 6). */
+  .join-modal__close--welcome {
+    border-color: var(--g8-open-water);
+    color: var(--g8-open-water);
+  }
+  .join-modal__close--welcome:hover { background: rgba(7, 147, 150, 0.12); }
+
+  .join-modal__heading {
+    /* JostRoman-Bold per the PDF's embedded fonts, same as .join__headline. */
+    margin: 0 0 clamp(10px, 1.9vw, 24px);
+    text-align: center;
+    font-family: var(--g8-font-ui);
+    font-weight: 700;
+    font-size: clamp(24px, 2.7vw, 38px);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--g8-golden-hour);
+    text-shadow: 2px 2px 0 var(--g8-midnight);
+  }
+
+  /* ── Pledge view ──────────────────────────────────────── */
+  .join-modal__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(18px, 3.6vw, 48px);
+  }
+
+  .join-modal__col-heading {
+    /* JostRoman-Bold per the PDF ("I promise:" / "Subscribe"). */
+    margin: 0 0 clamp(5px, 1.5vw, 13px);
+    font-family: var(--g8-font-ui);
+    font-weight: 700;
+    font-size: clamp(15px, 1.2vw, 19px);
+    color: var(--g8-midnight);
+  }
+
+  .join-modal__promise {
+    /* Jost-Regular per the PDF, not the sitewide Poppins body face.
+       Font-size raised ~12% — the previous size read as too small for the
+       actual pledge copy the visitor is meant to read carefully. */
+    margin: 0 0 clamp(5px, 1.5vw, 13px);
+    font-family: var(--g8-font-ui);
+    font-weight: 400;
+    font-size: clamp(13px, 1vw, 15px);
+    line-height: 1.32;
+    color: var(--g8-midnight);
+  }
+  .join-modal__promise--em {
+    /* Jost-Italic (a real italic face, loaded specifically for this —
+       see the Google Fonts link in BaseLayout.astro — not a synthetic
+       oblique of the upright weight). */
+    font-style: italic;
+  }
+
+  .join-modal__field {
+    display: block;
+    margin-bottom: clamp(4px, 0.9vw, 9px);
+  }
+
+  .join-modal__label {
+    display: block;
+    margin-bottom: 3px;
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    font-size: clamp(10px, 0.7vw, 11.5px);
+    letter-spacing: var(--g8-track-caps);
+    text-transform: uppercase;
+    color: var(--g8-midnight);
+  }
+
+  .join-modal__field input {
+    width: 100%;
+    padding: 6px 12px;
+    font-family: var(--g8-font-body);
+    font-size: clamp(12.5px, 0.85vw, 14.5px);
+    color: var(--g8-midnight);
+    background: var(--g8-chalk);
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    border-radius: var(--g8-radius-sm);
+  }
+  .join-modal__field input:focus-visible {
+    outline: 2px solid var(--g8-focus);
+    outline-offset: 2px;
+  }
+
+  .join-modal__checkbox {
+    /* JostRoman-SemiBold per the PDF ("I hereby promise" / "Get invites and
+       stay in touch"), same face/weight as the field labels above. */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    font-size: clamp(11.5px, 0.9vw, 13.5px);
+    color: var(--g8-midnight);
+    cursor: pointer;
+  }
+
+  .join-modal__checkbox input[type='checkbox'] {
+    appearance: none;
+    flex: none;
+    width: 15px;
+    height: 15px;
+    display: inline-grid;
+    place-content: center;
+    background: var(--g8-chalk);
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .join-modal__checkbox input[type='checkbox']::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--g8-midnight);
+    transform: scale(0);
+    transition: transform var(--g8-dur-fast) var(--g8-ease);
+  }
+  .join-modal__checkbox input[type='checkbox']:checked::before {
+    transform: scale(1);
+  }
+
+  .join-modal__submit {
+    /* HelveticaNeue-Medium per the PDF — same override as .join__cta. */
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    grid-column: 1 / -1;
+    justify-self: center;
+    margin-top: clamp(6px, 1vw, 14px);
+    text-transform: none;
+    font-size: clamp(13px, 0.95vw, 15px);
+    padding: clamp(9px, 0.9vw, 13px) clamp(22px, 2.2vw, 32px);
+    border: var(--g8-stroke-bold) solid var(--g8-border-strong);
+    box-shadow: var(--g8-shadow-card);
+  }
+  .join-modal__submit:hover { background: var(--g8-golden-dk); }
+
+  /* ── Welcome view ─────────────────────────────────────── */
+  .join-modal__welcome-card {
+    /* Outer bounds measured directly off page 7 of the PDF: 617×566 on the
+       1920 canvas — very close to square but very slightly WIDER than
+       tall (ratio 1.09), not portrait as it might read at a glance.
+       Sized relative to the modal panel's own width (617/1368 ≈ 45% of
+       the panel, which is itself 71.25vw), not the old fixed clamp. */
+    /* Min-width raised from an earlier 190px — at narrow phone widths that
+       floor made the card too narrow for the caption to wrap to its normal
+       two lines, pushing a third line up into the replay icon below. */
+    position: relative;
+    width: clamp(260px, 32.1vw, 420px);
+    aspect-ratio: 617 / 566;
+    margin: 0 auto;
+    border-radius: var(--g8-radius-lg);
+    border: var(--g8-stroke-bold) solid var(--g8-border-strong);
+    /* Measured directly off page 7: border + shadow band together are only
+       ~4-7px at the 1920 canvas scale — much tighter than --g8-shadow-lift
+       (10px, sized for the much larger modal panel). A flat small offset
+       matches what's actually there instead of scaling with viewport. */
+    box-shadow: 4px 4px 0 var(--g8-midnight);
+    overflow: hidden;
+  }
+
+  .join-modal__welcome-photo {
+    /* Fills the entire card — no separate photo region + solid panel. The
+       source crop stops above the PDF's baked-in caption line (see the
+       markup comment), so covering it into a taller card zooms in
+       slightly rather than showing empty space; object-position keeps
+       Rob's face in frame rather than centering strictly. */
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 12%;
+  }
+
+  .join-modal__welcome-wash {
+    /* Lighter than the previous pass, which read as almost pure white and
+       lost Rob, the room, and the wall art/guitars entirely. This keeps a
+       light overall fade (the PDF's photo IS faded, just not this heavily)
+       and leaves legibility for the caption to a second, local backing on
+       .join-modal__welcome-copy below instead of washing the whole card. */
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(245, 244, 240, 0.02) 0%,
+      rgba(245, 244, 240, 0.08) 45%,
+      rgba(245, 244, 240, 0.16) 70%,
+      rgba(245, 244, 240, 0.22) 100%
+    );
+  }
+
+  .join-modal__welcome-replay {
+    /* Coded rather than baked into the crop — see the markup comment.
+       Sits above the wash (later in DOM order, same stacking context).
+
+       BUG FOUND during runtime debugging: `place-content: center` centers
+       the grid's TRACK as a whole within the container — and with no
+       explicit grid-template and a percentage-sized child, the implicit
+       track sizes to "auto" content, which left percentage width/height on
+       the svg unable to resolve against anything definite. The measured
+       result was a 6.98×3.49px box instead of a ~25px square, nowhere near
+       centered. `place-items: center` centers the SVG ITEM within its own
+       cell (which stretches to fill this container by default), which is
+       the rule that actually does what "center a fixed-size child" means. */
+    position: absolute;
+    left: 50%;
+    top: 42%;
+    transform: translate(-50%, -50%);
+    width: clamp(30px, 8vw, 46px);
+    height: clamp(30px, 8vw, 46px);
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--g8-golden-hour);
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    box-shadow: 2px 2px 0 var(--g8-midnight);
+  }
+  .join-modal__welcome-replay svg {
+    /* Explicit, non-percentage dimensions — the earlier 55%/55% is exactly
+       what broke inside the content-sized grid track above. Scales with
+       the circle's own clamp() (55% of its 30px/46px bounds and 8vw rate),
+       but as absolute values the svg itself can size against, not a
+       percentage the grid has to resolve. */
+    display: block;
+    width: clamp(16.5px, 4.4vw, 25.3px);
+    height: clamp(16.5px, 4.4vw, 25.3px);
+  }
+
+  .join-modal__welcome-copy {
+    /* Positioned to match the measured caption block: text starting ~60%
+       down the card, signature ending ~83% down. Its own light-to-solid
+       backing (independent of the card-wide wash above) keeps the text and
+       signature legible over the now-more-visible photo without needing to
+       wash out the whole card to get there. */
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 14px 18px clamp(10px, 2vw, 20px);
+    text-align: center;
+    background: linear-gradient(
+      180deg,
+      rgba(245, 244, 240, 0) 0%,
+      rgba(245, 244, 240, 0.8) 30%,
+      rgba(245, 244, 240, 0.92) 100%
+    );
+  }
+
+  .join-modal__welcome-text {
+    /* JostRoman-SemiBold per the PDF. */
+    margin: 0;
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    font-size: clamp(12px, 1.3vw, 16px);
+    line-height: 1.35;
+    color: var(--g8-midnight);
+  }
+
+  .join-modal__welcome-sig {
+    display: block;
+    width: clamp(90px, 9vw, 130px);
+    height: auto;
+    margin: 6px auto 0;
+  }
+
+  .join-modal__return {
+    /* HelveticaNeue-Medium per the PDF, not Jost. */
+    display: block;
+    margin: clamp(12px, 2vw, 24px) auto 0;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--g8-open-water);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .join-modal__return:hover { color: var(--g8-golden-hour); }
+
+  /* ── Responsive ───────────────────────────────────────── */
+  @media (max-width: 1023px) {
+    .join__headline { text-shadow: 3px 3px 0 var(--g8-midnight); }
+  }
+
+  @media (max-width: 900px) {
+    /* The strict 1.756:1 shell above is a desktop-only target (the PDF's
+       own comp is desktop-only) — a single, stacked column of content
+       needs more height than that ratio allows, so tablet/mobile fall
+       back to width-driven sizing with a generous max-height and scroll
+       as the safety net, same as the previous working pass. */
+    .join-modal__panel {
+      width: min(88vw, 640px);
+      max-width: none;
+      aspect-ratio: auto;
+      max-height: 85vh;
+    }
+    .join-modal__grid { grid-template-columns: 1fr; gap: 32px; }
+  }
+
+  @media (min-width: 901px) {
+    /* Desktop only — measured off the PDF, the modal's top edge sits at
+       ~11% of viewport height, not vertically centered in the available
+       space (which is what centering was producing, since the shell isn't
+       tall enough to reach the middle of a typical viewport on its own).
+       Shared by pages 6 and 7, same as the shell dimensions above. */
+    .join-modal:not([hidden]) {
+      align-items: flex-start;
+    }
+    .join-modal {
+      padding-top: clamp(40px, 11vh, 140px);
+    }
+  }
+
+  @media (max-width: 680px) {
+    .join { padding-block: 56px 48px; }
+    .join__subhead { font-size: 15px; }
+    .join__media { margin: 32px 0 28px; }
+
+    .join-modal { padding: 0; }
+    .join-modal__panel {
+      width: 100%;
+      height: 100%;
+      max-height: 100vh;
+      border-radius: 0;
+      border-width: 0;
+      box-shadow: none;
+    }
+    .join-modal__view { padding: 20px 20px 32px; }
+    .join-modal__close { top: 14px; right: 14px; }
+    .join-modal__heading {
+      /* Symmetric inline padding keeps the centered heading clear of the
+         close button pinned top-right — without it, a wide heading like
+         "Welcome to The Gr8ful Project" runs straight under the button on
+         a phone-width panel. */
+      padding-inline: 42px;
+      font-size: 22px;
+      margin-top: 6px;
+      /* A 2px hard shadow at this font size reads as doubled/blurred
+         letterforms rather than a crisp offset — halved just at this
+         breakpoint, where the heading is smallest. */
+      text-shadow: 1px 1px 0 var(--g8-midnight);
+    }
+  }
+</style>

@@ -1,22 +1,58 @@
 ---
-import { navLinks } from '../data/site';
+import { navLinks, type NavLink } from '../data/site';
 
 /**
  * Shared chrome — edit once, every page follows.
  * Desktop matches SiteHeader.dc.html exactly. Below 900px the nav collapses
  * behind a Menu toggle; the pledge CTA never leaves the bar.
+ *
+ * `transparent` is a homepage-only variant (passed via BaseLayout's
+ * `transparentHeader` prop): the bar overlays the hero video instead of
+ * sitting on its own solid band, with its own logo, flat nav list, and
+ * outlined CTA — matching page 1 of the approved redesign. It does not
+ * touch `navLinks` or any other route; every other page renders exactly as
+ * before.
  */
+interface Props {
+  transparent?: boolean;
+}
+
+const { transparent = false } = Astro.props;
+
+/**
+ * Flat homepage-hero nav — no Events dropdown, no Van, PDF-approved order.
+ * Podcast/Jams/Seva point at their own homepage sections (not the standalone
+ * /podcast, /jams, /pbj pages) per instruction — those pages are still
+ * reachable via the section CTAs ("See all episodes →", "See all JAMS →")
+ * and via the regular (non-transparent) header used on every other route,
+ * which is untouched.
+ */
+const heroNavLinks: NavLink[] = [
+  { label: 'Home', href: '/' },
+  { label: 'Podcast', href: '/#podcast' },
+  { label: 'Jams', href: '/#jams' },
+  { label: 'Seva', href: '/#seva' },
+  { label: 'About Us', href: '/about' },
+];
+
+const links = transparent ? heroNavLinks : navLinks;
 ---
 
-<header class="header">
+<header class:list={['header', { 'header--overlay': transparent }]}>
   <div class="g8-container header__bar">
     <a href="/" class="header__logo">
-      <img src="/gr8ful-logo.png" alt="Gr8ful Project" width="106" height="44" />
+      {
+        transparent ? (
+          <img src="/gr8ful-logo-hero.png" alt="Gr8ful Project" width="104" height="44" />
+        ) : (
+          <img src="/gr8ful-logo.png" alt="Gr8ful Project" width="106" height="44" />
+        )
+      }
     </a>
 
     <nav class="header__nav" aria-label="Primary">
       {
-        navLinks.map((link) =>
+        links.map((link) =>
           link.children ? (
             <div class="header__group">
               <a href={link.href} class="header__parent">
@@ -36,9 +72,17 @@ import { navLinks } from '../data/site';
       }
     </nav>
 
-    <a href="/pledge" class="g8-btn g8-btn--primary g8-btn--sm g8-btn--shadow header__cta">
-      Take the Pledge
-    </a>
+    {
+      transparent ? (
+        <a href="/#join" class="g8-btn g8-btn--sm header__cta header__cta--outline">
+          Join the Project
+        </a>
+      ) : (
+        <a href="/pledge" class="g8-btn g8-btn--primary g8-btn--sm g8-btn--shadow header__cta">
+          Take the Pledge
+        </a>
+      )
+    }
 
     <button
       type="button"
@@ -53,7 +97,7 @@ import { navLinks } from '../data/site';
 
   <nav class="header__menu" id="header-menu" aria-label="Primary, compact" hidden>
     {
-      navLinks.map((link) => (
+      links.map((link) => (
         <>
           <a href={link.href}>{link.label}</a>
           {link.children?.map((child) => (
@@ -77,6 +121,43 @@ import { navLinks } from '../data/site';
     toggle.textContent = open ? 'Menu' : 'Close';
     menu?.toggleAttribute('hidden', open);
   });
+
+  // Scrolls nav links that point at a homepage section (/#podcast, /#jams,
+  // /#seva, /#join) to that section when already on that page. Links to a
+  // fragment on a DIFFERENT route are left alone entirely, so the browser
+  // does a normal navigation there and lands via its native load-time
+  // fragment scroll once the target page arrives.
+  //
+  // Deliberately instant (behavior:'auto'), not smooth — tested both CSS
+  // `scroll-behavior: smooth` (see global.css) and this handler with
+  // `behavior: 'smooth'`, and in testing neither animation ever completed;
+  // scrollY stayed at 0 indefinitely even though the click/preventDefault
+  // and hash update all fired correctly. Instant scroll is what's actually
+  // been verified to land on the right section every time, which matters
+  // more here than the animation.
+  document.querySelectorAll<HTMLAnchorElement>('a[href*="#"]').forEach((link) => {
+    const href = link.getAttribute('href') ?? '';
+    const hashIndex = href.indexOf('#');
+    if (hashIndex === -1) return;
+    const path = href.slice(0, hashIndex) || '/';
+    const id = href.slice(hashIndex + 1);
+    if (!id || path !== location.pathname) return;
+
+    link.addEventListener('click', (event) => {
+      const target = document.getElementById(id);
+      if (!target) return;
+      event.preventDefault();
+      target.scrollIntoView({ behavior: 'auto', block: 'start' });
+      history.pushState(null, '', href);
+      // aria-expanded lives on the toggle, not the menu — close the
+      // compact drawer the same way the toggle's own handler does.
+      if (!menu?.hasAttribute('hidden')) {
+        toggle?.setAttribute('aria-expanded', 'false');
+        toggle && (toggle.textContent = 'Menu');
+        menu?.setAttribute('hidden', '');
+      }
+    });
+  });
 </script>
 
 <style>
@@ -86,6 +167,68 @@ import { navLinks } from '../data/site';
     background: var(--g8-chalk);
     border-bottom: var(--g8-stroke) solid var(--g8-border-strong);
     font-family: var(--g8-font-body);
+  }
+
+  /* Homepage-only: floats transparently over the hero video. Scoped to this
+     modifier class so every other route keeps the solid bar untouched. */
+  .header.header--overlay {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 20;
+    background: transparent;
+    border-bottom: 0;
+  }
+
+  /* Left/right inset measured directly off page 1 of the PDF (logo sits at
+     13.4% of the 1920px canvas, the nav CTA's right edge at a near-matching
+     12.9% from the right) — expressed as a proportional value, not a fixed
+     breakpoint jump, and repeated verbatim on .hero__body in index.astro so
+     the two stay locked to one guide at every viewport width by
+     construction, not by coincidence of two different container rules. */
+  .header--overlay .header__bar {
+    /* Full-bleed, not the capped-and-centered .g8-container: at wide
+       viewports the container's own max-width auto-margin would stack with
+       this gutter and blow well past the PDF's measured inset. */
+    max-width: none;
+    margin-inline: 0;
+    --g8-page-gutter: clamp(24px, 13vw, 260px);
+    padding-block: clamp(40px, 9vh, 90px) 16px;
+  }
+
+  .header--overlay .header__logo img {
+    /* PDF logo is 15.9% of canvas width — scale with viewport instead of a
+       fixed px pair, floored so it never gets illegibly small on phones. */
+    width: clamp(120px, 15.9vw, 320px);
+    height: auto;
+  }
+
+  .header--overlay .header__nav {
+    /* Nav is right-anchored to the CTA via margin-left:auto, so tightening
+       this gap both compacts the cluster and shifts its start rightward —
+       matching the PDF, where the cluster sits closer to the CTA than the
+       default (wider-gapped) nav treatment used elsewhere on the site. */
+    gap: 20px;
+  }
+
+  .header--overlay .header__nav a {
+    color: var(--g8-chalk);
+    font-weight: 400;
+    white-space: nowrap;
+  }
+  .header--overlay .header__nav a:hover { color: var(--g8-golden-hour); }
+  .header--overlay .header__dropdown a { color: var(--g8-midnight); }
+
+  .header--overlay .header__toggle {
+    color: var(--g8-chalk);
+    border-color: var(--g8-chalk);
+  }
+
+  /* The compact drawer still needs a solid ground once opened — it's a
+     dropdown of stacked links, not something meant to float over video. */
+  .header--overlay .header__menu:not([hidden]) {
+    background: var(--g8-chalk);
+    box-shadow: var(--g8-shadow-soft);
   }
 
   .header__bar {
@@ -195,6 +338,20 @@ import { navLinks } from '../data/site';
 
   /* Compact nav — hidden until the bar runs out of room. */
   .header__cta { white-space: nowrap; }
+
+  .header__cta--outline {
+    background: transparent;
+    color: var(--g8-golden-hour);
+    border: var(--g8-stroke) solid var(--g8-golden-hour);
+    box-shadow: none;
+    text-transform: none;
+    font-size: 13px;
+    padding: 8px 20px;
+  }
+  .header__cta--outline:hover {
+    background: var(--g8-golden-hour);
+    color: var(--g8-midnight);
+  }
 
   .header__toggle {
     display: none;

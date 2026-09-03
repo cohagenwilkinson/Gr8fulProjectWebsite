@@ -9,6 +9,18 @@
 
 html { -webkit-text-size-adjust: 100%; }
 
+/* NOTE: deliberately NOT `html { scroll-behavior: smooth }`. Tested and
+   confirmed it breaks the browser's own native scroll-to-fragment on page
+   load/hash-change in this environment — a real, reproducible bug, not a
+   style choice: with it set, loading /#podcast directly landed the scroll
+   at ~23px instead of the section's actual ~884px offset, and re-triggering
+   the hash change afterward didn't fix it either. Removing the CSS
+   property restored native fragment navigation immediately. Smooth
+   scrolling for the header's own nav clicks is handled deliberately in
+   SiteHeader.astro's script instead (scrollIntoView, called directly,
+   which does not carry this bug), leaving native load/hashchange
+   navigation on its default (reliable) behavior. */
+
 body {
   margin: 0;
   background: var(--g8-bg);
@@ -37,6 +49,7 @@ img { max-width: 100%; }
    Paper grain lives on the BACKMOST light ground only — never under
    Midnight, Deep Teal or any saturated fill, and never as an overlay. */
 .g8-ground {
+  position: relative;
   background-color: var(--g8-bg);
   background-image: var(--g8-paper);
 }

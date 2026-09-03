@@ -1,29 +1,20 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ColorRibbon from '../components/ColorRibbon.astro';
-import EventCard from '../components/EventCard.astro';
-import PledgeQuote from '../components/PledgeQuote.astro';
-import PledgeForm from '../components/PledgeForm.astro';
-import { eventsCacheControl, getHomeEvents } from '../data/events';
-import { latestEpisodeUrl } from '../data/site';
-
-// Rendered per request so the strip tracks the Luma calendar without a rebuild.
-export const prerender = false;
-
-const homeEvents = await getHomeEvents();
-Astro.response.headers.set('Cache-Control', eventsCacheControl);
+import JoinProjectSection from '../components/JoinProjectSection.astro';
 ---
 
 <BaseLayout
   title="Gr8ful Project — Tomorrow can be better than today."
   description="A podcast and a string of good excuses to get together — live tapings, rooftop shows, and a lot of peanut butter and jelly."
+  transparentHeader
 >
   <section class="hero" id="top">
     <!--
-      B&W community video. The plate carries --g8-hero-filter (grayscale +
-      brightness 0.5) and the scrim below it holds type contrast over moving
-      footage. Decorative, so it's hidden from assistive tech; the script
-      below pauses it when the visitor prefers reduced motion.
+      B&W community video. A light grayscale filter plus a bottom-weighted
+      scrim hold type contrast without crushing the footage toward black —
+      see .hero__plate / .hero__scrim below. Decorative, so it's hidden from
+      assistive tech; the script below pauses it when the visitor prefers
+      reduced motion.
     -->
     <video
       class="hero__plate"
@@ -32,142 +23,227 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
       loop
       playsinline
       preload="metadata"
-      poster="/hero-poster.jpg"
+      poster="/hero-poster-2.jpg"
       aria-hidden="true"
       tabindex="-1"
       data-hero-video
     >
-      {/*
-        Ordered smallest-viable first. Codec strings are exact, read off the
-        files themselves — a browser without AV1 skips the WebM outright
-        rather than pulling megabytes before failing over to H.264.
-      */}
-      <source
-        src="/hero-540.webm"
-        type='video/webm; codecs="av01.0.04M.08"'
-        media="(max-width: 767px)"
-      />
-      <source
-        src="/hero-540.mp4"
-        type='video/mp4; codecs="avc1.64001F"'
-        media="(max-width: 767px)"
-      />
-      <source src="/hero-720.webm" type='video/webm; codecs="av01.0.05M.08"' />
-      <source src="/hero-720.mp4" type='video/mp4; codecs="avc1.640028"' />
+      {/* Portrait plate on narrow viewports, landscape everywhere else. */}
+      <source src="/hero-bw-portrait.mp4" type="video/mp4" media="(max-width: 767px)" />
+      <source src="/hero-bw-landscape.mp4" type="video/mp4" />
     </video>
     <div class="hero__scrim"></div>
+    {/*
+      Vignette — separate from .hero__scrim above so the already-tuned
+      overall brightness/scrim balance isn't touched. Purely edge and
+      corner darkening: perimeter and top (nav legibility) and lower-left
+      (hero copy legibility), leaving the center of the frame the
+      brightest part of the video.
+    */}
+    <div class="hero__vignette" aria-hidden="true"></div>
 
     <div class="g8-container hero__body">
-      <div class="g8-eyebrow g8-eyebrow--cool">Boulder, Colorado · A podcast and a practice</div>
-      <h1 class="g8-display hero__headline" style="--fs:78px">
-        Tomorrow can be better than today.
+      <h1 class="hero__headline">
+        <img src="/hero-live-happier.png" alt="Live Happier" class="hero__headline-img" />
       </h1>
-      <p class="g8-lede g8-lede--invert hero__lede">
-        Gr8ful Project is a podcast and a string of good excuses to get together — live tapings,
-        rooftop shows, and a lot of peanut butter and jelly. All of it in service of one idea:
-        gratitude is a practice, and practice makes life better.
+      <p class="hero__tagline">
+        Podcast <span class="hero__plus">+</span> Music <span class="hero__plus">+</span> Community
       </p>
       <div class="hero__actions">
-        <a href="#pledge" class="g8-btn g8-btn--primary g8-btn--lg">Take the Pledge</a>
-        <a href={latestEpisodeUrl} class="g8-link-quiet">Watch the latest episode</a>
+        <a href="#join" class="g8-btn g8-btn--gold hero__cta">Join the Project →</a>
       </div>
     </div>
-
-    <div class="hero__ribbon"><ColorRibbon variant="page" /></div>
   </section>
 
-  <section class="g8-container g8-page pledge" id="pledge" style="--pt:104px; --pb:104px">
-    <div class="pledge__head">
-      <div class="pledge__head-col">
-        <div class="g8-eyebrow pledge__label">The Pledge</div>
-        <h2 class="g8-display pledge__headline" style="--fs:56px; --lh:1">
-          Start with a promise.
-        </h2>
-        <p class="g8-lede pledge__lede">
-          The pledge is simple. Practice gratitude when you can. Skip the guilt when you can't.
-          Come back when you're able.
+  <!--
+    Podcast teaser — page 2 of the approved redesign. Full-bleed section (own
+    parchment wallpaper + full-width stripe ribbon), with text and the media
+    card constrained to the standard .g8-container so it lines up with every
+    other section on the page.
+  -->
+  <section class="podcast-teaser" id="podcast">
+    <img
+      src="/podcast-wallpaper-parchment.jpg"
+      alt=""
+      aria-hidden="true"
+      class="podcast-teaser__bg"
+    />
+
+    <div class="g8-container podcast-teaser__head">
+      <div class="podcast-teaser__title">
+        <img src="/podcast-wordmark.png" alt="Podcast" class="podcast-teaser__wordmark" />
+        <p class="podcast-teaser__byline">
+          with <img src="/robbiedob-sig.png" alt="Robbie Dob" class="podcast-teaser__sig" />
         </p>
       </div>
-    </div>
-
-    <div class="g8-grid-2" style="--col-a:1.05fr; --col-b:1fr; --gap:48px">
-      <PledgeQuote />
-      <PledgeForm validate />
-    </div>
-  </section>
-
-  <section class="g8-container g8-page show" style="--pt:24px; --pb:104px">
-    <div class="g8-card show__card g8-grid-2" style="--gap:56px; --align:center">
-      <div>
-        <div class="g8-eyebrow show__label">The Podcast</div>
-        <h2 class="g8-display show__headline" style="--fs:52px; --lh:1">
-          Musicians on gratitude.
-        </h2>
-        <p class="g8-lede show__lede">
-          We sit down with musicians and ask where gratitude shows up — in the work, the hard
-          seasons, the good ones — woven together with their live performances from our jams.
-        </p>
-        <a href={latestEpisodeUrl} class="g8-btn g8-btn--gold g8-btn--bordered">
-          Watch the latest episode
-        </a>
-      </div>
-      <div class="show__photo">
-        <span class="g8-caption">Candid photo · artist mid-taping<br />4:3</span>
+      <div class="podcast-teaser__tags">
+        <span>Life</span>
+        <span>Gratitude</span>
       </div>
     </div>
-  </section>
 
-  <!-- Deep Teal band: flat colour, no paper grain. -->
-  <section class="g8-band-teal" id="events">
-    <div class="g8-container g8-page upcoming" style="--pt:100px; --pb:104px">
-      <div class="upcoming__head">
-        <div class="upcoming__head-col">
-          <div class="g8-eyebrow g8-eyebrow--cool upcoming__label">Coming up</div>
-          <h2 class="g8-display upcoming__headline" style="--fs:56px; --lh:1">
-            Practice in person.
-          </h2>
-          <p class="g8-lede g8-lede--invert upcoming__lede">
-            A jam every couple of weeks. Sandwiches most weeks. Everything's free — just grab a
-            spot.
-          </p>
+    <div class="podcast-teaser__media-wrap">
+      <img
+        src="/podcast-wallpaper-stripes-original.png"
+        alt=""
+        aria-hidden="true"
+        class="podcast-teaser__ribbon"
+      />
+      <div class="g8-container">
+        <div class="podcast-teaser__card">
+          {/*
+            TEMPORARY PROTOTYPE MEDIA — cropped straight from page 2 of the
+            approved PDF mockup, not a final production asset. Replace with
+            a real episode photo/video once one exists. The play mark you
+            see is baked into this crop (it was part of the PDF's own
+            flattened render); once real media lands, rebuild the play
+            button as a proper overlay element rather than part of the
+            image.
+          */}
+          <img
+            src="/podcast-still-prototype.jpg"
+            alt="Podcast episode preview — placeholder image, not final"
+            class="podcast-teaser__media"
+          />
         </div>
-        <a href="/events" class="g8-btn g8-btn--gold g8-btn--bordered">See what's coming up</a>
       </div>
+    </div>
 
-      {
-        homeEvents.length > 0 ? (
-          <div class="g8-grid-3">
-            {homeEvents.map((event) => (
-              <EventCard event={event} />
-            ))}
-          </div>
-        ) : (
-          <div class="g8-note g8-note--cool upcoming__note">
-            Nothing posted right now — <a href="/events">see the full calendar</a>.
-          </div>
-        )
-      }
+    <div class="podcast-teaser__cta-wrap">
+      <a href="/podcast" class="g8-btn podcast-teaser__cta">See all episodes →</a>
     </div>
   </section>
 
-  <section class="g8-container g8-page van" style="--pt:104px; --pb:104px">
-    <div class="van__card">
-      <div class="van__body">
-        <div class="g8-eyebrow g8-eyebrow--cool">The Van</div>
-        <h2 class="g8-display van__headline" style="--fs:52px; --lh:1">
-          You may have seen the van.
-        </h2>
-        <p class="g8-lede g8-lede--invert">It gets around. And it has stories.</p>
-        <a href="/van" class="g8-link-quiet van__link">Meet the van →</a>
-      </div>
-      <div class="van__photo">
-        <img
-          src="/van-photo.jpg"
-          alt="The Gr8ful Project van parked in the desert — a white-and-orange VW bus wrapped in flowers, peace signs, and rainbow swirls"
-        />
+  <!--
+    Jams teaser — page 3 of the approved redesign. Same full-bleed-section /
+    13%-inset-content pattern as the Podcast teaser above, with its own
+    sea-glass gradient background.
+  -->
+  <section class="jams-teaser" id="jams">
+    <img
+      src="/jams-wallpaper-seaglass-original.png"
+      alt=""
+      aria-hidden="true"
+      class="jams-teaser__bg"
+    />
+    {/*
+      Sampling the actual PDF (not just the standalone asset) shows the top
+      of the section is measurably warmer/lighter than the raw PNG alone —
+      e.g. rgb(247,242,223) in the PDF vs. rgb(220,240,231) at the same
+      point in the source file — while the bottom two-thirds match the raw
+      asset almost exactly. So the approved composition layers a warm
+      cream fade over the real asset, blending it into the Podcast
+      section's cream above; the asset by itself doesn't produce that. This
+      reproduces that fade as a separate layer rather than replacing the
+      real asset with an invented gradient.
+    */}
+    <div class="jams-teaser__fade" aria-hidden="true"></div>
+
+    <div class="jams-teaser__head">
+      <img src="/jams-wordmark.png" alt="Jams" class="jams-teaser__wordmark" />
+      <div class="jams-teaser__tags">
+        <span>Music</span>
+        <span>Community</span>
       </div>
     </div>
+
+    {/*
+      TEMPORARY PROTOTYPE MEDIA — both stills cropped from page 3 of the
+      approved PDF, not final assets. The PDF repeats one placeholder
+      performer pair (Andy Babb + Lara Elle) across all four cards, which
+      this reproduces deliberately, per instruction — not a bug, and not a
+      live data source yet.
+
+      The lower photo's play mark is baked into this crop (same as the
+      Podcast card): the only source is the PDF's own flattened render, and
+      there's no clean patch of background nearby to remove it without a
+      visible clone/inpaint artifact (tried it — looked worse than leaving
+      it). Once real per-jam photos exist, rebuild the play mark as its own
+      coded overlay, decoupled from the image, the way the rest of this
+      card is already structured.
+    */}
+    <div class="jams-teaser__row">
+      {[0, 1, 2, 3].map((i) => (
+        <div class="jams-teaser__card">
+          <img
+            src="/jams-still-1-prototype.jpg"
+            alt={i === 0 ? 'Lara Elle performing — placeholder image, not final' : ''}
+            aria-hidden={i === 0 ? undefined : 'true'}
+            class="jams-teaser__photo"
+          />
+          <div class="jams-teaser__band">
+            <span>Andy Babb</span> <span class="jams-teaser__plus">+</span> <span>Lara Elle</span>
+          </div>
+          <img
+            src="/jams-still-2-prototype.jpg"
+            alt={i === 0 ? 'Andy Babb performing — placeholder image, not final' : ''}
+            aria-hidden={i === 0 ? undefined : 'true'}
+            class="jams-teaser__photo"
+          />
+        </div>
+      ))}
+    </div>
+
+    <div class="jams-teaser__cta-wrap">
+      <a href="/jams" class="g8-btn jams-teaser__cta">See all JAMS →</a>
+    </div>
   </section>
+
+  <!--
+    Seva teaser — page 4 of the approved redesign. Full-bleed color photo
+    (the only full-color section on the homepage; everything else is B&W or
+    flat brand color), with the same 13%-inset head-row pattern as Podcast
+    and Jams above it. Stats are static for this prototype — not wired to
+    Luma or computed, per instruction.
+  -->
+  <section class="seva-teaser" id="seva">
+    <img src="/seva-background-photo.jpg" alt="" class="seva-teaser__bg" />
+    {/*
+      Localized top and bottom darkening, same spirit as the hero vignette:
+      measured off the PDF directly (luminance ~0-6 at the top and bottom
+      edges, but 200+ at mid-height on both sides), this is a top band and
+      a bottom band fading toward an open, undarkened middle — not a
+      uniform dim over the whole photo.
+    */}
+    <div class="seva-teaser__vignette" aria-hidden="true"></div>
+
+    <div class="seva-teaser__head">
+      <img src="/seva-wordmark.png" alt="Seva" class="seva-teaser__wordmark" />
+      <div class="seva-teaser__tags">
+        <span>Selfless</span>
+        <span>Service</span>
+      </div>
+    </div>
+
+    <p class="seva-teaser__definition">
+      <em><u>Seva</u>: (V)</em> To serve. Work performed without expectation of reward, repayment
+      or personal gain.
+    </p>
+
+    {/*
+      Static for this prototype — not wired to Luma or computed.
+      Numbers start at 0 in the markup and count up via the script below
+      once the card scrolls into view (see data-count-to); a no-JS visitor
+      sees 0 rather than the real totals, a deliberate trade-off for the
+      count-up per instruction — this card is supplementary, not a
+      critical path like the pledge form's no-JS fallback.
+    */}
+    <div class="seva-teaser__stats" data-stats-card>
+      <div class="seva-teaser__stat-row">
+        <div class="seva-teaser__stat">
+          <span class="seva-teaser__stat-num seva-teaser__stat-num--teal" data-count-to="16">0</span>
+          <span class="seva-teaser__stat-label seva-teaser__stat-label--teal">Events</span>
+        </div>
+        <div class="seva-teaser__stat">
+          <span class="seva-teaser__stat-num seva-teaser__stat-num--rust" data-count-to="652">0</span>
+          <span class="seva-teaser__stat-label seva-teaser__stat-label--rust">Lunches Served</span>
+        </div>
+      </div>
+      <span class="seva-teaser__stat-caption">As of August 25, 2026</span>
+    </div>
+  </section>
+
+  <JoinProjectSection />
 </BaseLayout>
 
 <script>
@@ -190,12 +266,90 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
   reduceMotion.addEventListener('change', applyMotionPreference);
 </script>
 
+<script>
+  // Seva stats count-up. Runs once, the first time the card meaningfully
+  // enters the viewport; reduced-motion visitors get the final numbers
+  // immediately instead of a count. No external dependency — plain
+  // IntersectionObserver + requestAnimationFrame.
+  const statsCard = document.querySelector<HTMLElement>('[data-stats-card]');
+  const numberEls = statsCard?.querySelectorAll<HTMLElement>('[data-count-to]');
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const setFinal = () => {
+    numberEls?.forEach((el) => {
+      el.textContent = el.dataset.countTo ?? el.textContent;
+    });
+  };
+
+  if (!statsCard || !numberEls || numberEls.length === 0) {
+    // no-op — section not present on this page render
+  } else if (prefersReducedMotion) {
+    setFinal();
+  } else {
+    const DURATION_MS = 1200;
+    // Cubic ease-out — fast start, settles gently into the final number
+    // rather than ticking at a constant rate to the end.
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+    const runCountUp = () => {
+      const start = performance.now();
+      const targets = Array.from(numberEls).map((el) => ({
+        el,
+        to: parseInt(el.dataset.countTo ?? '0', 10),
+      }));
+
+      const tick = (now: number) => {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / DURATION_MS, 1);
+        const eased = easeOutCubic(progress);
+        targets.forEach(({ el, to }) => {
+          el.textContent = String(Math.round(to * eased));
+        });
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          // Guarantees an exact final value regardless of any rounding
+          // drift in the last animated frame.
+          setFinal();
+        }
+      };
+
+      requestAnimationFrame(tick);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            runCountUp();
+            observer.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.4 }
+    );
+    observer.observe(statsCard);
+  }
+</script>
+
 <style>
   /* ── Hero ─────────────────────────────────────────────
      B&W footage under Golden Hour type. The scrim is what holds 4.5:1 over
      moving footage — nothing behind type may exceed --g8-hero-max-luma. */
   .hero {
     position: relative;
+    margin: 0;
+    border-radius: 0;
+    min-height: 100vh;
+    /* 100vh on real mobile browsers is the *largest* possible viewport —
+       taller than what's visible once the address bar is showing, which is
+       exactly the kind of mismatch that can leave a gap at an edge. 100svh
+       (small viewport height) sizes to what's guaranteed visible instead;
+       vh stays first as the fallback for browsers without svh support. */
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
     background: var(--g8-midnight);
     overflow: hidden;
   }
@@ -206,128 +360,122 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: var(--g8-hero-filter);
+    /* Lighter than the shared --g8-hero-filter token: the approved design
+       keeps the footage's own tonal range legible, not flattened toward
+       black. Scoped here rather than changing the token, which nothing
+       else on the site reads. */
+    filter: grayscale(1) contrast(1.05) brightness(0.92);
   }
   .hero__scrim {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(1, 7, 21, 0.62) 0%, rgba(1, 7, 21, 0.86) 100%);
+    background: linear-gradient(180deg, rgba(1, 7, 21, 0.12) 0%, rgba(1, 7, 21, 0.5) 100%);
+  }
+
+  .hero__vignette {
+    /* Five stacked layers, edges/corners only — the center stays exactly
+       as bright as .hero__scrim already leaves it. Measured directly off
+       the PDF: corner/edge luminance sits near-black (0-14 out of 255)
+       while the open center reaches well over 100, so the previous single-
+       digit-percent layers read as "too subtle" — this pass pushes peak
+       edge opacity much higher and, critically, lets the top band and the
+       left/right edge bands overlap at the top corners so those corners
+       come out darker than either band alone (matching "especially dark"
+       upper corners) without a fully separate corner-specific gradient. */
+    position: absolute;
+    inset: 0;
+    background:
+      /* extra patch behind the hero copy's lower-left corner */
+      radial-gradient(ellipse 62% 52% at 12% 92%, rgba(1, 7, 21, 0.62) 0%, rgba(1, 7, 21, 0) 62%),
+      /* band behind the nav — reaches further down than before, and darker */
+      linear-gradient(180deg, rgba(1, 7, 21, 0.72) 0%, rgba(1, 7, 21, 0.22) 15%, rgba(1, 7, 21, 0) 27%),
+      /* left edge falloff */
+      linear-gradient(90deg, rgba(1, 7, 21, 0.6) 0%, rgba(1, 7, 21, 0) 24%),
+      /* right edge falloff */
+      linear-gradient(270deg, rgba(1, 7, 21, 0.6) 0%, rgba(1, 7, 21, 0) 24%),
+      /* overall perimeter vignette, transparent through the open center */
+      radial-gradient(ellipse 68% 68% at 50% 46%, rgba(1, 7, 21, 0) 38%, rgba(1, 7, 21, 0.55) 100%);
   }
 
   .hero__body {
     position: relative;
-    padding-block: 150px 128px;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    justify-content: flex-end;
+    /* Full-bleed, not the capped .g8-container — see the matching comment
+       on .header--overlay .header__bar in SiteHeader.astro. Both use this
+       identical formula so the logo and hero content stay locked to one
+       left-hand guide at every viewport width, PDF-measured (13.4%) rather
+       than inherited from the container's own auto-margin behaviour. */
+    max-width: none;
+    margin-inline: 0;
+    --g8-page-gutter: clamp(24px, 13vw, 260px);
+    padding-block: 64px 88px;
+    gap: 14px;
   }
 
   .hero__headline {
-    max-width: 900px;
-    color: var(--g8-golden-hour);
+    margin: 0;
   }
 
-  .hero__lede { max-width: 640px; }
+  .hero__headline-img {
+    display: block;
+    width: min(100%, 385px);
+    height: auto;
+  }
+
+  .hero__tagline {
+    margin: 0;
+    font-family: var(--g8-font-body);
+    font-size: 1.0625rem;
+    line-height: 1.3;
+    color: var(--g8-chalk);
+  }
+
+  .hero__plus {
+    color: var(--g8-open-water);
+    font-weight: var(--g8-weight-strong);
+    padding-inline: 2px;
+  }
 
   .hero__actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 18px;
-    padding-top: 8px;
+    padding-top: 4px;
   }
 
-  .hero__ribbon {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
+  .hero__cta {
+    text-transform: none;
+    font-size: 14px;
+    padding: 9px 26px;
+    /* Hard, zero-blur offset shadow, matching the PDF — same token as the
+       Podcast CTA's shadow, for consistency with the site's established
+       flat-offset shadow language. */
+    box-shadow: var(--g8-shadow-card);
   }
 
-  /* ── Pledge ───────────────────────────────────────── */
-  .pledge__head {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 24px;
-    align-items: flex-end;
-    margin-bottom: 44px;
-  }
-  .pledge__head-col { flex: 1 1 520px; }
-  .pledge__label { display: block; margin-bottom: 16px; }
-  .pledge__headline { margin-bottom: 16px; }
-  .pledge__lede { max-width: 520px; }
-
-  /* ── Podcast ──────────────────────────────────────── */
-  .show__card { padding: 56px 52px; }
-  .show__label { display: block; margin-bottom: 16px; }
-  .show__headline { margin-bottom: 18px; }
-  .show__lede { margin-bottom: 32px; }
-
-  .show__photo {
-    aspect-ratio: 4 / 3;
-    border: var(--g8-stroke) dashed rgba(1, 7, 21, 0.35);
-    border-radius: 20px;
-    background: var(--g8-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 24px;
+  /* ── Podcast teaser ───────────────────────────────── */
+  /* Nav-anchor landing spots. Neither header variant is fixed/sticky (the
+     overlay one is position:absolute and scrolls away with the hero), so
+     nothing actually overlaps an anchored section — this is just a little
+     breathing room above the landing point rather than a hard requirement. */
+  #podcast, #jams, #seva, #join {
+    scroll-margin-top: 16px;
   }
 
-  /* ── Events ───────────────────────────────────────── */
-  .upcoming__head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: 28px;
-    margin-bottom: 44px;
-  }
-  .upcoming__head-col { flex: 1 1 480px; }
-  .upcoming__label { display: block; margin-bottom: 16px; }
-  .upcoming__headline {
-    color: var(--g8-chalk);
-    margin-bottom: 16px;
-  }
-  .upcoming__lede { max-width: 520px; }
-  .upcoming__note { display: block; margin-top: 20px; }
-
-  /* ── Van teaser ───────────────────────────────────── */
-  .van__card {
+  .podcast-teaser {
     position: relative;
-    background: var(--g8-midnight);
-    border: var(--g8-stroke) solid var(--g8-border-strong);
-    border-radius: var(--g8-radius-lg);
     overflow: hidden;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    padding-block: 112px 128px;
   }
 
-  .van__body {
-    padding: 64px 52px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    align-self: center;
-  }
-
-  .van__headline { color: var(--g8-golden-hour); }
-
-  .van__link {
-    align-self: flex-start;
-    margin-top: 10px;
-    font-weight: var(--g8-weight-ui);
-    letter-spacing: var(--g8-track-ui);
-    text-transform: uppercase;
-  }
-
-  .van__photo {
-    position: relative;
-    min-height: 340px;
-    border-left: var(--g8-stroke) solid var(--g8-border-strong);
-    background: #232323;
-  }
-  .van__photo img {
+  .podcast-teaser__bg {
+    /* No z-index, same as .hero__plate — it's the first element in the
+       section, so normal paint order already puts every later sibling on
+       top of it without needing to escape the stacking context. */
     position: absolute;
     inset: 0;
     width: 100%;
@@ -335,26 +483,608 @@ Astro.response.headers.set('Cache-Control', eventsCacheControl);
     object-fit: cover;
   }
 
-  /* ── Responsive ───────────────────────────────────── */
-  @media (max-width: 1023px) {
-    .hero__body { padding-block: 112px 104px; }
-    .show__card { padding: 40px 36px; }
+  .podcast-teaser__head {
+    /* position:relative (z-index:auto) puts this in the same paint bucket
+       as .podcast-teaser__bg, which is also positioned — without it, this
+       plain in-flow div paints BEHIND the positioned background image
+       regardless of DOM order, a classic stacking-context gotcha. Same
+       reason .hero__body carries position:relative. */
+    position: relative;
+    /* Full-bleed, not the capped .g8-container — measured off the PDF, the
+       wordmark sits at 13.1% of the canvas width from the left and the
+       LIFE/GRATITUDE tags at 12.9% from the right. Same fix as the hero's
+       logo/headline inset: 100% of .g8-container tracks its 1240px
+       max-width, which at ordinary laptop widths reads as far less than
+       13% of the viewport. Scoped to this row only — the media card,
+       ribbon, and CTA below keep the standard container. */
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: clamp(24px, 13vw, 260px);
+    display: flex;
+    /* nowrap by default — this row must stay side-by-side (title left, tags
+       right) at every desktop/tablet width. Only the narrow-mobile media
+       query below switches it to a stacked column. */
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 44px;
   }
 
-  @media (max-width: 900px) {
-    .van__card { grid-template-columns: 1fr; }
-    .van__photo {
-      min-height: 260px;
-      border-left: 0;
-      border-top: var(--g8-stroke) solid var(--g8-border-strong);
-    }
+  .podcast-teaser__title {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .podcast-teaser__wordmark {
+    display: block;
+    width: min(100%, 380px);
+    height: auto;
+    /* The supplied PODCAST.png is flat orange with no baked-in shadow
+       (confirmed by inspecting the source file directly) — the PDF's hard,
+       zero-blur dark offset is reproduced here. drop-shadow (not
+       box-shadow) follows the letterforms' alpha shape rather than
+       drawing a shadow behind the image's whole rectangular bounds. */
+    filter: drop-shadow(3px 3px 0 var(--g8-midnight));
+  }
+
+  .podcast-teaser__byline {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--g8-font-body);
+    font-size: 15px;
+    color: var(--g8-text-muted);
+  }
+
+  .podcast-teaser__sig {
+    display: block;
+    width: 96px;
+    height: auto;
+  }
+
+  .podcast-teaser__tags {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    font-size: 26px;
+    line-height: 1.15;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--g8-open-water);
+    text-align: right;
+  }
+
+  .podcast-teaser__media-wrap {
+    position: relative;
+  }
+
+  .podcast-teaser__ribbon {
+    /* Full original artwork, uncropped, but measuring the PDF directly
+       shows its own placed ribbon is shorter (≈29.4% of canvas width) than
+       the source PNG's native aspect ratio would give at full width
+       (≈35.5%) — i.e. the approved design stretches the band vertically,
+       it doesn't crop it. Setting an explicit height with no object-fit
+       does exactly that (the default is 'fill': every band still renders,
+       just proportioned to match), which is how the card ends up taller
+       than the ribbon and visibly overhangs it top and bottom, as the PDF
+       shows — cover-cropping cannot produce that relationship without
+       losing the outer bands. */
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: clamp(140px, 29.4vw, 600px);
+    transform: translateY(-50%);
+  }
+
+  .podcast-teaser__card {
+    /* Both numbers measured directly off page 2 of the PDF: the card's
+       own border-to-border box is 1234×679px on the 1920px canvas — an
+       aspect ratio of ~1.82:1, not the ~2.2:1 a prior pass drifted to.
+       Width is capped as a viewport-relative value (64vw, ≈ the PDF's own
+       64.3%-of-canvas proportion) rather than 100% of .g8-container —
+       otherwise it just tracks the container's max-width, which at
+       ordinary laptop widths (container not yet capped at 1240px) reads
+       far wider than the PDF's card ever does. Same lesson as the hero's
+       logo/headline sizing. overflow:hidden clips the media image to the
+       card's own radius. */
+    position: relative;
+    overflow: hidden;
+    width: min(100%, 64vw);
+    margin-inline: auto;
+    aspect-ratio: 1234 / 679;
+    border-radius: var(--g8-radius-lg);
+    border: 10px solid var(--g8-parchment);
+    background: var(--g8-surface-dark);
+    /* Soft ambient lift, not a hard offset shadow — the PDF's card casts a
+       faint, diffuse shadow, barely visible against the cream ground, not
+       the heavy dark shadow the previous 0.35 opacity produced. */
+    box-shadow: 0 16px 32px rgba(1, 7, 21, 0.14);
+  }
+
+  .podcast-teaser__media {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .podcast-teaser__cta-wrap {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+  }
+
+  .podcast-teaser__cta {
+    /* text-transform:none overrides the sitewide uppercase .g8-btn default —
+       the PDF shows this pill in title case. */
+    text-transform: none;
+    background: var(--g8-parchment);
+    color: var(--g8-midnight);
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    /* Hard, zero-blur offset shadow, measured off the PDF — same value as
+       the site's existing --g8-shadow-card token, so this stays consistent
+       with the flat-offset shadow language used elsewhere. */
+    box-shadow: var(--g8-shadow-card);
+  }
+  .podcast-teaser__cta:hover { background: var(--g8-sea-glass); }
+
+  /* ── Jams teaser ──────────────────────────────────── */
+  .jams-teaser {
+    position: relative;
+    overflow: hidden;
+    padding-block: 96px 128px;
+  }
+
+  .jams-teaser__bg {
+    /* object-position:top (not the default center) — the source asset is
+       1840×1200, far squarer than this wide, short section, so cover
+       scales it up until its width matches and crops the overflow top and
+       bottom. Centered, that crop ate the lightest part of the gradient
+       (concentrated in the upper-right) along with the top edge entirely.
+       Anchoring to the top keeps that whole light band intact and only
+       trims from the bottom, which was already the most uniform sea-glass
+       area — matching the PDF's pale-parchment-at-top read. */
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  .jams-teaser__fade {
+    /* Warm cream fading to transparent by ~48% down the section — matches
+       the color and rough falloff measured directly from the PDF (see the
+       markup comment above for the sampled values). */
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(247, 242, 223) 0%, rgba(247, 242, 223, 0) 48%);
+  }
+
+  .jams-teaser__head {
+    /* position:relative — same stacking-context reason as
+       .podcast-teaser__head: without it this plain div paints behind the
+       positioned .jams-teaser__bg regardless of DOM order. */
+    position: relative;
+    /* Identical clamp() to the Podcast head/card row and the hero's logo
+       inset — measured off page 3 the same way: JAMS sits 13.2% in from
+       the left, MUSIC/COMMUNITY 12.9% in from the right. */
+    padding-inline: clamp(24px, 13vw, 260px);
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 44px;
+  }
+
+  .jams-teaser__wordmark {
+    display: block;
+    width: min(100%, 220px);
+    height: auto;
+    /* JAMS.png is flat orange with no baked-in shadow (checked the source
+       file directly) — same hard, zero-blur reproduction as the Podcast
+       wordmark, scaled down to match this smaller wordmark. */
+    filter: drop-shadow(2px 2px 0 var(--g8-midnight));
+  }
+
+  .jams-teaser__tags {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    font-size: 26px;
+    line-height: 1.15;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--g8-open-water);
+    text-align: right;
+  }
+
+  .jams-teaser__row {
+    position: relative;
+    padding-inline: clamp(24px, 13vw, 260px);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(16px, 3.13vw, 60px);
+    margin-bottom: 40px;
+  }
+
+  .jams-teaser__card {
+    /* Aspect ratio measured directly off one card on page 3: 306×568px. */
+    aspect-ratio: 306 / 568;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--g8-radius-lg);
+    /* Measured directly off the PDF: the frame is ~7-9px thick at the
+       1920px canvas scale, on a 306px-wide card — about 2.4% of card
+       width, not the standard 2px --g8-stroke hairline used elsewhere.
+       6px at this card's rendered size matches that proportion. */
+    border: 6px solid var(--g8-border-strong);
+    background: var(--g8-midnight);
+    overflow: hidden;
+  }
+
+  .jams-teaser__photo {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .jams-teaser__band {
+    flex: none;
+    padding-block: 10px;
+    text-align: center;
+    background: var(--g8-midnight);
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--g8-golden-hour);
+  }
+
+  .jams-teaser__plus {
+    color: var(--g8-open-water);
+    font-weight: var(--g8-weight-strong);
+  }
+
+  .jams-teaser__cta-wrap {
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+
+  .jams-teaser__cta {
+    text-transform: none;
+    background: var(--g8-parchment);
+    color: var(--g8-midnight);
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    box-shadow: var(--g8-shadow-card);
+  }
+  .jams-teaser__cta:hover { background: var(--g8-sea-glass); }
+
+  /* ── Seva teaser ──────────────────────────────────── */
+  .seva-teaser {
+    position: relative;
+    overflow: hidden;
+    /* Matches the PDF canvas's own 16:9, and the supplied photo's native
+       ratio (2400×1350) — cover needs no meaningful crop at this ratio. */
+    aspect-ratio: 16 / 9;
+  }
+
+  .seva-teaser__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .seva-teaser__vignette {
+    /* Rebuilt as a full perimeter treatment — top and bottom bands (kept
+       from the previous pass) plus new left/right edge falloff, so all
+       four edges darken and the corners (where bands overlap) come out
+       darkest, while the gap between them leaves the center open. Same
+       approach as the hero vignette; values tuned to this photo rather
+       than reused directly, per instruction. */
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to bottom, rgba(1, 7, 21, 0.94) 0%, rgba(1, 7, 21, 0) 30%),
+      linear-gradient(to top, rgba(1, 7, 21, 0.9) 0%, rgba(1, 7, 21, 0) 38%),
+      linear-gradient(to right, rgba(1, 7, 21, 0.55) 0%, rgba(1, 7, 21, 0) 18%),
+      linear-gradient(to left, rgba(1, 7, 21, 0.55) 0%, rgba(1, 7, 21, 0) 18%);
+  }
+
+  .seva-teaser__head {
+    position: absolute;
+    top: 6%;
+    left: 0;
+    right: 0;
+    padding-inline: clamp(24px, 13vw, 260px);
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .seva-teaser__wordmark {
+    display: block;
+    width: min(100%, 220px);
+    height: auto;
+    /* SEVA.png is flat orange with no baked-in shadow (checked the source
+       file directly) — same hard, zero-blur reproduction as the Podcast
+       and Jams wordmarks. */
+    filter: drop-shadow(2px 2px 0 var(--g8-midnight));
+  }
+
+  .seva-teaser__tags {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    font-size: 26px;
+    line-height: 1.15;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    text-align: right;
+    /* Parchment, not the teal used on Podcast/Jams — measured directly off
+       the PDF (rgb(234,216,165), an exact match for --g8-parchment).
+       Against a busy color photo rather than a flat illustrated
+       background, teal doesn't hold contrast the way it does elsewhere. */
+    color: var(--g8-parchment);
+  }
+
+  .seva-teaser__definition {
+    /* padding-LEFT only (not padding-inline) — this sets the 13% left
+       guide the same way the head row does, without also padding the
+       right side, which would fight max-width and crush the text into an
+       unreadably narrow column. max-width handles the right edge. */
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 5%;
+    margin: 0;
+    padding-left: clamp(24px, 13vw, 260px);
+    padding-right: 24px;
+    /* Measured off the PDF: the text box (including its own left padding,
+       since box-sizing:border-box) runs from the viewport edge out to
+       ~52.6% of the canvas width, wrapping to two lines there. The
+       previous pass used 41vw here — the content-width span alone, minus
+       the 13% left inset — which is the wrong number for max-width: it
+       needs to cover the padding too, so the real target is ~53vw, not
+       41vw. That's what was crushing this onto 4+ lines. */
+    max-width: clamp(320px, 53vw, 900px);
+    font-family: var(--g8-font-body);
+    font-size: 1.0625rem;
+    line-height: 1.5;
+    color: var(--g8-parchment);
+  }
+  .seva-teaser__definition em { font-style: italic; }
+
+  .seva-teaser__stats {
+    /* Outer bounds measured directly off the PDF (border-to-border):
+       535×266px on the 1920px canvas, ~2.01:1 — re-confirmed this pass,
+       unchanged. Everything INSIDE the card is now sized off the card's
+       own rendered width via a container query (container-type below)
+       instead of viewport width — the previous pass tied the outer card
+       to viewport width (vw) but left the numbers at a flat 78px with only
+       two hard breakpoints, so at any width between those breakpoints the
+       card shrank while "652" did not, and it overflowed the card. Sizing
+       every internal value off the card's own box, continuously, is what
+       makes this genuinely responsive rather than breakpoint-patched.
+       bottom:22% matches the PDF measurement exactly (card bottom edge at
+       77.96% down the 1080-tall canvas = 22.04% up from the bottom) —
+       confirmed by live measurement after the sizing fix above landed the
+       card at 52.3%/74.0% top/bottom against a bottom:26% that was tried
+       first, versus the PDF's 53.3%/78.0%; bottom:22% closes that gap.
+       (A larger bottom% moves the card UP, not down — the fix here is
+       lower than 26%, not higher, which is easy to get backwards.) */
+    container-type: inline-size;
+    position: absolute;
+    right: clamp(24px, 13vw, 260px);
+    bottom: 22%;
+    width: clamp(260px, 28vw, 420px);
+    background: var(--g8-parchment);
+    border-radius: var(--g8-radius-sm);
+    border: 4px solid var(--g8-border-strong);
+    box-shadow: var(--g8-shadow-card);
+    padding: clamp(18px, 8.5cqi, 34px) clamp(12px, 6cqi, 26px) clamp(10px, 4cqi, 16px);
+  }
+
+  .seva-teaser__stat-row {
+    /* Grid, not flex — a 1fr/1fr grid guarantees each stat gets an equal,
+       contained half of the card no matter how narrow the card gets, where
+       a flex row would let "Lunches Served" push "652" wider than its
+       share. min-width:0 on the columns (below) is required for that
+       containment — grid items default to min-width:auto, which lets a
+       long unbroken run (three digits, or a stubbornly-long word) force
+       its own track wider than its share regardless of the 1fr. */
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(10px, 9cqi, 60px);
+  }
+
+  .seva-teaser__stat {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 5cqi, 24px);
+    min-width: 0;
+  }
+
+  .seva-teaser__stat-num {
+    font-family: var(--g8-font-ui);
+    font-weight: 700;
+    /* Fluid against the CARD's own width (cqi), not the viewport — this is
+       what keeps "652" inside its column at every intermediate width, not
+       just at the two breakpoints the old fixed 78px/38px/36px covered.
+       Ceiling of 78px matches the PDF measurement (~30% of card height); 17cqi
+       is tuned so three digits at the card's own narrowest width (260px)
+       stay inside their ~45%-minus-gap column with room to spare. */
+    font-size: clamp(20px, 17cqi, 78px);
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .seva-teaser__stat-num--teal { color: var(--g8-open-water); }
+  .seva-teaser__stat-num--rust { color: var(--g8-mesa); }
+
+  .seva-teaser__stat-label {
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    /* Allowed to wrap ("Lunches Served" onto two lines) rather than shrink
+       as aggressively as the number above — wrapping a label reads fine;
+       an illegibly tiny label doesn't. */
+    font-size: clamp(10px, 6cqi, 24px);
+    line-height: 1.15;
+  }
+  .seva-teaser__stat-label--teal { color: var(--g8-open-water); }
+  .seva-teaser__stat-label--rust { color: var(--g8-mesa); }
+
+  .seva-teaser__stat-caption {
+    /* Kept deliberately small/subordinate — "As of…" reads as a fine-print
+       date in the PDF even after everything else scaled up, tucked toward
+       the lower-right rather than growing in proportion. */
+    display: block;
+    margin-top: clamp(8px, 4cqi, 18px);
+    text-align: right;
+    font-family: var(--g8-font-body);
+    font-size: clamp(9px, 3.2cqi, 12px);
+    color: var(--g8-text);
+  }
+
+  /* ── Responsive ───────────────────────────────────── */
+  @media (max-width: 1023px) {
+    .hero__body { padding-block: 56px 72px; }
+    .hero__headline-img { width: min(100%, 310px); }
+    .hero__tagline { font-size: 1rem; }
+    .podcast-teaser { padding-block: 84px 96px; }
+    .podcast-teaser__wordmark { width: min(100%, 300px); }
+    .podcast-teaser__tags { font-size: 21px; }
+
+    .jams-teaser { padding-block: 72px 96px; }
+    .jams-teaser__wordmark { width: min(100%, 170px); }
+    .jams-teaser__tags { font-size: 21px; }
+
+    .seva-teaser__wordmark { width: min(100%, 170px); }
+    .seva-teaser__tags { font-size: 21px; }
+    .seva-teaser__definition { font-size: 0.9375rem; }
+    /* Stat numbers/gaps are no longer overridden here — the cqi-based
+       sizing on .seva-teaser__stat-num etc. above already scales smoothly
+       through this breakpoint and every width around it. */
   }
 
   @media (max-width: 680px) {
-    .hero__body { padding-block: 88px 96px; gap: 22px; }
-    .show__card { padding: 28px 24px; border-radius: var(--g8-radius-md); }
-    .show__photo { border-radius: var(--g8-radius-md); }
-    .van__card { border-radius: var(--g8-radius-md); }
-    .van__body { padding: 32px 26px; }
+    .hero__body { padding-block: 48px 56px; gap: 12px; }
+    .hero__headline-img { width: min(100%, 210px); }
+    .hero__tagline { font-size: 0.9375rem; }
+
+    .podcast-teaser { padding-block: 64px 72px; }
+    /* Below this width the 13vw inset would eat too much of a phone
+       screen — match the standard mobile container gutter instead, same
+       as the media card and CTA below it. */
+    .podcast-teaser__head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+      padding-inline: 24px;
+    }
+    .podcast-teaser__wordmark { width: min(100%, 220px); }
+    .podcast-teaser__sig { width: 76px; }
+    .podcast-teaser__tags { align-items: flex-start; text-align: left; font-size: 18px; }
+    /* Cancel the desktop 64vw cap — on a phone-width viewport that formula
+       would shrink the card to a sliver; full container width (as before)
+       is correct here. */
+    .podcast-teaser__card { width: 100%; border-radius: var(--g8-radius-md); border-width: 6px; }
+    .podcast-teaser__cta-wrap { margin-top: 28px; }
+
+    .jams-teaser { padding-block: 56px 64px; }
+    .jams-teaser__head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+      padding-inline: 24px;
+    }
+    .jams-teaser__wordmark { width: min(100%, 150px); }
+    .jams-teaser__tags { align-items: flex-start; text-align: left; font-size: 18px; }
+    /* No mobile comp was supplied for four tall cards side by side — at
+       phone width a 4-column grid would squeeze each one down to an
+       unreadable sliver, so this switches to a horizontal scroll-snap
+       strip instead: full desktop card proportions preserved, just
+       swipeable rather than squeezed. */
+    .jams-teaser__row {
+      display: flex;
+      grid-template-columns: none;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 16px;
+      padding-inline: 24px;
+      padding-bottom: 8px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .jams-teaser__card {
+      flex: 0 0 auto;
+      width: 62vw;
+      max-width: 260px;
+      scroll-snap-align: start;
+    }
+    .jams-teaser__card:first-child { margin-left: 0; }
+    .jams-teaser__band { font-size: 12px; }
+
+    /* No mobile comp was supplied. Keeping the full-bleed photo and the
+       overlaid head/definition text (just smaller insets/type), but the
+       stat card switches from a narrow floating box on the right to a
+       full-width band near the bottom — narrow enough at desktop scale to
+       become cramped on a phone, and centering it reads more naturally
+       than shrinking it further. Section height comes from a fixed
+       min-height instead of the 16:9 aspect-ratio, which would otherwise
+       squeeze this much overlaid content into ~210px. */
+    .seva-teaser { aspect-ratio: auto; min-height: 640px; }
+    .seva-teaser__head { padding-inline: 24px; top: 5%; }
+    .seva-teaser__wordmark { width: min(100%, 140px); }
+    .seva-teaser__tags { font-size: 16px; }
+    .seva-teaser__definition {
+      padding-inline: 24px;
+      max-width: 100%;
+      bottom: 33%;
+      font-size: 0.9375rem;
+    }
+    .seva-teaser__stats {
+      right: 24px;
+      left: 24px;
+      bottom: 5%;
+      width: auto;
+    }
+    /* Card is much wider here (edge-to-edge minus gutters) than the narrow
+       floating desktop card the cqi sizing above was tuned against, so the
+       fluid formula alone would size the numbers too large for this
+       layout. Content-hugging, centered columns (rather than the desktop
+       minmax(0,1fr) stretch) preserves the original, already-good mobile
+       treatment instead of stretching two stats across a wide band. */
+    .seva-teaser__stat-row {
+      grid-template-columns: max-content max-content;
+      justify-content: center;
+      gap: 32px;
+    }
+    .seva-teaser__stat-num { font-size: clamp(30px, 9.5vw, 44px); }
+    .seva-teaser__stat-label { font-size: clamp(12px, 3.2vw, 15px); }
+    .seva-teaser__stat-caption { text-align: center; }
   }
 </style>
