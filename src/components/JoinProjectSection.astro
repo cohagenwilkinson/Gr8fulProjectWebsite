@@ -21,7 +21,7 @@
  */
 ---
 
-<section class="join" id="join">
+<section class="join g8-section-panel" id="join">
   <img
     src="/join-wallpaper-burst-deepteal.png"
     alt=""
@@ -34,15 +34,33 @@
     <p class="join__subhead">Take the pledge. Get invites. Stay in touch.</p>
 
     <div class="join__media">
-      {/* TEMPORARY PROTOTYPE MEDIA — cropped from page 5 of the PDF, play mark baked in (same treatment as the Podcast/Jams cards). Replace with real video once it exists. */}
-      <img
-        src="/join-still-pledge-prototype.jpg"
-        alt="Robbie Dob — video preview placeholder, not final"
+      {/* Real asset — replaces the page-5 PDF-crop placeholder. Source is
+          portrait (720×1280); the square container/object-fit:cover crop
+          is unchanged from the placeholder, so this just drops into the
+          existing frame. Not autoplayed (it has audio) and not looped —
+          native controls, user presses play.
+
+          Poster: there's no separate custom Play-button overlay here (this
+          is a plain native <video controls>, not a custom-built player), so
+          the native `poster` attribute is the exactly-right tool rather
+          than a second image layer — it's the SAME element, styled by the
+          SAME .join__media-img rule (object-fit/object-position/dimensions)
+          that applies to the video once playing, so the poster crop can't
+          drift from the video crop, and there's nothing to hide/swap in JS
+          when playback starts. The poster is the same 720×1280 footage
+          (join-the-project-poster.jpg), so the framing lines up exactly. */}
+      <video
+        src="/join-the-project.mp4"
+        poster="/join-the-project-poster.jpg"
+        controls
+        playsinline
+        preload="metadata"
         class="join__media-img"
-      />
+      >
+      </video>
     </div>
 
-    <button type="button" class="g8-btn g8-btn--gold join__cta" data-join-open>
+    <button type="button" class="g8-btn g8-btn--gold g8-btn--cta g8-btn--cta-shadow join__cta" data-join-open>
       Take the pledge
     </button>
   </div>
@@ -97,7 +115,8 @@
             </label>
           </div>
 
-          <button type="submit" class="g8-btn g8-btn--gold join-modal__submit">Make it official</button>
+          <button type="submit" class="g8-btn g8-btn--gold g8-btn--cta g8-btn--cta-shadow join-modal__submit">Make it official</button>
+          <p class="join-modal__error" data-join-error hidden role="alert"></p>
         </form>
       </div>
 
@@ -114,52 +133,27 @@
 
         <div class="join-modal__welcome-card">
           {/*
-            TEMPORARY PROTOTYPE MEDIA — cropped from page 7 of the PDF. The
-            source crop stops just above where the PDF bakes in the caption
-            and signature so those can render as live content instead; a
-            wash gradient + object-fit:cover let the photo fill the whole
-            card rather than splitting it into a photo region and a solid
-            panel, matching the approved design.
+            Real asset — replaces the page-7 PDF-crop placeholder. Source is
+            portrait (1080×1920); same native poster+controls pattern as
+            .join__media-img above (see that comment for why: no separate
+            custom Play-button layer exists on the actual site, so the
+            native `poster` attribute is the right tool, not a second image
+            element). The decorative (aria-hidden, non-interactive) "replay"
+            circle that used to sit here was a stand-in for a play button
+            over a static photo — now that a REAL native play control
+            exists, it's redundant/would double up with it, so it's removed
+            rather than left floating on top of working video controls.
           */}
-          <img
-            src="/join-still-welcome-prototype.jpg"
-            alt="Robbie Dob — video preview placeholder, not final"
+          <video
+            src="/thanks-for-joining.mp4"
+            poster="/thanks-for-joining-poster.jpg"
+            controls
+            playsinline
+            preload="metadata"
             class="join-modal__welcome-photo"
-          />
+          >
+          </video>
           <div class="join-modal__welcome-wash" aria-hidden="true"></div>
-          {/*
-            Coded, not baked into the crop — a baked icon would land at
-            whatever position the cover-fit crop happens to leave it at
-            (unreliable across crop/zoom changes) and would sit under the
-            wash. This paints above both.
-          */}
-          <span class="join-modal__welcome-replay" aria-hidden="true">
-            {/*
-              viewBox is cropped to this path's own measured geometry
-              (getBBox: x=1 y=3 w=20 h=18 in the icon library's stock 0-24
-              box, plus half the stroke width as margin), not the stock
-              "0 0 24 24" — that box has ~2 units more empty space on the
-              right than the left, which is what was reading as the mark
-              sitting off-center in the circle. Cropped this way, the path
-              fills its own viewport edge-to-edge, so centering the SVG
-              element (below) centers the mark itself.
-            */}
-            <svg
-              viewBox="-0.2 1.8 22.4 20.4"
-              width="24"
-              height="24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"
-                stroke="#010715"
-                stroke-width="2.4"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </span>
           <div class="join-modal__welcome-copy">
             <p class="join-modal__welcome-text">
               I am Gr8ful for you.<br />
@@ -187,6 +181,10 @@
   const form = document.querySelector<HTMLFormElement>('[data-join-form]');
   const pledgeView = document.querySelector<HTMLElement>('[data-join-view="pledge"]');
   const welcomeView = document.querySelector<HTMLElement>('[data-join-view="welcome"]');
+  const submitBtn = form?.querySelector<HTMLButtonElement>('.join-modal__submit');
+  const errorEl = form?.querySelector<HTMLElement>('[data-join-error]');
+  const submitLabel = submitBtn?.textContent ?? 'Make it official';
+  let submitting = false;
 
   function showPledgeView() {
     pledgeView?.removeAttribute('hidden');
@@ -216,6 +214,11 @@
     // Next open always starts at the pledge step, not wherever it was left.
     showPledgeView();
     form?.reset();
+    if (errorEl) errorEl.hidden = true;
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = submitLabel;
+    }
   }
 
   openBtn?.addEventListener('click', openModal);
@@ -233,16 +236,67 @@
     }
   });
 
-  // Local prototype only — this never sends data anywhere. It just advances
-  // to the welcome view once the required fields pass native validation.
-  // The production signup form remains PledgeForm.astro / /api/pledge.
+  // Posts to /api/join-pledge, which emails a notification of the
+  // submission (see that route for recipients/provider details). The
+  // welcome view only opens once the server confirms the send — never on
+  // native validation alone, and never twice for one button press (the
+  // `submitting` guard blocks a second submit firing while the first
+  // request is still in flight, e.g. from a double-click or Enter-then-
+  // click).
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
-    if (form.checkValidity()) {
-      showWelcomeView();
-    } else {
+
+    if (!form.checkValidity()) {
       form.reportValidity();
+      return;
     }
+
+    if (submitting) return;
+    submitting = true;
+
+    if (errorEl) errorEl.hidden = true;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
+    }
+
+    const data = new FormData(form);
+
+    fetch('/api/join-pledge', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        firstName: data.get('firstName'),
+        email: data.get('email'),
+        zip: data.get('zip'),
+      }),
+    })
+      .then(async (response) => {
+        const result = await response.json().catch(() => ({}));
+        if (response.ok && result?.ok) {
+          showWelcomeView();
+          return;
+        }
+        if (errorEl) {
+          errorEl.textContent = result?.message ?? 'Something went wrong. Please try again.';
+          errorEl.hidden = false;
+        }
+      })
+      .catch(() => {
+        // Offline or the request never landed — keep their input, let them retry.
+        if (errorEl) {
+          errorEl.textContent =
+            'We couldn’t reach the server. Please check your connection and try again.';
+          errorEl.hidden = false;
+        }
+      })
+      .finally(() => {
+        submitting = false;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = submitLabel;
+        }
+      });
   });
 </script>
 
@@ -285,10 +339,10 @@
     margin: 0;
     font-family: var(--g8-font-ui);
     font-weight: 700;
-    /* Jost is measurably narrower than the Poppins this replaced — the
-       previous size (right for Poppins) rendered ~12.5% under the PDF's
-       measured width once swapped to the correct font. Bumped to match. */
-    font-size: clamp(34px, 4.7vw, 68px);
+    /* Re-measured against the PDF's own embedded text run: 86.3pt on the
+       1920 canvas = 4.49vw. The previous 68px ceiling (4.7vw rate, but
+       capped well below what that rate would reach at 1920) undershot it. */
+    font-size: clamp(34px, 4.49vw, 86px);
     line-height: 1;
     letter-spacing: -0.01em;
     color: var(--g8-golden-hour);
@@ -304,8 +358,8 @@
     margin: clamp(8px, 1.35vw, 20px) 0 0;
     font-family: var(--g8-font-ui);
     font-weight: 700;
-    /* Same ~12.5% correction as the headline above, for the same reason. */
-    font-size: clamp(22px, 2.15vw, 30px);
+    /* Re-measured: 40.7pt on the 1920 canvas = 2.12vw. */
+    font-size: clamp(22px, 2.12vw, 41px);
     color: var(--g8-chalk);
     text-shadow: 2px 2px 0 var(--g8-midnight);
   }
@@ -332,21 +386,26 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    /* Portrait 720×1280 source inside a square frame — this is the ONE
+       value to change for "move the video up/down": raising the vertical
+       number moves the visible crop window DOWN the source (showing more
+       of Rob's lower body/less headroom), lowering it moves the crop
+       window UP (more headroom, tighter on the face). 45% (vs. a plain
+       centered 50%) was chosen after inspecting the actual clip, which
+       reads slightly better with a touch more headroom than dead-center.
+       Also governs the poster image (join-the-project-poster.jpg, same
+       720×1280 footage) via the `poster` attribute on the same element —
+       one rule, so poster and video crop can't drift apart from each
+       other; there's no second element/layer for this to apply to. */
+    object-position: 50% 45%;
   }
 
   .join__cta {
-    /* Slightly smaller than before — the CTA pill measures 349×68 on the
-       1920 canvas (18.2% of width, 6.3% of height), a touch tighter than
-       the original pass. Font per the PDF's embedded resources:
-       HelveticaNeue-Medium, not the Jost the sitewide .g8-btn base applies —
-       overridden here to the system Helvetica Neue stack at weight 500. */
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-weight: 500;
-    text-transform: none;
-    font-size: 15px;
-    padding: 14px 32px;
+    /* Font/case/size/shadow now come from the shared .g8-btn--cta(-shadow)
+       classes on the element (Inter Medium, the 9pt/301.3° hard shadow) —
+       this rule only owns the bold border this CTA doesn't share with the
+       rest of the primary-CTA family. */
     border: var(--g8-stroke-bold) solid var(--g8-border-strong);
-    box-shadow: var(--g8-shadow-card);
   }
   .join__cta:hover { background: var(--g8-golden-dk); }
 
@@ -413,7 +472,9 @@
     background: var(--g8-parchment);
     border: var(--g8-stroke-bold) solid var(--g8-border-strong);
     border-radius: var(--g8-radius-lg);
-    box-shadow: var(--g8-shadow-lift);
+    /* Keynote's own spec for this shadow (20pt offset @325.1°), not the
+       generic --g8-shadow-lift — see tokens.css for the trig. */
+    box-shadow: var(--g8-shadow-modal);
   }
 
   .join-modal__view {
@@ -443,21 +504,21 @@
   }
   .join-modal__close:hover { background: var(--g8-chalk); }
 
-  /* Welcome state only (page 7) — the PDF's close mark is teal there, not
-     the dark stroke used on the pledge state (page 6). */
-  .join-modal__close--welcome {
-    border-color: var(--g8-open-water);
-    color: var(--g8-open-water);
-  }
-  .join-modal__close--welcome:hover { background: rgba(7, 147, 150, 0.12); }
+  /* Welcome state's close mark is black, same as the pledge state — no
+     modifier colors left to override; the class stays as a hook in case
+     the two states need to diverge again later. */
+  .join-modal__close--welcome:hover { background: var(--g8-chalk); }
 
   .join-modal__heading {
-    /* JostRoman-Bold per the PDF's embedded fonts, same as .join__headline. */
+    /* JostRoman-Bold per the PDF's embedded fonts, same as .join__headline.
+       55pt on the 1920 canvas = 2.86vw — shared by both modal states
+       ("The Gr8ful Pledge" and "Welcome to The Gr8ful Project" measure the
+       same size in the deck). */
     margin: 0 0 clamp(10px, 1.9vw, 24px);
     text-align: center;
     font-family: var(--g8-font-ui);
     font-weight: 700;
-    font-size: clamp(24px, 2.7vw, 38px);
+    font-size: clamp(24px, 2.86vw, 55px);
     line-height: 1;
     letter-spacing: -0.01em;
     color: var(--g8-golden-hour);
@@ -472,22 +533,24 @@
   }
 
   .join-modal__col-heading {
-    /* JostRoman-Bold per the PDF ("I promise:" / "Subscribe"). */
-    margin: 0 0 clamp(5px, 1.5vw, 13px);
+    /* JostRoman-Bold 33pt per the PDF ("I promise:" / "Subscribe") = 1.72vw
+       on the 1920 canvas — was capped well under that. */
+    margin: 0 0 clamp(6px, 1.5vw, 15px);
     font-family: var(--g8-font-ui);
     font-weight: 700;
-    font-size: clamp(15px, 1.2vw, 19px);
+    font-size: clamp(16px, 1.72vw, 33px);
     color: var(--g8-midnight);
   }
 
   .join-modal__promise {
-    /* Jost-Regular per the PDF, not the sitewide Poppins body face.
-       Font-size raised ~12% — the previous size read as too small for the
-       actual pledge copy the visitor is meant to read carefully. */
-    margin: 0 0 clamp(5px, 1.5vw, 13px);
+    /* Jost-Regular 26pt per the PDF (1.354vw on the 1920 canvas), not the
+       sitewide Poppins body face — re-measured up from an earlier ~12%
+       "read as too small" correction that was still well under the deck's
+       actual size. */
+    margin: 0 0 clamp(6px, 1.5vw, 15px);
     font-family: var(--g8-font-ui);
     font-weight: 400;
-    font-size: clamp(13px, 1vw, 15px);
+    font-size: clamp(14px, 1.354vw, 26px);
     line-height: 1.32;
     color: var(--g8-midnight);
   }
@@ -504,21 +567,30 @@
   }
 
   .join-modal__label {
+    /* JostRoman-SemiBold 17pt per the PDF (FIRST NAME / EMAIL / ZIPCODE)
+       = 0.885vw on the 1920 canvas. */
     display: block;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     font-family: var(--g8-font-ui);
     font-weight: var(--g8-weight-ui);
-    font-size: clamp(10px, 0.7vw, 11.5px);
+    font-size: clamp(11px, 0.885vw, 17px);
     letter-spacing: var(--g8-track-caps);
     text-transform: uppercase;
     color: var(--g8-midnight);
   }
 
   .join-modal__field input {
+    /* Inter — interface chrome, not the site's Poppins body face (which
+       this pass is removing from the button/form/UI register entirely).
+       Vertical padding raised from 6px to 9.5px (6px→31.5px was measured
+       as feeling short next to the bold type/CTAs elsewhere) — a ~22%
+       taller field (31.5px→38.5px measured), landing in the middle of the
+       requested 20-25% range. Horizontal padding, font, border, radius,
+       and background are all untouched. */
     width: 100%;
-    padding: 6px 12px;
-    font-family: var(--g8-font-body);
-    font-size: clamp(12.5px, 0.85vw, 14.5px);
+    padding: 9.5px 12px;
+    font-family: var(--g8-font-inter);
+    font-size: clamp(13px, 0.9vw, 16px);
     color: var(--g8-midnight);
     background: var(--g8-chalk);
     border: var(--g8-stroke) solid var(--g8-border-strong);
@@ -530,24 +602,26 @@
   }
 
   .join-modal__checkbox {
-    /* JostRoman-SemiBold per the PDF ("I hereby promise" / "Get invites and
-       stay in touch"), same face/weight as the field labels above. */
+    /* JostRoman-SemiBold 23pt per the PDF ("I hereby promise" / "Get
+       invites and stay in touch") = 1.198vw — a distinct, larger size from
+       the 17pt field labels above, not the same scale as previously coded. */
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 2px;
+    margin-top: 4px;
     font-family: var(--g8-font-ui);
     font-weight: var(--g8-weight-ui);
-    font-size: clamp(11.5px, 0.9vw, 13.5px);
+    font-size: clamp(14px, 1.198vw, 23px);
     color: var(--g8-midnight);
     cursor: pointer;
   }
 
   .join-modal__checkbox input[type='checkbox'] {
+    /* Scaled up to match the bigger 23pt label text beside it. */
     appearance: none;
     flex: none;
-    width: 15px;
-    height: 15px;
+    width: 18px;
+    height: 18px;
     display: inline-grid;
     place-content: center;
     background: var(--g8-chalk);
@@ -557,8 +631,8 @@
   }
   .join-modal__checkbox input[type='checkbox']::before {
     content: '';
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     background: var(--g8-midnight);
     transform: scale(0);
     transition: transform var(--g8-dur-fast) var(--g8-ease);
@@ -568,19 +642,30 @@
   }
 
   .join-modal__submit {
-    /* HelveticaNeue-Medium per the PDF — same override as .join__cta. */
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-weight: 500;
+    /* Font/case/shadow come from the shared .g8-btn--cta(-shadow) classes
+       on the element now — this rule only owns layout (centered under a
+       2-column grid) and the bold border it shares with .join__cta. */
     grid-column: 1 / -1;
     justify-self: center;
     margin-top: clamp(6px, 1vw, 14px);
-    text-transform: none;
-    font-size: clamp(13px, 0.95vw, 15px);
-    padding: clamp(9px, 0.9vw, 13px) clamp(22px, 2.2vw, 32px);
     border: var(--g8-stroke-bold) solid var(--g8-border-strong);
-    box-shadow: var(--g8-shadow-card);
   }
   .join-modal__submit:hover { background: var(--g8-golden-dk); }
+  .join-modal__submit:disabled { cursor: not-allowed; }
+
+  .join-modal__error {
+    /* Same role/placement as .pledge__error on the site's other form
+       (PledgeForm.astro) — shown only when the server rejects a
+       submission or the request never lands, so entered values are never
+       lost and the welcome view never opens on a failure. */
+    grid-column: 1 / -1;
+    justify-self: center;
+    margin: 0;
+    text-align: center;
+    font-family: var(--g8-font-inter);
+    font-size: clamp(13px, 1vw, 15px);
+    color: var(--g8-crimson);
+  }
 
   /* ── Welcome view ─────────────────────────────────────── */
   .join-modal__welcome-card {
@@ -607,17 +692,21 @@
   }
 
   .join-modal__welcome-photo {
-    /* Fills the entire card — no separate photo region + solid panel. The
-       source crop stops above the PDF's baked-in caption line (see the
-       markup comment), so covering it into a taller card zooms in
-       slightly rather than showing empty space; object-position keeps
-       Rob's face in frame rather than centering strictly. */
+    /* Fills the entire card — no separate photo region + solid panel.
+       Source is a much taller portrait (1080×1920, ~9:16) than this
+       slightly-wider-than-tall card (617:566), so cover fits by WIDTH —
+       roughly half the source's height ends up cropped away, making the
+       vertical object-position value below do most of the framing work
+       (unlike the square Join card, where cropping was mostly horizontal
+       and this number barely mattered). This is the ONE value to change
+       for "move it up/down": inspected against the actual footage, 42%
+       keeps Rob's face/peace-sign gesture comfortably framed. */
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center 12%;
+    object-position: 50% 42%;
   }
 
   .join-modal__welcome-wash {
@@ -625,53 +714,25 @@
        lost Rob, the room, and the wall art/guitars entirely. This keeps a
        light overall fade (the PDF's photo IS faded, just not this heavily)
        and leaves legibility for the caption to a second, local backing on
-       .join-modal__welcome-copy below instead of washing the whole card. */
+       .join-modal__welcome-copy below instead of washing the whole card.
+
+       pointer-events: none — this is a decorative, aria-hidden tint sitting
+       (in DOM/paint order) above the real <video>. Without this, it — and
+       .join-modal__welcome-copy below — silently ate every click over the
+       card, including Chrome's native center play-button hit target, since
+       plain DOM order beats the video's own internal controls when nothing
+       has an explicit z-index. Confirmed via elementFromPoint at the
+       video's center: it resolved to the caption text, never the video. */
     position: absolute;
+    pointer-events: none;
     inset: 0;
     background: linear-gradient(
       180deg,
-      rgba(245, 244, 240, 0.02) 0%,
-      rgba(245, 244, 240, 0.08) 45%,
-      rgba(245, 244, 240, 0.16) 70%,
-      rgba(245, 244, 240, 0.22) 100%
+      rgba(245, 244, 240, 0) 0%,
+      rgba(245, 244, 240, 0) 52%,
+      rgba(245, 244, 240, 0.12) 70%,
+      rgba(245, 244, 240, 0.26) 100%
     );
-  }
-
-  .join-modal__welcome-replay {
-    /* Coded rather than baked into the crop — see the markup comment.
-       Sits above the wash (later in DOM order, same stacking context).
-
-       BUG FOUND during runtime debugging: `place-content: center` centers
-       the grid's TRACK as a whole within the container — and with no
-       explicit grid-template and a percentage-sized child, the implicit
-       track sizes to "auto" content, which left percentage width/height on
-       the svg unable to resolve against anything definite. The measured
-       result was a 6.98×3.49px box instead of a ~25px square, nowhere near
-       centered. `place-items: center` centers the SVG ITEM within its own
-       cell (which stretches to fill this container by default), which is
-       the rule that actually does what "center a fixed-size child" means. */
-    position: absolute;
-    left: 50%;
-    top: 42%;
-    transform: translate(-50%, -50%);
-    width: clamp(30px, 8vw, 46px);
-    height: clamp(30px, 8vw, 46px);
-    display: grid;
-    place-items: center;
-    border-radius: 999px;
-    background: var(--g8-golden-hour);
-    border: var(--g8-stroke) solid var(--g8-border-strong);
-    box-shadow: 2px 2px 0 var(--g8-midnight);
-  }
-  .join-modal__welcome-replay svg {
-    /* Explicit, non-percentage dimensions — the earlier 55%/55% is exactly
-       what broke inside the content-sized grid track above. Scales with
-       the circle's own clamp() (55% of its 30px/46px bounds and 8vw rate),
-       but as absolute values the svg itself can size against, not a
-       percentage the grid has to resolve. */
-    display: block;
-    width: clamp(16.5px, 4.4vw, 25.3px);
-    height: clamp(16.5px, 4.4vw, 25.3px);
   }
 
   .join-modal__welcome-copy {
@@ -679,48 +740,92 @@
        down the card, signature ending ~83% down. Its own light-to-solid
        backing (independent of the card-wide wash above) keeps the text and
        signature legible over the now-more-visible photo without needing to
-       wash out the whole card to get there. */
+       wash out the whole card to get there.
+
+       Now that the card holds a real <video controls> (not a static photo),
+       the browser's own control bar renders pinned to the card's bottom
+       edge whenever paused — the same strip this panel used to have all to
+       itself for the signature. Extra bottom padding (native Chrome's bar
+       measures ~34px here) reserves that strip so the bar sits in the
+       gradient's opaque zone below the sign-off instead of drawing through
+       it. Trimmed from the earlier 38-48px down to 34-38px — this box is
+       bottom-anchored and shrink-wraps to its content, so the message's
+       distance from the card's TOP is entirely a function of what's below
+       it (text height + this gap + signature height + this padding); with
+       font size and signature size both off-limits, this padding and the
+       text-to-signature gap below are the only levers left to pull the
+       message down away from the center Play control. Floor kept at 34px
+       (the bar's own measured height) plus a small few px of breathing
+       room — never less than the bar itself needs.
+
+       pointer-events: none for the same reason as the wash above — this
+       panel has no interactive content (the text/signature don't need to
+       be clickable), so it must not sit in the way of clicks meant for the
+       video/native controls underneath. Verified with elementFromPoint:
+       this was the actual element receiving clicks aimed at the center
+       play button before this fix.
+
+       Alpha reduced ~22% off both non-zero stops (0.8→0.62, 0.92→0.72) —
+       the same gradient shape, just a lighter veil, so Rob/the room read
+       through more while the text/signature keep enough backing to stay
+       readable. */
     position: absolute;
+    pointer-events: none;
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 14px 18px clamp(10px, 2vw, 20px);
+    /* 10px trimmed off the desktop floor (34px→28px) purely to open up a
+       little more breathing room above the message, below Safari's centered
+       Play button — this box is bottom-anchored and shrink-wraps to its
+       content, so this bottom padding is the only remaining lever once
+       font size, the text-to-signature gap, and the signature itself are
+       all off the table. Mobile keeps a smaller 4px trim (34px→30px, see
+       the @media override below) since its control bar has less proven
+       slack to give up. */
+    padding: 14px 18px 28px;
     text-align: center;
     background: linear-gradient(
       180deg,
       rgba(245, 244, 240, 0) 0%,
-      rgba(245, 244, 240, 0.8) 30%,
-      rgba(245, 244, 240, 0.92) 100%
+      rgba(245, 244, 240, 0.3) 30%,
+      rgba(245, 244, 240, 0.42) 100%
     );
   }
 
   .join-modal__welcome-text {
-    /* JostRoman-SemiBold per the PDF. */
+    /* JostRoman-SemiBold 28pt per the PDF = 1.458vw on the 1920 canvas. */
     margin: 0;
     font-family: var(--g8-font-ui);
     font-weight: var(--g8-weight-ui);
-    font-size: clamp(12px, 1.3vw, 16px);
+    font-size: clamp(13px, 1.458vw, 28px);
     line-height: 1.35;
     color: var(--g8-midnight);
   }
 
   .join-modal__welcome-sig {
+    /* Scaled up alongside the message above it so the two keep reading as
+       one signed note, not a full sentence next to a barely-there scrawl.
+       Gap to the message above tightened from 8px to 4px — the other lever
+       (besides the control-safe padding above) for pulling the message
+       down away from the center Play control without touching font size
+       or the signature's own dimensions. */
     display: block;
-    width: clamp(90px, 9vw, 130px);
+    width: clamp(100px, 10vw, 160px);
     height: auto;
-    margin: 6px auto 0;
+    margin: 4px auto 0;
   }
 
   .join-modal__return {
-    /* HelveticaNeue-Medium per the PDF, not Jost. */
+    /* HelveticaNeue-Medium 28pt per the PDF — Inter, not Jost, at the same
+       rate the rest of the "Inter chrome" text uses. */
     display: block;
     margin: clamp(12px, 2vw, 24px) auto 0;
     background: none;
     border: none;
     padding: 0;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: var(--g8-font-inter);
     font-weight: 500;
-    font-size: 16px;
+    font-size: clamp(15px, 1.458vw, 28px);
     color: var(--g8-open-water);
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -746,6 +851,10 @@
       max-height: 85vh;
     }
     .join-modal__grid { grid-template-columns: 1fr; gap: 32px; }
+    /* Smaller trim than desktop's (34px→30px, not →28px) — less proven
+       slack to give up on a card this small before risking the native
+       control bar. */
+    .join-modal__welcome-copy { padding-bottom: 30px; }
   }
 
   @media (min-width: 901px) {
@@ -763,6 +872,15 @@
   }
 
   @media (max-width: 680px) {
+    /* The shared 100svh (g8-section-panel, global.css) is a desktop/tablet
+       reading of the scroll — at phone width this should be exactly as
+       tall as its own content, not a full-screen box with a small centered
+       card floating in a lot of empty space above and below it. (The
+       equivalent reset for .podcast-teaser/.jams-teaser lives in
+       index.astro, where those sections are actually authored — Astro's
+       per-file style scoping means a rule targeting .join written there
+       never matches this element, since .join is authored here.) */
+    .join { height: auto; }
     .join { padding-block: 56px 48px; }
     .join__subhead { font-size: 15px; }
     .join__media { margin: 32px 0 28px; }

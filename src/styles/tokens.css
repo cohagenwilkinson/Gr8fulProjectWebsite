@@ -54,12 +54,30 @@
   --g8-accent-cool:     var(--g8-deep-teal);
   --g8-accent-quiet:    var(--g8-sea-glass);
 
+  /* Not a brand color (see the "fixed" note at the top of this file) — a
+     single functional gray for the Jam card coming-soon state (border,
+     artist-banner background, inactive Play button), sampled against the
+     operator-approved reference screenshot for that card. Scoped to that
+     one "not available yet" signal; don't reach for it elsewhere. */
+  --g8-inactive:        #5c5f61;
+
   /* ── Type ────────────────────────────────────────────── */
   /* All three are open font license. No purchase, no fallback drift. */
   --g8-font-display: "Instrument Serif", Georgia, serif;   /* one weight only */
   --g8-font-body:    "Poppins", "Century Gothic", system-ui, sans-serif;
   --g8-font-ui:      "Jost", "Futura", "Century Gothic", sans-serif;
   --g8-font-display-alt: "Yeseva One", Georgia, serif;     /* loud variant, 24px+ */
+  /* Keynote's Helvetica Neue, web-served as Inter (loaded in BaseLayout).
+     Interface chrome only — nav links, button labels, form/metadata text —
+     never editorial voice, which stays Jost. */
+  --g8-font-inter:   "Inter", system-ui, -apple-system, sans-serif;
+  /* Keynote reserves actual Futura for one spot: the Seva definition line.
+     No licensed Futura web-font asset exists in this project (proprietary
+     Monotype family, not on Google Fonts) — this stack asks for the system
+     copy of Futura, present on macOS/iOS, and falls back to a comparable
+     geometric sans everywhere else. That is NOT the same guarantee as a
+     licensed web font; flagged in CLAUDE.md. */
+  --g8-font-futura:  Futura, "Century Gothic", "Avenir Next", sans-serif;
 
   --g8-size-d1:      4.5rem;   /* 72 */
   --g8-size-d2:      3rem;     /* 48 */
@@ -109,6 +127,19 @@
   --g8-shadow-card: 6px 6px 0 var(--g8-midnight);
   --g8-shadow-lift: 10px 10px 0 var(--g8-midnight);
   --g8-shadow-soft: 0 2px 0 rgba(1, 7, 21, 0.18);
+  /* Keynote's own shadow specs, converted from (offset, angle) to CSS x/y —
+     Keynote's angle is a standard math angle (0°=east, counterclockwise);
+     screen y is down, so dx=d·cos(θ), dy=−d·sin(θ). Verified against a
+     value we could sanity-check independently: 270° resolves to (0, +d),
+     i.e. straight down, which is exactly what the Podcast card's ALREADY-
+     shipped shadow was (0 offset horizontally) before this pass gave it a
+     name — good evidence this is the right convention, not a guess.
+     Button (9pt @301.3°): 9·cos(301.3°)=4.68, −9·sin(301.3°)=7.69 → 5,8.
+     Modal  (20pt @325.1°): 20·cos(325.1°)=16.42, −20·sin(325.1°)=11.44 → 16,11. */
+  --g8-shadow-cta:   5px 8px 0 var(--g8-midnight);    /* every primary CTA */
+  --g8-shadow-modal: 16px 11px 0 var(--g8-midnight);  /* Pledge modal panel */
+  /* Podcast media card (blur 61pt, offset 14pt @270°, opacity 89%). */
+  --g8-shadow-media: 0 14px 61px rgba(1, 7, 21, 0.89);
 
   /* ── Texture ─────────────────────────────────────────
      Paper is a 256px seamless noise tile of warm tan specks, set as the
@@ -133,6 +164,25 @@
   /* ── Layout (implementation) ─────────────────────────── */
   --g8-page-max:    1240px;
   --g8-page-gutter: 40px;
+  /* One shared left/right guide for the homepage's full-bleed chapters
+     (Hero, Podcast, Jams, Seva, Join — and the overlay header that sits on
+     the Hero) so every left title and right descriptor lock to the same
+     invisible edge as the page scrolls, instead of five sections each
+     repeating this clamp() literally and risking drift between them.
+     13% of the Keynote's 1920px canvas, floored/ceilinged for phones and
+     ultra-wide desktops. */
+  --g8-hero-inset: clamp(24px, 13vw, 260px);
+  /* Shared right-side descriptor family — LIFE/GRATITUDE, MUSIC/COMMUNITY,
+     SELFLESS/SERVICE, and About's ROBBIEDOB'S STORY all read at this one
+     size instead of four places independently approximating the same
+     Jost SemiBold register. Their right edge is unaffected — it's fixed by
+     each caller's own layout (justify-content:space-between / text-align:
+     right against --g8-hero-inset) — so a larger value here only grows the
+     text leftward, never moves that edge. Rolled back to the pre-scale-
+     review size — a later pass pushed this to a 41px-at-1440 ceiling while
+     Safari was zoomed out during evaluation, which read as correct then
+     but is too large at 100%/Actual Size. */
+  --g8-descriptor-size: clamp(23px, 2.4vw, 46px);
 }
 
 @media (max-width: 680px) {

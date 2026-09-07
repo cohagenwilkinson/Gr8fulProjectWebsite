@@ -12,12 +12,21 @@ import { navLinks, type NavLink } from '../data/site';
  * outlined CTA — matching page 1 of the approved redesign. It does not
  * touch `navLinks` or any other route; every other page renders exactly as
  * before.
+ *
+ * `homeNav` (via BaseLayout's `homeNav` prop) opts a solid-background page
+ * into that same flat link set + outlined "Join the Project" CTA, without
+ * the overlay chrome — there's no hero video on these pages for a
+ * transparent bar to sit over, and the overlay's white nav text would be
+ * unreadable against a solid light bar, so it keeps the standard bar's
+ * background and midnight text. Currently just /about. Homepage itself is
+ * untouched either way.
  */
 interface Props {
   transparent?: boolean;
+  homeNav?: boolean;
 }
 
-const { transparent = false } = Astro.props;
+const { transparent = false, homeNav = false } = Astro.props;
 
 /**
  * Flat homepage-hero nav — no Events dropdown, no Van, PDF-approved order.
@@ -25,17 +34,19 @@ const { transparent = false } = Astro.props;
  * /podcast, /jams, /pbj pages) per instruction — those pages are still
  * reachable via the section CTAs ("See all episodes →", "See all JAMS →")
  * and via the regular (non-transparent) header used on every other route,
- * which is untouched.
+ * which is untouched. Shared by both the homepage's transparent header and
+ * any solid page opting in via `homeNav`.
  */
 const heroNavLinks: NavLink[] = [
   { label: 'Home', href: '/' },
   { label: 'Podcast', href: '/#podcast' },
   { label: 'Jams', href: '/#jams' },
   { label: 'Seva', href: '/#seva' },
-  { label: 'About Us', href: '/about' },
+  { label: 'About', href: '/about' },
 ];
 
-const links = transparent ? heroNavLinks : navLinks;
+const links = transparent || homeNav ? heroNavLinks : navLinks;
+const showJoinCta = transparent || homeNav;
 ---
 
 <header class:list={['header', { 'header--overlay': transparent }]}>
@@ -73,8 +84,8 @@ const links = transparent ? heroNavLinks : navLinks;
     </nav>
 
     {
-      transparent ? (
-        <a href="/#join" class="g8-btn g8-btn--sm header__cta header__cta--outline">
+      showJoinCta ? (
+        <a href="/#join" class="g8-btn g8-btn--cta g8-btn--cta-sm header__cta header__cta--outline">
           Join the Project
         </a>
       ) : (
@@ -180,19 +191,17 @@ const links = transparent ? heroNavLinks : navLinks;
     border-bottom: 0;
   }
 
-  /* Left/right inset measured directly off page 1 of the PDF (logo sits at
-     13.4% of the 1920px canvas, the nav CTA's right edge at a near-matching
-     12.9% from the right) — expressed as a proportional value, not a fixed
-     breakpoint jump, and repeated verbatim on .hero__body in index.astro so
-     the two stay locked to one guide at every viewport width by
-     construction, not by coincidence of two different container rules. */
+  /* Left/right inset shared with every homepage chapter via --g8-hero-inset
+     (tokens.css) — logo left edge, hero content, and every section's own
+     head row all reference that one variable now, instead of each repeating
+     the same clamp() literally and risking drift between them. */
   .header--overlay .header__bar {
     /* Full-bleed, not the capped-and-centered .g8-container: at wide
        viewports the container's own max-width auto-margin would stack with
        this gutter and blow well past the PDF's measured inset. */
     max-width: none;
     margin-inline: 0;
-    --g8-page-gutter: clamp(24px, 13vw, 260px);
+    --g8-page-gutter: var(--g8-hero-inset);
     padding-block: clamp(40px, 9vh, 90px) 16px;
   }
 
@@ -204,11 +213,14 @@ const links = transparent ? heroNavLinks : navLinks;
   }
 
   .header--overlay .header__nav {
-    /* Nav is right-anchored to the CTA via margin-left:auto, so tightening
-       this gap both compacts the cluster and shifts its start rightward —
-       matching the PDF, where the cluster sits closer to the CTA than the
-       default (wider-gapped) nav treatment used elsewhere on the site. */
-    gap: 20px;
+    /* Nav is right-anchored to the CTA via margin-left:auto — this stays a
+       touch tighter than the default gap above so the cluster still reads
+       as compact against the CTA, matching the PDF's proportions, but
+       scales up with the link text rather than staying flat. Rolled back
+       to the pre-scale-review size — Safari had been zoomed out during
+       evaluation, which made the enlarged pass look correct when it
+       wasn't, at 100%/Actual Size. */
+    gap: clamp(18px, 1.8vw, 26px);
   }
 
   .header--overlay .header__nav a {
@@ -250,14 +262,21 @@ const links = transparent ? heroNavLinks : navLinks;
   }
 
   .header__nav {
+    /* Keynote sets nav links in HelveticaNeue (Regular) 28pt — web: Inter.
+       Fluid off the 1920 canvas, floored so the bar doesn't overflow
+       narrower desktop/tablet widths (the nav collapses to the drawer
+       below 900px anyway, so the floor only has to hold from there up).
+       Rolled back to the pre-scale-review size — an intermediate pass had
+       pushed this larger while Safari was zoomed out during evaluation,
+       which read as correct then but is too large at 100%/Actual Size. */
     display: flex;
     align-items: center;
-    gap: 28px;
+    gap: clamp(22px, 2vw, 32px);
     margin-left: auto;
-    font-family: var(--g8-font-ui);
-    font-weight: 500;
-    font-size: 15px;
-    letter-spacing: 0.04em;
+    font-family: var(--g8-font-inter);
+    font-weight: 400;
+    font-size: clamp(17px, 1.46vw, 22px);
+    letter-spacing: 0;
   }
   .header__nav a {
     color: var(--g8-midnight);
@@ -344,9 +363,6 @@ const links = transparent ? heroNavLinks : navLinks;
     color: var(--g8-golden-hour);
     border: var(--g8-stroke) solid var(--g8-golden-hour);
     box-shadow: none;
-    text-transform: none;
-    font-size: 13px;
-    padding: 8px 20px;
   }
   .header__cta--outline:hover {
     background: var(--g8-golden-hour);

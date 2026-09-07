@@ -213,6 +213,57 @@ img { max-width: 100%; }
 
 .g8-btn[disabled] { cursor: not-allowed; }
 
+/* Primary CTA family — every button traced to the Keynote (Hero/Podcast/
+   Jams/Join "Join the Project", "See all episodes", "See all JAMS", "Take
+   the pledge", "Make it official", the header CTA) is set in
+   HelveticaNeue-Medium at ~28pt (21pt for the small header variant), title
+   case, not the site's default uppercase Jost button voice. One shared
+   modifier instead of each section re-declaring its own font/case/shadow:
+   font/case/tracking here, the matching 9pt/301.3° hard shadow via
+   --g8-shadow-cta (apply .g8-btn--cta-shadow alongside), sizing via
+   --g8-cta-size (full) or --g8-cta-size-sm (header variant). Color/fill
+   stays on the existing --gold/--primary/etc. modifiers — this only
+   standardizes typography, case and shadow. */
+.g8-btn--cta {
+  /* Rolled back to the pre-scale-review size — a later pass enlarged this
+     (25px ceiling, taller padding) while Safari was zoomed out during
+     evaluation, which read as correct then but is too large at
+     100%/Actual Size. */
+  --g8-cta-size: clamp(15px, 1.46vw, 21px);
+  font-family: var(--g8-font-inter);
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--g8-cta-size);
+  padding: clamp(12px, 1.15vw, 17px) clamp(24px, 2.3vw, 34px);
+}
+.g8-btn--cta-sm {
+  /* Header's "Join the Project" — Keynote sets this one at 21pt, not the
+     ~28pt every other primary CTA on the page uses, so it stays the
+     smaller of the two by design. Rolled back alongside .g8-btn--cta and
+     the nav beside it (SiteHeader.astro) for the same reason. */
+  --g8-cta-size: clamp(14px, 1.2vw, 17px);
+  padding: clamp(9px, 0.95vw, 13px) clamp(18px, 1.9vw, 26px);
+}
+.g8-btn--cta-shadow { box-shadow: var(--g8-shadow-cta); }
+
+/* Shared equal-height system for the homepage's five scrolling chapters
+   (Hero/Podcast/Jams/Seva/Join) — a true height, not min-height, so all
+   five measure IDENTICALLY at desktop/tablet widths rather than a section
+   with more content quietly growing past the others. Each section already
+   carries its own overflow:hidden (for its background image), which is
+   what makes this safe: content is sized to actually fit (see each
+   section's own padding/media/gap values), not clipped to force-fit — the
+   flex centering below just absorbs whatever slack is left over. Mobile
+   opts out per-section where a full 100svh would force overflow or crush
+   content — see each section's own mobile query. */
+.g8-section-panel {
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 /* ── Links ───────────────────────────────────────────── */
 /* Quiet link on dark grounds: sea glass, hairline rule, golden on hover. */
 .g8-link-quiet {

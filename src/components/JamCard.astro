@@ -1,0 +1,380 @@
+---
+/**
+ * One Jams card. Two INDEPENDENT axes control it — don't couple them:
+ *
+ * - status: 'published' | 'coming-soon' — border/band/Play colour, Play
+ *   behaviour, the Coming Soon overlay. Visuals for both come from the
+ *   operator's approved reference screenshot (leftmost card = published,
+ *   "Noah Proudfoot" card = coming-soon) — see the "Jams cards" note in
+ *   CLAUDE.md.
+ * - imageLayout: 'split' | 'single' — whether the card shows two separate
+ *   photos (one above the band, one below) or one continuous photo behind
+ *   the band. Either status can use either layout.
+ *
+ * Card dimensions, radius, typography, and the band's vertical position are
+ * one shared system below regardless of which state/layout is active. The
+ * band's position is never set directly — in both layouts it's centred by
+ * equal flex:1 space above and below it (a plain spacer div in 'single'
+ * layout, standing in for the top photo in 'split'), so it lands at the
+ * exact same height either way without hardcoding a number anywhere.
+ */
+import type { JamCardData } from '../data/jams';
+
+interface Props extends JamCardData {
+  /**
+   * Cards after the first repeat identical prototype photos today, so their
+   * images are kept out of the accessibility tree to avoid announcing the
+   * same placeholder four times — matches the homepage's pre-existing
+   * behaviour for card 1 vs. cards 2-4. Once each card has a real, distinct
+   * photo this can just be dropped.
+   */
+  decorative?: boolean;
+}
+
+const {
+  artistName,
+  image,
+  secondaryImage = image,
+  status,
+  videoUrl,
+  imageLayout = 'split',
+  imagePosition = '50% 50%',
+  imageScale = 1,
+  imageOffsetX = 0,
+  imageContrast = 1,
+  imageBrightness = 1,
+  decorative = false,
+} = Astro.props as Props;
+
+// Scoped to just this one <img> — never the banner/name/overlay/Play button.
+// translateX is listed BEFORE scale() so it applies AFTER scaling (CSS
+// transform functions compose right-to-left) — a fixed-px shift of the
+// already-scaled image, independent of imageScale/imagePosition. That
+// independence is the point: imagePosition still sets the crop + the
+// scale's zoom anchor, but offsetX is a plain nudge on top, so it can't be
+// fought by re-deriving what percentage "means" once a scale is involved.
+const photoTuningStyle =
+  `object-position: ${imagePosition}; ` +
+  `transform: translateX(${imageOffsetX}px) scale(${imageScale}); transform-origin: ${imagePosition}; ` +
+  `filter: contrast(${imageContrast}) brightness(${imageBrightness});`;
+
+const isPublished = status === 'published';
+const isInteractive = isPublished && Boolean(videoUrl);
+const isSplit = imageLayout === 'split';
+
+// "Andy Babb + Lara Elle" -> teal "+" between the two names, same as before.
+// A single-name card (no "+") just renders as one span.
+const [firstArtist, secondArtist] = artistName.split(/\s*\+\s*/);
+---
+
+<div
+  class:list={[
+    'jam-card',
+    isPublished ? 'jam-card--published' : 'jam-card--coming-soon',
+    `jam-card--${imageLayout}`,
+  ]}
+  data-status={status}
+  data-image-layout={imageLayout}
+>
+  {isSplit ? (
+    <img
+      src={image}
+      alt={decorative ? '' : `${artistName} performing — placeholder image, not final`}
+      aria-hidden={decorative ? 'true' : undefined}
+      class="jam-card__photo"
+    />
+  ) : (
+    <>
+      {/* One continuous photo behind the whole card (band included) — see
+         .jam-card__photo--full below. This spacer just reserves the same
+         flex share the split layout's top photo would, so the band centres
+         identically either way; it draws nothing itself. */}
+      <img
+        src={image}
+        alt={decorative ? '' : `${artistName} — placeholder image, not final`}
+        aria-hidden={decorative ? 'true' : undefined}
+        class="jam-card__photo jam-card__photo--full"
+        style={photoTuningStyle}
+      />
+      <div class="jam-card__spacer" aria-hidden="true"></div>
+    </>
+  )}
+
+  <div class="jam-card__band">
+    {secondArtist ? (
+      <Fragment>
+        <span>{firstArtist}</span> <span class="jam-card__plus">+</span> <span>{secondArtist}</span>
+      </Fragment>
+    ) : (
+      <span>{firstArtist}</span>
+    )}
+  </div>
+
+  <div class="jam-card__media">
+    {isSplit && <img src={secondaryImage} alt="" aria-hidden="true" class="jam-card__photo" />}
+
+    {!isPublished && (
+      <p class="jam-card__overlay">Coming<br />Soon</p>
+    )}
+
+    {isInteractive ? (
+      <a
+        class="jam-card__play"
+        href={videoUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Watch ${artistName} — opens in a new tab`}
+      >
+        <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
+          <path d="M8 5v14l11-7z" fill="var(--g8-midnight)" />
+        </svg>
+      </a>
+    ) : !isPublished ? (
+      // coming-soon: a real (non-disabled) control — clicking it surfaces
+      // the toast below, it just has no destination. Not `disabled`
+      // because it now genuinely does something on click; a disabled
+      // button can't receive that click at all.
+      <button
+        type="button"
+        class="jam-card__play"
+        data-jam-toast-trigger
+        aria-label={`${artistName} — coming soon`}
+      >
+        <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
+          <path d="M8 5v14l11-7z" fill="var(--g8-midnight)" />
+        </svg>
+      </button>
+    ) : (
+      // published but no videoUrl yet — genuinely inert, not a
+      // coming-soon card. Kept as the original fully-disabled control.
+      <button
+        type="button"
+        class="jam-card__play"
+        disabled
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
+          <path d="M8 5v14l11-7z" fill="var(--g8-midnight)" />
+        </svg>
+      </button>
+    )}
+
+    {!isPublished && (
+      <p class="jam-card__toast" role="status" aria-live="polite" hidden>Coming soon!</p>
+    )}
+  </div>
+</div>
+
+<script>
+  // Shared across every JamCard instance on the page (Astro dedupes this
+  // script once regardless of how many cards render it) — one listener per
+  // coming-soon Play button, each scoped to its own card's toast so
+  // clicking one card never surfaces another's message.
+  document.querySelectorAll<HTMLButtonElement>('[data-jam-toast-trigger]').forEach((btn) => {
+    const toast = btn.closest('.jam-card')?.querySelector<HTMLElement>('.jam-card__toast');
+    if (!toast) return;
+    let hideTimer: ReturnType<typeof setTimeout> | undefined;
+    btn.addEventListener('click', () => {
+      clearTimeout(hideTimer);
+      toast.hidden = false;
+      // Re-trigger the fade-in even on a repeat click within the window,
+      // rather than stacking a second message.
+      toast.classList.remove('is-visible');
+      void toast.offsetWidth;
+      toast.classList.add('is-visible');
+      hideTimer = setTimeout(() => {
+        toast.classList.remove('is-visible');
+        toast.hidden = true;
+      }, 2500);
+    });
+  });
+</script>
+
+<style>
+  /* ── Shared across both states ───────────────────────
+     Aspect ratio measured directly off one card on page 3 of the PDF:
+     306×568px. container-type lets the Play button and the Coming Soon
+     overlay size off the card's OWN rendered width (cqi) rather than the
+     viewport — same reasoning as the Seva stats card (index.astro): a
+     grid-column card's real width isn't a fixed fraction of the viewport,
+     so anything sized in vw drifts out of proportion between breakpoints. */
+  .jam-card {
+    container-type: inline-size;
+    aspect-ratio: 306 / 568;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border-radius: var(--g8-radius-lg);
+    /* Measured off the PDF: ~2.4% of card width, not the standard 2px
+       --g8-stroke hairline used elsewhere. */
+    border: 6px solid var(--g8-border-strong);
+    background: var(--g8-midnight);
+    overflow: hidden;
+  }
+
+  .jam-card__photo {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* imageLayout: 'single' only — one photo behind the entire card (band
+     included), instead of the split layout's two separate <img> flex
+     children. A positioned element paints above static siblings regardless
+     of DOM order, so the band/media need their own z-index (below, on
+     .jam-card__band and .jam-card__media) to stay on top of this. */
+  .jam-card__photo--full {
+    position: absolute;
+    inset: 0;
+    flex: none;
+    z-index: 0;
+  }
+
+  /* Reserves the exact same flex:1 share the split layout's top photo
+     would, purely so the band centres at the same height either way.
+     Paints nothing — the real photo is .jam-card__photo--full behind it. */
+  .jam-card__spacer {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .jam-card__band {
+    position: relative;
+    z-index: 1;
+    flex: none;
+    padding-block: 10px;
+    text-align: center;
+    background: var(--g8-midnight);
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--g8-golden-hour);
+  }
+
+  .jam-card__plus {
+    color: var(--g8-open-water);
+    font-weight: var(--g8-weight-strong);
+  }
+
+  /* Wraps the lower photo (split) or just the overlay/Play button (single)
+     so they can be positioned against just this half of the card. z-index
+     matters only for 'single', to stay above .jam-card__photo--full. */
+  .jam-card__media {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-height: 0;
+  }
+  .jam-card__media .jam-card__photo {
+    position: absolute;
+    inset: 0;
+  }
+
+  .jam-card__play {
+    position: absolute;
+    right: 7cqi;
+    bottom: 7cqi;
+    width: 17cqi;
+    height: 17cqi;
+    display: grid;
+    place-items: center;
+    border-radius: var(--g8-radius-pill);
+    border: var(--g8-stroke) solid var(--g8-border-strong);
+    box-shadow: var(--g8-shadow-cta);
+    background: var(--g8-golden-hour);
+    padding: 0;
+    transition: background-color var(--g8-dur-fast) var(--g8-ease);
+  }
+  .jam-card__play svg { width: 40%; height: 40%; margin-left: 8%; }
+  a.jam-card__play,
+  button.jam-card__play:not(:disabled) { cursor: pointer; }
+  a.jam-card__play:hover { background: var(--g8-golden-dk); }
+  /* Disabled <button> already drops out of the tab order and can't be
+     activated by click/Enter/Space — no click handler to defend, no href
+     to withhold. cursor:default keeps it from even looking clickable. */
+  button.jam-card__play:disabled { cursor: default; }
+
+  /* ── coming-soon overrides only ──────────────────────
+     Everything above stays identical between states; only these rules
+     change. --g8-inactive is defined in tokens.css, scoped to this one
+     "not available yet" use — see the comment there for why it's not a
+     brand color. */
+  .jam-card--coming-soon {
+    border-color: var(--g8-inactive);
+  }
+  .jam-card--coming-soon .jam-card__band {
+    background: var(--g8-inactive);
+  }
+  .jam-card--coming-soon .jam-card__play {
+    background: var(--g8-inactive);
+  }
+
+  /* Transient click feedback for coming-soon Play buttons only. Positioned
+     above the Play button (which sits bottom:7cqi, 17cqi tall) so the two
+     never overlap. [hidden] wins the display fight over the flex/opacity
+     rules below it while JS hasn't cleared it yet — same reason SiteFooter
+     uses :not([hidden]) rather than a bare class for this. */
+  .jam-card__toast {
+    position: absolute;
+    left: 50%;
+    bottom: 27cqi;
+    transform: translateX(-50%);
+    margin: 0;
+    max-width: 84%;
+    padding: 0.55em 1.1em;
+    border-radius: var(--g8-radius-pill);
+    /* Parchment-on-Midnight, not Midnight-on-Midnight — the shadow below
+       is also Midnight, so a Midnight background made the toast read as
+       one flat blob instead of a surface with depth. Deliberately not
+       Golden Hour: that's already the COMING SOON text's accent color. */
+    background: var(--g8-parchment);
+    color: var(--g8-midnight);
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-ui);
+    font-size: clamp(11px, 5.5cqi, 15px);
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: var(--g8-shadow-card);
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity var(--g8-dur-fast) var(--g8-ease);
+  }
+  .jam-card__toast:not([hidden]).is-visible {
+    opacity: 1;
+  }
+
+  .jam-card__overlay {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    top: 16%;
+    margin: 0;
+    text-align: center;
+    font-family: var(--g8-font-ui);
+    font-weight: var(--g8-weight-strong);
+    text-transform: uppercase;
+    line-height: 0.98;
+    letter-spacing: 0.01em;
+    color: var(--g8-golden-hour);
+    font-size: clamp(16px, 15.5cqi, 32px);
+    text-shadow: 2px 3px 0 var(--g8-midnight);
+  }
+
+  @media (max-width: 680px) {
+    .jam-card {
+      flex: 0 0 auto;
+      width: 62vw;
+      max-width: 260px;
+      scroll-snap-align: start;
+    }
+    .jam-card:first-child { margin-left: 0; }
+    .jam-card__band { font-size: 12px; }
+  }
+</style>

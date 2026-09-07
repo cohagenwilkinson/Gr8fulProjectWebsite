@@ -70,11 +70,43 @@ src/
   styles/global.css      shared primitives: type, buttons, cards, grids
   layouts/BaseLayout     head, fonts, header + footer
   components/            SiteHeader, SiteFooter, ColorRibbon, EventCard,
-                         PledgeForm, PledgeQuote
+                         PledgeForm, PledgeQuote, JamCard
   data/site.ts           nav, socials, YouTube playlist, podcast platforms
   data/events.ts         Luma types, config, fetch, and the per-page selectors
+  data/jams.ts            homepage Jams card content — see "Jams cards" below
   pages/api/pledge.ts    Brevo signup endpoint
 ```
+
+### Jams cards
+
+The four cards in the homepage Jams section (`.jams-teaser__row` in
+`src/pages/index.astro`) are data-driven, not hand-written markup. Content lives in
+`src/data/jams.ts`, an array of `{ artistName, image, secondaryImage?, status, videoUrl? }`
+objects; rendering/styling/behavior for both states lives in `src/components/JamCard.astro`.
+
+**To swap a card's content, all that's needed is:**
+
+```
+artistName: Artist Name
+image: filename.jpg          (public/ path; reused for both photo halves
+                              unless a distinct secondaryImage is also given)
+status: published | coming-soon
+videoUrl: https://...        (published only — omitting it leaves that
+                              card's Play button rendered but inert)
+```
+
+`status` drives everything else automatically:
+
+- **`published`** — dark/navy border + artist banner, orange Play button. If `videoUrl` is
+  set, the Play button is a real `target="_blank"` link; if not, it still looks active but
+  is a disabled, non-clickable button (never points at a guessed URL).
+- **`coming-soon`** — gray border + banner (via the `--g8-inactive` token in
+  `tokens.css`, the one non-brand color in the palette, scoped to exactly this state), an
+  orange "Coming Soon" overlay on the lower photo, Play button gray and permanently disabled.
+
+All four cards currently ship as `published` with no `videoUrl`, reusing the same PDF-cropped
+placeholder photos (Andy Babb + Lara Elle) — real per-artist photos/names/status/links for
+cards 2-4 are still pending from the operator.
 
 ## Not finished yet
 
@@ -246,6 +278,20 @@ writing to a mailing list; keep it.
 cookies are set until someone presses play. Keep it that way, and keep the visible
 "watch on YouTube" link so the section is never a dead end if the embed fails.
 
+The homepage Podcast card works the same way: the poster image + a real coded play button
+(`data-podcast-play` in `index.astro`) swap in place for a `youtube-nocookie.com/embed/
+videoseries?list=PLJ06EoI7HZ1c` iframe, sized to the card via inline styles (see the scoped-
+CSS trap above for why). `autoplay=1` only ever fires from that click handler, never on page
+load. **The playlist embed plays whatever is first in the playlist — that is NOT
+automatically "most recently uploaded."** It's the playlist's own stored order, which
+defaults to manual/add-order unless the playlist's sort is set to "Date added (newest)" in
+YouTube Studio (a setting on the playlist itself, not something this repo controls). At the
+time this was wired up the playlist held exactly one video, so there's no live multi-video
+data to confirm that setting is on — **when a new episode goes up, either drag it to
+position 1 in YouTube Studio, or confirm the playlist's sort order is "Date added (newest)"
+so it lands there automatically.** No website code changes either way; this is a YouTube-
+Studio task, not a deploy.
+
 ---
 
 ## Design system and layout traps
@@ -271,6 +317,16 @@ Check specificity when a global rule appears to do nothing.
 
 **`getBoundingClientRect()` excludes shadows**, and Chromium clips leftward overflow
 silently. Neither shows up in naive measurements.
+
+**Astro's scoped CSS never reaches elements created with `document.createElement`.**
+Scoping works by stamping a `data-astro-cid-*` attribute onto every element *in that file's
+own template* at build time; a node built at runtime in a `<script>` block never gets it, so
+a component-scoped class rule silently matches nothing on it — no error, the element just
+renders unstyled (browser defaults). Bit the Podcast play-in-place embed: the injected
+`<iframe>` rendered at the browser's ~304×154 default instead of filling the card, with the
+intended `.podcast-teaser__frame` rule sitting right there unmatched. Fix is to style
+anything you build with `createElement` via `el.style.cssText` (or inline attributes), not a
+scoped class — same issue would hit any future JS-injected element on this site.
 
 ---
 
