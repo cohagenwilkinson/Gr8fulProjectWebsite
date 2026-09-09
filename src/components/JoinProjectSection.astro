@@ -73,47 +73,53 @@
         <button type="button" class="join-modal__close" data-join-close aria-label="Close">✕</button>
         <h3 class="join-modal__heading">The Gr8ful Pledge</h3>
 
+        <!-- Flat, row-major children (not two independently-flowing column
+             divs) so the grid's own 2-col × 5-row auto-placement is what
+             lines up "I promise:"/Subscribe, each pledge paragraph with its
+             corresponding field label, and the two checkboxes — see
+             .join-modal__grid below. Each pair (heading/heading, promise/
+             field, ...) is two consecutive children, filling left-then-
+             right, row by row, in source order. -->
         <form class="join-modal__grid" data-join-form novalidate>
-          <div class="join-modal__col">
-            <h4 class="join-modal__col-heading">I promise:</h4>
-            <p class="join-modal__promise">
-              To practice when I can.<br />
-              Be kind to myself when I can't.<br />
-              Return when I'm able - without guilt.
-            </p>
-            <p class="join-modal__promise">
-              This is my project.<br />
-              This is my promise.
-            </p>
-            <p class="join-modal__promise join-modal__promise--em">
-              I don't need perfect attendance to make progress.<br />
-              I believe tomorrow can be better than today.
-            </p>
-            <label class="join-modal__checkbox">
-              <input type="checkbox" name="promise" required />
-              <span>I hereby promise</span>
-            </label>
-          </div>
+          <h4 class="join-modal__col-heading">I promise:</h4>
+          <h4 class="join-modal__col-heading">Subscribe</h4>
 
-          <div class="join-modal__col">
-            <h4 class="join-modal__col-heading">Subscribe</h4>
-            <label class="join-modal__field">
-              <span class="join-modal__label">First name</span>
-              <input type="text" name="firstName" autocomplete="given-name" required />
-            </label>
-            <label class="join-modal__field">
-              <span class="join-modal__label">Email</span>
-              <input type="email" name="email" autocomplete="email" required />
-            </label>
-            <label class="join-modal__field">
-              <span class="join-modal__label">Zipcode</span>
-              <input type="text" name="zip" autocomplete="postal-code" inputmode="numeric" required />
-            </label>
-            <label class="join-modal__checkbox">
-              <input type="checkbox" name="invites" />
-              <span>Get invites and stay in touch</span>
-            </label>
-          </div>
+          <p class="join-modal__promise">
+            To practice when I can.<br />
+            Be kind to myself when I can't.<br />
+            Return when I'm able - without guilt.
+          </p>
+          <label class="join-modal__field">
+            <span class="join-modal__label">First name</span>
+            <input type="text" name="firstName" autocomplete="given-name" required />
+          </label>
+
+          <p class="join-modal__promise">
+            This is my project.<br />
+            This is my promise.
+          </p>
+          <label class="join-modal__field">
+            <span class="join-modal__label">Email</span>
+            <input type="email" name="email" autocomplete="email" required />
+          </label>
+
+          <p class="join-modal__promise join-modal__promise--em">
+            I don't need perfect attendance to make progress.<br />
+            I believe tomorrow can be better than today.
+          </p>
+          <label class="join-modal__field">
+            <span class="join-modal__label">Zipcode</span>
+            <input type="text" name="zip" autocomplete="postal-code" inputmode="numeric" required />
+          </label>
+
+          <label class="join-modal__checkbox">
+            <input type="checkbox" name="promise" required />
+            <span>I hereby promise</span>
+          </label>
+          <label class="join-modal__checkbox">
+            <input type="checkbox" name="invites" />
+            <span>Get invites and stay in touch</span>
+          </label>
 
           <button type="submit" class="g8-btn g8-btn--gold g8-btn--cta g8-btn--cta-shadow join-modal__submit">Make it official</button>
           <p class="join-modal__error" data-join-error hidden role="alert"></p>
@@ -186,6 +192,21 @@
   const submitLabel = submitBtn?.textContent ?? 'Make it official';
   let submitting = false;
 
+  // Thank-you overlay ("I am Gr8ful for you...") stays hidden through the
+  // poster and playback, and only appears once the video has actually been
+  // watched through — `ended` reveals it, `play` hides it again, which also
+  // covers pressing the native Replay control (that fires `play`, same as
+  // a first play). CSS reacts to the --ended class name; see
+  // .join-modal__welcome-card--ended in the styles below.
+  const welcomeCard = document.querySelector<HTMLElement>('.join-modal__welcome-card');
+  const welcomeVideo = document.querySelector<HTMLVideoElement>('.join-modal__welcome-photo');
+  welcomeVideo?.addEventListener('ended', () => {
+    welcomeCard?.classList.add('join-modal__welcome-card--ended');
+  });
+  welcomeVideo?.addEventListener('play', () => {
+    welcomeCard?.classList.remove('join-modal__welcome-card--ended');
+  });
+
   function showPledgeView() {
     pledgeView?.removeAttribute('hidden');
     welcomeView?.setAttribute('hidden', '');
@@ -214,6 +235,10 @@
     // Next open always starts at the pledge step, not wherever it was left.
     showPledgeView();
     form?.reset();
+    // So a later pledge doesn't reopen the welcome view already showing the
+    // overlay from a previous watch-through, in case the video element
+    // itself retains its ended state across opens.
+    welcomeCard?.classList.remove('join-modal__welcome-card--ended');
     if (errorEl) errorEl.hidden = true;
     if (submitBtn) {
       submitBtn.disabled = false;
@@ -269,6 +294,10 @@
         firstName: data.get('firstName'),
         email: data.get('email'),
         zip: data.get('zip'),
+        // Checkbox: FormData omits an unchecked box entirely (data.get
+        // returns null), so Boolean(...) is the whole conversion — checked
+        // ("on", since the input has no explicit value) -> true, missing -> false.
+        invites: Boolean(data.get('invites')),
       }),
     })
       .then(async (response) => {
@@ -462,11 +491,14 @@
        back to flexible sizing below — this exact shape is a desktop-only
        target, same as the rest of the PDF comp. */
     position: relative;
-    /* No max-width cap — the previous pass's 1180px ceiling under-shot the
-       target at 1920×1080 (a common desktop size, and the PDF's own canvas
-       resolution), rendering the modal at only ~61% instead of ~71%. The
-       percentage is the target at every desktop size, matching the PDF. */
+    /* The percentage/vh formula is the target at ordinary desktop sizes,
+       matching the PDF — but with no ceiling it grows without limit on very
+       large monitors/windows. max-width stops it at the 1440px-wide design's
+       own rendered size (71vw × 1440 ≈ 1022px, rounded) — the modal reaches
+       that size and then holds, rather than continuing to scale on a 4K or
+       ultrawide viewport. */
     width: min(71vw, calc(72vh * 1.7561));
+    max-width: 1024px;
     aspect-ratio: 1368 / 779;
     overflow-y: auto;
     background: var(--g8-parchment);
@@ -475,6 +507,16 @@
     /* Keynote's own spec for this shadow (20pt offset @325.1°), not the
        generic --g8-shadow-lift — see tokens.css for the trig. */
     box-shadow: var(--g8-shadow-modal);
+    /* Establishes the `cqw` unit used throughout this modal's type/spacing
+       below, sized against THIS element's own (now capped) width rather
+       than the raw viewport. Without this, every clamp() in here keeps
+       scaling off vw past the point where max-width stops the panel itself
+       from growing — the panel holds still, but headline/label/checkbox
+       text keeps enlarging toward each clamp's own ceiling, so the same
+       copy that fit at ~1440px starts wrapping/overflowing on a wider
+       window even though the box around it never got any bigger. cqw makes
+       text stop growing at exactly the same width the panel does. */
+    container-type: inline-size;
   }
 
   .join-modal__view {
@@ -482,14 +524,15 @@
     /* Tightened further from the previous pass so content fits the
        smaller, PDF-accurate shell above without relying on scroll at
        ordinary desktop sizes — proportional scaling of the same spacing,
-       not a redesign. */
-    padding: clamp(10px, 1.4vw, 26px) clamp(20px, 4vw, 56px) clamp(10px, 2vw, 38px);
+       not a redesign. cqw (relative to .join-modal__panel's own, now
+       capped, width) rather than vw — see the container-type note there. */
+    padding: clamp(10px, 1.97cqw, 26px) clamp(20px, 5.63cqw, 56px) clamp(10px, 2.82cqw, 38px);
   }
 
   .join-modal__close {
     position: absolute;
-    top: clamp(12px, 1.5vw, 22px);
-    right: clamp(12px, 1.5vw, 22px);
+    top: clamp(12px, 2.11cqw, 22px);
+    right: clamp(12px, 2.11cqw, 22px);
     width: 38px;
     height: 38px;
     display: grid;
@@ -514,11 +557,11 @@
        55pt on the 1920 canvas = 2.86vw — shared by both modal states
        ("The Gr8ful Pledge" and "Welcome to The Gr8ful Project" measure the
        same size in the deck). */
-    margin: 0 0 clamp(10px, 1.9vw, 24px);
+    margin: 0 0 clamp(10px, 2.68cqw, 24px);
     text-align: center;
     font-family: var(--g8-font-ui);
     font-weight: 700;
-    font-size: clamp(24px, 2.86vw, 55px);
+    font-size: clamp(24px, 4.03cqw, 55px);
     line-height: 1;
     letter-spacing: -0.01em;
     color: var(--g8-golden-hour);
@@ -526,19 +569,40 @@
   }
 
   /* ── Pledge view ──────────────────────────────────────── */
+  /* Shared 2-column × 5-row grid — the actual alignment mechanism. Every
+     pair of children (see the markup above) lands in the same row via plain
+     grid auto-placement, so "I promise:"/Subscribe, each pledge paragraph/
+     field pair, and the two checkboxes all share a row automatically —
+     nothing here targets a specific row or element by hand. align-items:
+     start keeps every cell's content flush to its row's top edge (so a
+     taller left-hand paragraph never pushes the shorter field on the right
+     down to vertically center in the row). column-gap is unchanged from
+     the max-size/no-wrap pass (still cqw, still what keeps the two columns
+     from crowding at the modal's capped width); row-gap is new — see the
+     comment on each element below for why their own margins were zeroed in
+     favor of this one shared value. */
   .join-modal__grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: clamp(18px, 3.6vw, 48px);
+    align-items: start;
+    column-gap: clamp(18px, 5.07cqw, 48px);
+    row-gap: clamp(14px, 3.2cqw, 28px);
   }
 
   .join-modal__col-heading {
     /* JostRoman-Bold 33pt per the PDF ("I promise:" / "Subscribe") = 1.72vw
-       on the 1920 canvas — was capped well under that. */
-    margin: 0 0 clamp(6px, 1.5vw, 15px);
+       on the 1920 canvas — was capped well under that. cqw (relative to
+       .join-modal__panel's own width) rather than vw from here down — see
+       the container-type note on that rule for why.
+
+       No bottom margin any more — spacing to the next row now comes
+       entirely from .join-modal__grid's row-gap, so it stays IDENTICAL on
+       both sides of a row instead of each column accumulating its own,
+       possibly-different, margin. */
+    margin: 0;
     font-family: var(--g8-font-ui);
     font-weight: 700;
-    font-size: clamp(16px, 1.72vw, 33px);
+    font-size: clamp(16px, 2.42cqw, 33px);
     color: var(--g8-midnight);
   }
 
@@ -546,11 +610,14 @@
     /* Jost-Regular 26pt per the PDF (1.354vw on the 1920 canvas), not the
        sitewide Poppins body face — re-measured up from an earlier ~12%
        "read as too small" correction that was still well under the deck's
-       actual size. */
-    margin: 0 0 clamp(6px, 1.5vw, 15px);
+       actual size.
+
+       No bottom margin — see the row-gap note on .join-modal__col-heading
+       above; same reasoning applies to every row in this grid. */
+    margin: 0;
     font-family: var(--g8-font-ui);
     font-weight: 400;
-    font-size: clamp(14px, 1.354vw, 26px);
+    font-size: clamp(14px, 1.91cqw, 26px);
     line-height: 1.32;
     color: var(--g8-midnight);
   }
@@ -562,8 +629,10 @@
   }
 
   .join-modal__field {
+    /* No margin-bottom — the grid's row-gap owns row-to-row spacing now,
+       and the field's own top edge (this element IS the row's right-hand
+       cell) is what the corresponding pledge paragraph aligns to. */
     display: block;
-    margin-bottom: clamp(4px, 0.9vw, 9px);
   }
 
   .join-modal__label {
@@ -573,7 +642,7 @@
     margin-bottom: 4px;
     font-family: var(--g8-font-ui);
     font-weight: var(--g8-weight-ui);
-    font-size: clamp(11px, 0.885vw, 17px);
+    font-size: clamp(11px, 1.25cqw, 17px);
     letter-spacing: var(--g8-track-caps);
     text-transform: uppercase;
     color: var(--g8-midnight);
@@ -590,7 +659,18 @@
     width: 100%;
     padding: 9.5px 12px;
     font-family: var(--g8-font-inter);
-    font-size: clamp(13px, 0.9vw, 16px);
+    /* Flat 16px, not the previous clamp(13px, 1.27cqw, 16px) — iOS Safari
+       force-zooms the page on focus into any text input computing under
+       16px, and doesn't un-zoom on blur/submit, which is what was leaving
+       the thank-you video and the page itself off-center after this form.
+       The old clamp's cqw-based preferred value never actually reached its
+       own 16px ceiling anywhere within the panel's real width range (mobile
+       through the 1024px desktop cap all resolve below it), so it was
+       already rendering as a de facto flat 13px, not a genuinely fluid
+       size — this isn't a visual regression, it's naming what was already
+       happening and moving the floor to the one value mobile Safari
+       requires. */
+    font-size: 16px;
     color: var(--g8-midnight);
     background: var(--g8-chalk);
     border: var(--g8-stroke) solid var(--g8-border-strong);
@@ -605,13 +685,14 @@
     /* JostRoman-SemiBold 23pt per the PDF ("I hereby promise" / "Get
        invites and stay in touch") = 1.198vw — a distinct, larger size from
        the 17pt field labels above, not the same scale as previously coded. */
+    /* No top margin — this row's spacing above it comes from the grid's
+       row-gap, same as every other row. */
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 4px;
     font-family: var(--g8-font-ui);
     font-weight: var(--g8-weight-ui);
-    font-size: clamp(14px, 1.198vw, 23px);
+    font-size: clamp(14px, 1.69cqw, 23px);
     color: var(--g8-midnight);
     cursor: pointer;
   }
@@ -647,7 +728,7 @@
        2-column grid) and the bold border it shares with .join__cta. */
     grid-column: 1 / -1;
     justify-self: center;
-    margin-top: clamp(6px, 1vw, 14px);
+    margin-top: clamp(6px, 1.41cqw, 14px);
     border: var(--g8-stroke-bold) solid var(--g8-border-strong);
   }
   .join-modal__submit:hover { background: var(--g8-golden-dk); }
@@ -663,7 +744,7 @@
     margin: 0;
     text-align: center;
     font-family: var(--g8-font-inter);
-    font-size: clamp(13px, 1vw, 15px);
+    font-size: clamp(13px, 1.41cqw, 15px);
     color: var(--g8-crimson);
   }
 
@@ -678,7 +759,7 @@
        floor made the card too narrow for the caption to wrap to its normal
        two lines, pushing a third line up into the replay icon below. */
     position: relative;
-    width: clamp(260px, 32.1vw, 420px);
+    width: clamp(260px, 45.21cqw, 420px);
     aspect-ratio: 617 / 566;
     margin: 0 auto;
     border-radius: var(--g8-radius-lg);
@@ -722,10 +803,18 @@
        card, including Chrome's native center play-button hit target, since
        plain DOM order beats the video's own internal controls when nothing
        has an explicit z-index. Confirmed via elementFromPoint at the
-       video's center: it resolved to the caption text, never the video. */
+       video's center: it resolved to the caption text, never the video.
+
+       Hidden until the video actually finishes — see the `ended`/`play`
+       listeners below, which toggle --ended on .join-modal__welcome-card.
+       This wash is now specifically part of the END-STATE reveal (the
+       sign-off's legibility backing), not a treatment visible during
+       poster/playback. */
     position: absolute;
     pointer-events: none;
     inset: 0;
+    opacity: 0;
+    transition: opacity var(--g8-dur-slow) var(--g8-ease);
     background: linear-gradient(
       180deg,
       rgba(245, 244, 240, 0) 0%,
@@ -733,6 +822,9 @@
       rgba(245, 244, 240, 0.12) 70%,
       rgba(245, 244, 240, 0.26) 100%
     );
+  }
+  .join-modal__welcome-card--ended .join-modal__welcome-wash {
+    opacity: 1;
   }
 
   .join-modal__welcome-copy {
@@ -790,6 +882,15 @@
       rgba(245, 244, 240, 0.3) 30%,
       rgba(245, 244, 240, 0.42) 100%
     );
+    /* Hidden until the video ends (same mechanism/reasoning as the wash
+       above): no message/signature during poster or playback, revealed
+       only on the native `ended` event, hidden again on `play` (covers
+       Replay) — see the script below. */
+    opacity: 0;
+    transition: opacity var(--g8-dur-slow) var(--g8-ease);
+  }
+  .join-modal__welcome-card--ended .join-modal__welcome-copy {
+    opacity: 1;
   }
 
   .join-modal__welcome-text {
@@ -797,7 +898,7 @@
     margin: 0;
     font-family: var(--g8-font-ui);
     font-weight: var(--g8-weight-ui);
-    font-size: clamp(13px, 1.458vw, 28px);
+    font-size: clamp(13px, 2.05cqw, 28px);
     line-height: 1.35;
     color: var(--g8-midnight);
   }
@@ -810,22 +911,32 @@
        down away from the center Play control without touching font size
        or the signature's own dimensions. */
     display: block;
-    width: clamp(100px, 10vw, 160px);
+    width: clamp(100px, 14.08cqw, 160px);
     height: auto;
     margin: 4px auto 0;
+    /* Same handwritten-upward-slant convention as the About page's
+       signature (src/pages/about.astro, .founder__sig-img): a
+       counterclockwise rotate(-5deg) around the left edge reads as the
+       tail (right side) lifting above the start (left side), not the
+       whole mark spinning. translateX runs BEFORE rotate in the function
+       list so it's a plain horizontal shift off the box's originally-
+       centered position (margin: auto), not a shift along the rotated
+       axis — a subtle nudge right, not a re-centering. */
+    transform: translateX(16px) rotate(-5deg);
+    transform-origin: left center;
   }
 
   .join-modal__return {
     /* HelveticaNeue-Medium 28pt per the PDF — Inter, not Jost, at the same
        rate the rest of the "Inter chrome" text uses. */
     display: block;
-    margin: clamp(12px, 2vw, 24px) auto 0;
+    margin: clamp(12px, 2.82cqw, 24px) auto 0;
     background: none;
     border: none;
     padding: 0;
     font-family: var(--g8-font-inter);
     font-weight: 500;
-    font-size: clamp(15px, 1.458vw, 28px);
+    font-size: clamp(15px, 2.05cqw, 28px);
     color: var(--g8-open-water);
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -850,6 +961,30 @@
       aspect-ratio: auto;
       max-height: 85vh;
     }
+    /* Single column, so the grid's row-major auto-placement (built for the
+       desktop 2-col alignment — see .join-modal__grid's own comment) would
+       otherwise interleave the two sides here: heading, heading, promise,
+       field, promise, field... reading as neither "all the pledge, then
+       all the subscribe" nor anything else coherent. `order` restores the
+       original sequential reading flow (I promise: → its 3 paragraphs →
+       its checkbox → Subscribe → its 3 fields → its checkbox) without
+       touching the desktop markup/DOM order the alignment above depends
+       on. Indexed by nth-child position in the flat markup: 1/3/5/7/9 are
+       the pledge side, 2/4/6/8/10 the subscribe side, 11/12 the button/
+       error (unstyled by nth-child, so they'd default to order:0 and jump
+       to the front if left unset here). */
+    .join-modal__grid > *:nth-child(1) { order: 1; }  /* I promise: */
+    .join-modal__grid > *:nth-child(3) { order: 2; }  /* promise para 1 */
+    .join-modal__grid > *:nth-child(5) { order: 3; }  /* promise para 2 */
+    .join-modal__grid > *:nth-child(7) { order: 4; }  /* promise para 3 (em) */
+    .join-modal__grid > *:nth-child(9) { order: 5; }  /* I hereby promise */
+    .join-modal__grid > *:nth-child(2) { order: 6; }  /* Subscribe */
+    .join-modal__grid > *:nth-child(4) { order: 7; }  /* First name field */
+    .join-modal__grid > *:nth-child(6) { order: 8; }  /* Email field */
+    .join-modal__grid > *:nth-child(8) { order: 9; }  /* Zipcode field */
+    .join-modal__grid > *:nth-child(10) { order: 10; } /* Get invites... */
+    .join-modal__grid > *:nth-child(11) { order: 11; } /* submit button */
+    .join-modal__grid > *:nth-child(12) { order: 12; } /* error message */
     .join-modal__grid { grid-template-columns: 1fr; gap: 32px; }
     /* Smaller trim than desktop's (34px→30px, not →28px) — less proven
        slack to give up on a card this small before risking the native

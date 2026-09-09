@@ -61,6 +61,20 @@ export interface JamCardData {
    */
   imageOffsetX?: number;
   /**
+   * single only — same concept as imageOffsetX, vertically: shifts the
+   * already-scaled photo by this many CSS pixels (negative = up), applied
+   * as a plain translateY AFTER imageScale/imagePosition, independent of
+   * both. Added specifically because chasing a target pixel position (e.g.
+   * matching another card's eye-line) by re-tuning imagePosition's Y is
+   * fighting the same coupling imageOffsetX exists to avoid — that Y value
+   * is simultaneously the object-position crop AND the scale's transform-
+   * origin, so nudging it shifts the crop and re-anchors the zoom at once.
+   * Use imageOffsetY to move the rendered image a known, literal amount
+   * instead. Defaults to 0 (no shift — every existing card is unaffected).
+   * Ignored by 'split'.
+   */
+  imageOffsetY?: number;
+  /**
    * single only — CSS filter contrast()/brightness() on just this photo
    * (never the banner/name/overlay/Play button). Photos vary in their own
    * tonal range (a flatter source photo isn't a bug to "fix" globally);
@@ -114,53 +128,59 @@ export const jamCards: JamCardData[] = [
   },
   {
     artistName: 'Noah Proudfoot',
-    image: '/Noah Proudfoot.webp',
+    image: '/Noah_BW_Still.webp',
     status: 'coming-soon',
     imageLayout: 'single',
-    // The 1.9-scale reference-matching attempt over-corrected — too tight a
-    // crop, lost too much body/mountain/guitar context, and read left-
-    // weighted. Reverted to the 1.45/27% that gave the right amount of
-    // context and left both untouched since.
+    // Same live-jam still, tonally-corrected .webp (Photoshop owns the
+    // grading — no contrast/brightness filter added). X (~25%) still does
+    // essentially all the horizontal cropping, unchanged from the .jpg pass.
     //
-    // Horizontal target changed: the operator now wants Noah's FACE
-    // centered specifically (not his hat/torso "center of mass" — that
-    // read fine by that metric but still looked face-left-weighted).
-    // imagePosition's X kept fighting us here because it's doing two jobs
-    // at once (object-position AND the scale's transform-origin), so
-    // nudging it shifts the crop AND re-anchors the zoom simultaneously —
-    // moving it can shift the visible subject either direction depending
-    // on imageScale, which is why this took several rounds. Added
-    // imageOffsetX (translateX in real px, applied AFTER the scale, so
-    // it's a plain literal nudge decoupled from imagePosition/imageScale)
-    // instead of continuing to re-derive what a percentage does at this
-    // scale. imagePosition stays at 45%/27% for the crop + zoom anchor;
-    // imageOffsetX: 38 shifts the already-scaled image right by 38px,
-    // landing his FACE (not his hat or torso) on the card's centerline —
-    // confirmed by computing the actual rendered page-position of his
-    // face from the real box/image rects (not by eyeballing a screenshot,
-    // which overshot by ~17px on the first attempt here).
-    imagePosition: '45% 27%',
-    imageScale: 1.45,
-    imageOffsetX: 38,
+    // imageScale/imageOffsetY: Noah read slightly smaller than Tubby and his
+    // face sat too high, but his source was already touching the top edge at
+    // imageScale:1 — translating down with imageOffsetY alone would have
+    // revealed empty space above his hat. Needed crop margin first. The
+    // minimum scale that creates enough margin to cover a given downward
+    // imageOffsetY without exposing that gap turns out to be independent of
+    // imagePosition's Y (the transform-origin/anchor): S >= (target +
+    // buffer) / baseline_eye_Y, where baseline_eye_Y is the eye's Y position
+    // at scale 1. That put the floor around 1.25, so that's what's set here
+    // (1.05, in the original 1.04-1.06 nudge range, still left a visible
+    // sliver of background at the top — confirmed via RGB channel analysis,
+    // not just eyeballing). imageOffsetY: 15 then nudges the now-margined
+    // image down so his eye lines up with Tubby's — measured with a
+    // darkness-weighted centroid on the actual eye/iris (not eyebrow, lid,
+    // or hat line) in one shared screenshot spanning both cards, landing
+    // within ~1.3px of Tubby's eye height.
+    imagePosition: '25% 20%',
+    imageScale: 1.25,
+    imageOffsetY: 15,
   },
   {
     artistName: 'Tubby Love',
-    image: '/Tubby Love.webp',
+    image: '/Tubby_BW_Still.webp',
     status: 'coming-soon',
     imageLayout: 'single',
-    // Operator swapped in a new source photo (beanie, eyes closed, softer
-    // bokeh background) after the prior crop was tuned for the old one —
-    // this pass re-tunes scale/position for the new photo from scratch,
-    // not an increment on the old numbers. 1.05 read small/loose next to
-    // Sierra and Noah with too much soft background around him; 1.35 gives
-    // him comparable visual weight while keeping the guitar/strumming hand
-    // meaningful in the lower panel. 56% keeps his beanie fully clear of
-    // the top edge with a small margin, same "breathing room" logic as the
-    // other two. A CSS contrast/brightness lift used to live here (tuned
-    // for a since-replaced source photo, never re-verified against this
-    // one) — removed now that final tonal grading happens in Photoshop on
-    // the source WebP itself; the site should render that file as-is.
-    imagePosition: '50% 56%',
-    imageScale: 1.35,
+    // Same live-jam still, tonally-corrected .webp (Photoshop owns the
+    // grading — no contrast/brightness filter added). X (~61%) still does
+    // essentially all the horizontal cropping, unchanged from the .jpg pass.
+    //
+    // imageScale/imagePosition-Y: eye-line reference is Noah (Sierra is
+    // being replaced, no longer used). Noah's own crop is locked — already
+    // at the top edge of his source, can't move further.
+    //
+    // Switched from chasing this via imagePosition's Y percentage to
+    // imageOffsetY (see that field's doc comment in this file, and the
+    // transform comment in JamCard.astro) after repeated percentage
+    // iteration kept landing off — the Y value doing double duty as both
+    // crop position and scale transform-origin made each adjustment's
+    // actual rendered effect hard to predict and easy to mis-measure.
+    // imagePosition/imageScale are left as the last percentage-tuned pass;
+    // imageOffsetY below is a plain, literal, scale-independent nudge on
+    // top of that, set directly from a measured on-screen pixel gap
+    // against Noah's eye line (one shared screenshot, one guide line
+    // across both cards — not separately-cropped comparisons).
+    imagePosition: '61% 71%',
+    imageScale: 1.05,
+    imageOffsetY: -4,
   },
 ];

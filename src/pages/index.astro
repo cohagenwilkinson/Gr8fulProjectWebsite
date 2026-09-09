@@ -114,7 +114,7 @@ import { jamCards } from '../data/jams';
             data-podcast-play
             aria-label="Play the latest Gr8ful Podcast episode"
           >
-            <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true">
               <path d="M8 5v14l11-7z" fill="var(--g8-midnight)" />
             </svg>
           </button>
@@ -260,10 +260,12 @@ import { jamCards } from '../data/jams';
 </script>
 
 <script>
-  // Seva stats count-up. Runs once, the first time the card meaningfully
-  // enters the viewport; reduced-motion visitors get the final numbers
-  // immediately instead of a count. No external dependency — plain
-  // IntersectionObserver + requestAnimationFrame.
+  // Seva stats count-up. Replays every time the card meaningfully enters
+  // the viewport (not just the first time) — scroll away and back and it
+  // counts up again from zero. Reduced-motion visitors get the final
+  // numbers immediately instead of a count, and never touch the observer
+  // below at all. No external dependency — plain IntersectionObserver +
+  // requestAnimationFrame.
   const statsCard = document.querySelector<HTMLElement>('[data-stats-card]');
   const numberEls = statsCard?.querySelectorAll<HTMLElement>('[data-count-to]');
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -284,7 +286,17 @@ import { jamCards } from '../data/jams';
     // rather than ticking at a constant rate to the end.
     const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
+    // Bumped on every run/reset so an in-flight animation can tell it's
+    // been superseded. Without this, scrolling away mid-count and back
+    // again would leave the OLD requestAnimationFrame loop still writing
+    // numbers alongside the new one — two animations racing over the same
+    // element. Each tick checks its own captured id against the current
+    // one and just stops (no further rAF scheduled) the moment it's stale;
+    // nothing to explicitly cancel.
+    let runId = 0;
+
     const runCountUp = () => {
+      const myRunId = ++runId;
       const start = performance.now();
       const targets = Array.from(numberEls).map((el) => ({
         el,
@@ -292,6 +304,7 @@ import { jamCards } from '../data/jams';
       }));
 
       const tick = (now: number) => {
+        if (myRunId !== runId) return; // superseded by a reset or a newer run
         const elapsed = now - start;
         const progress = Math.min(elapsed / DURATION_MS, 1);
         const eased = easeOutCubic(progress);
@@ -310,13 +323,34 @@ import { jamCards } from '../data/jams';
       requestAnimationFrame(tick);
     };
 
+    // Whether this visibility session has already played its count-up —
+    // reset to false on every exit, so re-entry knows to run again. This
+    // (not observer.disconnect()) is what makes the replay possible: one
+    // observer for the page's whole life, just tracking enter/exit state
+    // instead of tearing itself down after the first hit.
+    let hasEnteredThisVisit = false;
+
+    const armForNextEntry = () => {
+      hasEnteredThisVisit = false;
+      runId++; // invalidate any animation still in flight
+      // Safe to snap to 0 here without a visible flash — this only runs
+      // when the card is NOT meaningfully visible (isIntersecting: false
+      // at the same 0.4 threshold used to trigger the count-up).
+      numberEls?.forEach((el) => {
+        el.textContent = '0';
+      });
+    };
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            runCountUp();
-            observer.disconnect();
-            break;
+            if (!hasEnteredThisVisit) {
+              hasEnteredThisVisit = true;
+              runCountUp();
+            }
+          } else {
+            armForNextEntry();
           }
         }
       },
@@ -708,7 +742,15 @@ import { jamCards } from '../data/jams';
     transition: background-color var(--g8-dur-fast) var(--g8-ease);
   }
   .podcast-teaser__play:hover { background: var(--g8-golden-dk); }
-  .podcast-teaser__play svg { width: 38%; height: 38%; margin-left: 6%; }
+  /* Triangle only, not the circle — sized as a % of .podcast-teaser__play
+     itself (the circle), so the circle's own clamp() dimensions above are
+     untouched. 38%→43% (~13% larger). margin-left scaled by the same
+     ratio (6%→6.8%) rather than left as-is: it's the optical-centering
+     nudge a Play triangle always needs (its flat edge sits left, point
+     right, so true geometric centering reads as left-heavy) — that nudge
+     should grow with the triangle, not stay fixed while the shape around
+     it gets bigger. */
+  .podcast-teaser__play svg { width: 43%; height: 43%; margin-left: 6.8%; }
 
   .podcast-teaser__cta-wrap {
     position: relative;
@@ -1124,8 +1166,20 @@ import { jamCards } from '../data/jams';
        min-height instead of the 16:9 aspect-ratio, which would otherwise
        squeeze this much overlaid content into ~210px. */
     .seva-teaser { height: auto; min-height: 640px; }
-    .seva-teaser__head { padding-inline: 24px; top: 5%; }
+    /* Same stack-and-left-align treatment as .podcast-teaser__head/
+       .jams-teaser__head at this breakpoint — SELFLESS/SERVICE was the one
+       descriptor still missing it, so it stayed right-aligned on its own
+       side instead of dropping under SEVA like LIFE/GRATITUDE and MUSIC/
+       COMMUNITY do under their wordmarks. */
+    .seva-teaser__head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+      padding-inline: 24px;
+      top: 5%;
+    }
     .seva-teaser__wordmark { width: min(100%, 140px); }
+    .seva-teaser__tags { align-items: flex-start; text-align: left; }
     .seva-teaser__definition {
       padding-inline: 24px;
       max-width: 100%;

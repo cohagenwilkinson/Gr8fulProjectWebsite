@@ -63,38 +63,48 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
       </div>
 
       <div class="founder__letter">
-        <h2 class="founder__headline">Desperate Times / Desperate Measures</h2>
+        <div class="founder__intro">
+          <h2 class="founder__headline">Desperate Times<br />Desperate Measures</h2>
 
-        <p class="founder__para robbiedob-note--misregister">
-          In 2023, I was crumbling. I didn't know what to do—but I knew if something didn't change,
-          I wasn't going to make it. So I did a radical reset, converted a van, and hit the road. Not
-          in celebration, but in desperation.
-        </p>
-        <p class="founder__para robbiedob-note--misregister">
-          Getting metaphorically (and sometimes literally) lost changed everything. I found a deep
-          gratitude practice—and it saved my life. Proactively managing my mental health grew from
-          there.
-        </p>
-        <p class="founder__para robbiedob-note--misregister">
-          The Gr8ful Project will likely be my last chapter as an entrepreneur. But this time, it's
-          not about profit. It's about building a lasting community—and helping each other live
-          happier. Simple as that.
-        </p>
+          <p class="founder__para robbiedob-note--misregister">
+            In 2023, I was crumbling. I didn't know what to do—but I knew if something didn't change,
+            I wasn't going to make it. So I did a radical reset, converted a van, and hit the road. Not
+            in celebration, but in desperation.
+          </p>
+          <p class="founder__para robbiedob-note--misregister">
+            Getting metaphorically (and sometimes literally) lost changed everything. I found a deep
+            gratitude practice—and it saved my life. Proactively managing my mental health grew from
+            there.
+          </p>
+          <p class="founder__para robbiedob-note--misregister">
+            The Gr8ful Project will likely be my last chapter as an entrepreneur. But this time, it's
+            not about profit. It's about building a lasting community—and helping each other live
+            happier. Simple as that.
+          </p>
+        </div>
 
-        <p class="founder__pullquote">I'm gr8ful for you, even if we haven't met yet.</p>
+        <!-- Sign-off group: pullquote + signature stay together as one
+             unit, set apart from the intro copy above by a controlled,
+             clamped gap (see .founder__signoff in the CSS) rather than a
+             flex push-to-bottom — see that rule's comment for why. -->
+        <div class="founder__signoff">
+          <p class="founder__pullquote">I'm gr8ful for you, even if we haven't met yet.</p>
 
-        <div class="founder__sign">
-          <img src="/join-robbiedob-sig-large.png" alt="RobbieDob's signature" class="founder__sig-img" />
+          <div class="founder__sign">
+            <img src="/join-robbiedob-sig-large.png" alt="RobbieDob's signature" class="founder__sig-img" />
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Gratitude — full-bleed Bauhaus-inspired divider. Three separate
-       layers, not one flattened image: the geometric band (inline SVG,
-       hand-composed, not runtime-random), a cream card sitting on top of
-       it, and live quote text on the card. Two SVGs (desktop/mobile) swap
-       by breakpoint rather than one viewBox trying to serve both.
+  <!-- Gratitude — Bauhaus-inspired divider, width-matched to the lower
+       cards below it (not full-bleed any more — see .gratitude__bg-wrap).
+       Three separate layers, not one flattened image: the geometric band
+       (inline SVG, hand-composed, not runtime-random) inside a
+       .g8-container-width wrapper, a cream card sitting on top of it, and
+       live quote text on the card. Two SVGs (desktop/mobile) swap by
+       breakpoint rather than one viewBox trying to serve both.
 
        Row rhythm is modeled on design-reference/assets/Bauhaus Quote
        Divider.html — specifically its embedded thumbnail SVG, the only
@@ -129,82 +139,96 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
        same check after any future edit to these rects, the same way the
        color-adjacency rule below already asks you to. -->
   <section class="gratitude">
-    <div class="gratitude__bg" aria-hidden="true">
-      <svg
-        class="gratitude__svg gratitude__svg--desktop"
-        viewBox="0 0 1440 400"
-        preserveAspectRatio="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <!-- Row 1 — short edge piece at left, two long bars — seams 152, 684 -->
-        <rect x="0" y="0" width="152" height="50" fill="var(--g8-midnight)" />
-        <rect x="152" y="0" width="532" height="50" fill="var(--g8-golden-hour)" />
-        <rect x="684" y="0" width="756" height="50" fill="var(--g8-deep-teal)" />
-        <!-- Row 2 — no edge fragment, 3 medium/long bars — seams 423, 945 -->
-        <rect x="0" y="50" width="423" height="50" fill="var(--g8-sea-glass)" />
-        <rect x="423" y="50" width="522" height="50" fill="var(--g8-ember)" />
-        <rect x="945" y="50" width="495" height="50" fill="var(--g8-open-water)" />
-        <!-- Row 3 — two long bars, short edge piece at right (crimson used once, sparingly) — seams 335, 1291 -->
-        <rect x="0" y="100" width="335" height="50" fill="var(--g8-midnight)" />
-        <rect x="335" y="100" width="956" height="50" fill="var(--g8-mesa)" />
-        <rect x="1291" y="100" width="149" height="50" fill="var(--g8-crimson)" />
-        <!-- Row 4 — short edge piece at left, two long bars — seams 68, 1029 -->
-        <rect x="0" y="150" width="68" height="50" fill="var(--g8-golden-hour)" />
-        <rect x="68" y="150" width="961" height="50" fill="var(--g8-sea-glass)" />
-        <rect x="1029" y="150" width="411" height="50" fill="var(--g8-deep-teal)" />
-        <!-- Row 5 — no edge fragment, 3 medium/long bars — seams 507, 1122 -->
-        <rect x="0" y="200" width="507" height="50" fill="var(--g8-ember)" />
-        <rect x="507" y="200" width="615" height="50" fill="var(--g8-midnight)" />
-        <rect x="1122" y="200" width="318" height="50" fill="var(--g8-open-water)" />
-        <!-- Row 6 — two long bars, short edge piece at right — seams 852, 1375 -->
-        <rect x="0" y="250" width="852" height="50" fill="var(--g8-open-water)" />
-        <rect x="852" y="250" width="523" height="50" fill="var(--g8-sea-glass)" />
-        <rect x="1375" y="250" width="65" height="50" fill="var(--g8-mesa)" />
-        <!-- Row 7 — short edge piece at left, two long bars — seams 251, 600 -->
-        <rect x="0" y="300" width="251" height="50" fill="var(--g8-deep-teal)" />
-        <rect x="251" y="300" width="349" height="50" fill="var(--g8-ember)" />
-        <rect x="600" y="300" width="840" height="50" fill="var(--g8-golden-hour)" />
-        <!-- Row 8 — short edge piece at right (not desktop's usual no-fragment slot
-             this pass — needed as a 3rd right-edge row to absorb a seam value
-             that had no clean home in a plain 3-medium-block row) — seams 768, 1206 -->
-        <rect x="0" y="350" width="768" height="50" fill="var(--g8-sea-glass)" />
-        <rect x="768" y="350" width="438" height="50" fill="var(--g8-midnight)" />
-        <rect x="1206" y="350" width="234" height="50" fill="var(--g8-mesa)" />
-      </svg>
+    <div class="gratitude__bg-wrap g8-container" aria-hidden="true">
+      <div class="gratitude__bg">
+        <svg
+          class="gratitude__svg gratitude__svg--desktop"
+          viewBox="0 0 1440 400"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <!-- Row 1 — short edge piece at left, two long bars — seams 152, 684 -->
+          <rect x="0" y="0" width="152" height="50" fill="var(--g8-midnight)" />
+          <rect x="152" y="0" width="532" height="50" fill="var(--g8-golden-hour)" />
+          <rect x="684" y="0" width="756" height="50" fill="var(--g8-deep-teal)" />
+          <!-- Row 2 — no edge fragment, 3 medium/long bars — seams 423, 945 -->
+          <rect x="0" y="50" width="423" height="50" fill="var(--g8-sea-glass)" />
+          <rect x="423" y="50" width="522" height="50" fill="var(--g8-ember)" />
+          <rect x="945" y="50" width="495" height="50" fill="var(--g8-open-water)" />
+          <!-- Row 3 — two long bars, short edge piece at right (crimson used once, sparingly) — seams 335, 1291 -->
+          <rect x="0" y="100" width="335" height="50" fill="var(--g8-midnight)" />
+          <rect x="335" y="100" width="956" height="50" fill="var(--g8-mesa)" />
+          <rect x="1291" y="100" width="149" height="50" fill="var(--g8-crimson)" />
+          <!-- Row 4 — short edge piece at left, two long bars — seams 68, 1029 -->
+          <rect x="0" y="150" width="68" height="50" fill="var(--g8-golden-hour)" />
+          <rect x="68" y="150" width="961" height="50" fill="var(--g8-sea-glass)" />
+          <rect x="1029" y="150" width="411" height="50" fill="var(--g8-deep-teal)" />
+          <!-- Row 5 — no edge fragment, 3 medium/long bars — seams 507, 1122 -->
+          <rect x="0" y="200" width="507" height="50" fill="var(--g8-ember)" />
+          <rect x="507" y="200" width="615" height="50" fill="var(--g8-midnight)" />
+          <rect x="1122" y="200" width="318" height="50" fill="var(--g8-open-water)" />
+          <!-- Row 6 — two long bars, short edge piece at right — seams 852, 1375 -->
+          <rect x="0" y="250" width="852" height="50" fill="var(--g8-open-water)" />
+          <rect x="852" y="250" width="523" height="50" fill="var(--g8-sea-glass)" />
+          <rect x="1375" y="250" width="65" height="50" fill="var(--g8-mesa)" />
+          <!-- Row 7 — short edge piece at left, two long bars — seams 251, 600 -->
+          <rect x="0" y="300" width="251" height="50" fill="var(--g8-deep-teal)" />
+          <rect x="251" y="300" width="349" height="50" fill="var(--g8-ember)" />
+          <rect x="600" y="300" width="840" height="50" fill="var(--g8-golden-hour)" />
+          <!-- Row 8 — short edge piece at right (not desktop's usual no-fragment slot
+               this pass — needed as a 3rd right-edge row to absorb a seam value
+               that had no clean home in a plain 3-medium-block row) — seams 768, 1206.
+               First block was sea-glass, which is the EXACT fill of the Planting
+               Trees card sitting flush beneath it — the bottom row must not equal
+               either lower card's color (sea-glass or deep-teal), so it doesn't
+               visually fuse with the card below. Swapped to open-water, which
+               still clears every adjacency check: differs from row 7 above at
+               every x it overlaps (deep-teal/ember/golden-hour), differs from
+               midnight to its right, and isn't used anywhere else in this row. -->
+          <rect x="0" y="350" width="768" height="50" fill="var(--g8-open-water)" />
+          <rect x="768" y="350" width="438" height="50" fill="var(--g8-midnight)" />
+          <rect x="1206" y="350" width="234" height="50" fill="var(--g8-mesa)" />
+        </svg>
 
-      <svg
-        class="gratitude__svg gratitude__svg--mobile"
-        viewBox="0 0 390 280"
-        preserveAspectRatio="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <!-- 6 rows (up from the previous 4) — thinner, related to desktop's
-             new rhythm, but not desktop's full 8: at 390px wide, 8 rows
-             would squeeze every block back down into the small fragments
-             this whole pass is trying to get rid of. Same "short blocks
-             only at an outer edge" rule applies.
+        <svg
+          class="gratitude__svg gratitude__svg--mobile"
+          viewBox="0 0 390 280"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <!-- 6 rows (up from the previous 4) — thinner, related to desktop's
+               new rhythm, but not desktop's full 8: at 390px wide, 8 rows
+               would squeeze every block back down into the small fragments
+               this whole pass is trying to get rid of. Same "short blocks
+               only at an outer edge" rule applies.
 
-             Same seam-stagger rule as desktop, scaled down: minimum 30px
-             separation between any two rows' seams (not 84px — proportional
-             to this canvas being 390px instead of 1440px, not a blind reuse
-             of the desktop number), checked all-rows-against-all-rows.
-             Seam pool: 35, 69, 111, 147, 187, 220, 259, 294, 335. -->
-        <rect x="0" y="0" width="187" height="47" fill="var(--g8-midnight)" />
-        <rect x="187" y="0" width="203" height="47" fill="var(--g8-golden-hour)" />
-        <rect x="0" y="47" width="35" height="47" fill="var(--g8-sea-glass)" />
-        <rect x="35" y="47" width="112" height="47" fill="var(--g8-ember)" />
-        <rect x="147" y="47" width="243" height="47" fill="var(--g8-deep-teal)" />
-        <rect x="0" y="94" width="259" height="47" fill="var(--g8-golden-hour)" />
-        <rect x="259" y="94" width="131" height="47" fill="var(--g8-midnight)" />
-        <rect x="0" y="141" width="111" height="47" fill="var(--g8-deep-teal)" />
-        <rect x="111" y="141" width="183" height="47" fill="var(--g8-sea-glass)" />
-        <rect x="294" y="141" width="96" height="47" fill="var(--g8-ember)" />
-        <rect x="0" y="188" width="69" height="46" fill="var(--g8-ember)" />
-        <rect x="69" y="188" width="321" height="46" fill="var(--g8-open-water)" />
-        <rect x="0" y="234" width="220" height="46" fill="var(--g8-golden-hour)" />
-        <rect x="220" y="234" width="115" height="46" fill="var(--g8-deep-teal)" />
-        <rect x="335" y="234" width="55" height="46" fill="var(--g8-mesa)" />
-      </svg>
+               Same seam-stagger rule as desktop, scaled down: minimum 30px
+               separation between any two rows' seams (not 84px — proportional
+               to this canvas being 390px instead of 1440px, not a blind reuse
+               of the desktop number), checked all-rows-against-all-rows.
+               Seam pool: 35, 69, 111, 147, 187, 220, 259, 294, 335. -->
+          <rect x="0" y="0" width="187" height="47" fill="var(--g8-midnight)" />
+          <rect x="187" y="0" width="203" height="47" fill="var(--g8-golden-hour)" />
+          <rect x="0" y="47" width="35" height="47" fill="var(--g8-sea-glass)" />
+          <rect x="35" y="47" width="112" height="47" fill="var(--g8-ember)" />
+          <rect x="147" y="47" width="243" height="47" fill="var(--g8-deep-teal)" />
+          <rect x="0" y="94" width="259" height="47" fill="var(--g8-golden-hour)" />
+          <rect x="259" y="94" width="131" height="47" fill="var(--g8-midnight)" />
+          <rect x="0" y="141" width="111" height="47" fill="var(--g8-deep-teal)" />
+          <rect x="111" y="141" width="183" height="47" fill="var(--g8-sea-glass)" />
+          <rect x="294" y="141" width="96" height="47" fill="var(--g8-ember)" />
+          <rect x="0" y="188" width="69" height="46" fill="var(--g8-ember)" />
+          <rect x="69" y="188" width="321" height="46" fill="var(--g8-open-water)" />
+          <!-- Row 6 (bottom) — same bottom-row/card-color fix as desktop: the
+               middle block was deep-teal, the exact fill of the If You're
+               Struggling card beneath it. Swapped to midnight, which differs
+               from golden-hour (left), mesa (right), and open-water (row 5
+               above, at this x-range). -->
+          <rect x="0" y="234" width="220" height="46" fill="var(--g8-golden-hour)" />
+          <rect x="220" y="234" width="115" height="46" fill="var(--g8-midnight)" />
+          <rect x="335" y="234" width="55" height="46" fill="var(--g8-mesa)" />
+        </svg>
+      </div>
     </div>
 
     <div class="gratitude__card">
@@ -300,17 +324,15 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
             <p class="proverb__text">
               "The Best Time to Plant a Tree is 30 Years Ago. The Second Best Time is Today"
             </p>
-            <p class="proverb__source" style={`font-family:${inter}`}>Chinese Proverb</p>
           </blockquote>
 
           <p class="panel-body">
             I wish 20 year old me knew what 50 year old me knows, but I'm proud I'm still planting
             trees and working to be the best and happiest version of myself.
           </p>
-          <p class="panel-body">
+          <p class="panel-body planting__closing">
             Here's to new beginnings and planting some trees together.
           </p>
-          <p class="planting__mantra">Om Mani Padme Hum</p>
         </div>
       </div>
     </div>
@@ -398,24 +420,60 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
     object-position: 50% 70%;
   }
 
-  .founder__letter { padding-top: 4px; }
+  /* PREVIOUSLY: a flex column stretched to the photo's own height, with
+     justify-content:space-between pushing the sign-off group down to meet
+     the photo's bottom edge. That broke at large desktop widths: this
+     grid's columns only grow up to .g8-container's own 1240px cap, but
+     they DO grow between ~900px and that cap, and paragraph line length
+     growing with them shortened the body copy (fewer, longer-wrapped
+     lines) — as the text got shorter, space-between had more empty height
+     to distribute above the sign-off, producing a large, growing dead gap
+     right before the orange note instead of the intended tight rhythm.
+     (Beyond the container's own cap the layout was already frozen either
+     way, so the gap didn't keep growing past ~1440px, but it was already
+     bad there.)
+
+     Fixed at the cause, not with a patch: cap the actual reading measure
+     (max-width below) so line length — and therefore paragraph height —
+     stays essentially constant across the whole desktop range instead of
+     shrinking as the column widens. With the text block's height no longer
+     shrinking, a small fixed/clamped gap (see .founder__signoff) is enough
+     on its own; the height-matching push is no longer needed. */
+  .founder__letter {
+    padding-top: 4px;
+    /* Narrowed from 620px (~6.5%) purely for vertical balance against the
+       photo — a slightly tighter measure wraps each paragraph onto a bit
+       more height without reading as a cramped column. Still well within
+       a comfortable reading width. */
+    max-width: 580px;
+  }
 
   /* Deck's heading register is Jost Bold in sentence case — the uppercase
-     runs in the deck are the SemiBold category tags, not headings. */
+     runs in the deck are the SemiBold category tags, not headings. Two
+     centered lines (structure only, borrowed from an old-site reference —
+     not its font, color, or panel treatment, all of which stay this site's
+     own) rather than the previous single "A / B" line — the slash is gone,
+     replaced by the line break in the markup. Tight line-height (vs. body
+     copy's much more open 1.73) is what makes two lines read as one
+     compact title instead of two loosely related headlines. */
   .founder__headline {
     margin: 0 0 22px;
+    text-align: center;
     font-family: var(--g8-font-ui);
     font-weight: 700;
     font-size: 30px;
-    line-height: 1.2;
+    line-height: 1.1;
     letter-spacing: -0.005em;
     color: var(--g8-midnight);
   }
 
   /* Jost-Regular 26px on the 1920 canvas ≈ 19px here; 18px with open leading
-     reads comfortably at this 556px measure (~62 characters). */
+     reads comfortably at this 556px measure (~62 characters). Gap raised
+     20px→30px — the other half of the vertical-balance adjustment
+     alongside the narrower max-width above; one consistent value, not a
+     per-paragraph tune. */
   .founder__para {
-    margin: 0 0 20px;
+    margin: 0 0 30px;
     font-family: var(--g8-font-ui);
     font-weight: 400;
     font-size: 18px;
@@ -454,9 +512,22 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
     }
   }
 
+  /* Sign-off group (orange note + signature): the orange line is the
+     story's closing thought, not a separate footer, so it gets the SAME
+     gap above it as any other paragraph transition — matching
+     .founder__para's own 30px margin-bottom exactly (these collapse at the
+     .founder__intro/.founder__signoff boundary, so 30px here reproduces
+     the identical rhythm rather than adding to it). No forced push toward
+     the photo's bottom edge — the max-width readable-width fix
+     (.founder__letter, above) is what keeps the large-desktop gap under
+     control; this value doesn't do that job. */
+  .founder__signoff {
+    margin-top: 30px;
+  }
+
   /* Deck sets its emphasis lines in Jost-Italic at body size. */
   .founder__pullquote {
-    margin: 26px 0 0;
+    margin: 0;
     font-family: var(--g8-font-ui);
     font-style: italic;
     font-weight: 400;
@@ -466,30 +537,31 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
   }
 
   /* No rule/border before this any more — the signature is the letter's
-     natural close, not a separate chapter needing a formal break. Margin
-     alone gives it room to breathe after the pullquote. */
+     natural close, not a separate chapter needing a formal break. A small,
+     fixed gap keeps it visually glued to the pullquote as one sign-off
+     unit. */
   .founder__sign {
-    /* Pulled up from 40px so the mark reads as the direct sign-off to the
-       pullquote above it, not a detached element. */
-    margin-top: 15px;
+    margin-top: 16px;
   }
   .founder__sig-img {
     display: block;
     width: clamp(128px, 12vw, 164px);
     height: auto;
-    /* A human signature drifts slightly upward left-to-right, not a flat
-       baseline — a tiny counterclockwise rotation, anchored at the left
-       edge (where a pen touches down) rather than the center, so it reads
-       as a natural upward slant rather than the whole mark spinning. */
-    transform: rotate(-1.5deg);
+    /* A human signature drifts upward left-to-right, not a flat baseline —
+       a counterclockwise rotation, anchored at the left edge (where a pen
+       touches down) rather than the center, so it reads as a natural
+       upward slant (tail higher than the start) rather than the whole
+       mark spinning. */
+    transform: rotate(-5deg);
     transform-origin: left center;
   }
 
   /* ── Gratitude ────────────────────────────────────────
-     Full-bleed Bauhaus band (own layer, edge to edge) with a centred cream
-     card (own layer) holding live quote text (own layer) — see the note in
-     the markup above for why these stay three separate things rather than
-     one flattened image. Section height is set here, independently of the
+     Bauhaus band (own layer, width-matched to the lower cards — see
+     .gratitude__bg-wrap/.gratitude__bg below) with a centred cream card
+     (own layer) holding live quote text (own layer) — see the note in the
+     markup above for why these stay three separate things rather than one
+     flattened image. Section height is set here, independently of the
      SVGs' own viewBox math; preserveAspectRatio="none" just stretches each
      one to fill whatever height this component gives it. */
   .gratitude {
@@ -498,18 +570,45 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
     align-items: center;
     justify-content: center;
     height: clamp(280px, 26vw, 400px);
-    /* Deliberate parchment pause on either side of the divider, outside the
-       geometric artwork itself — the section's own background stays plain
-       (the page's own .g8-ground paper shows straight through), so this is
-       pure air, not a colored band. Reduced (not just clamped down) at the
-       680px breakpoint below rather than left to the same formula, so it
-       still reads as intentional at phone width without eating the screen. */
-    margin-block: clamp(56px, 6vw, 100px);
+    /* Deliberate parchment pause ABOVE the divider only — Rob wants the
+       band touching the lower cards (0px gap), so the bottom half of what
+       used to be a symmetrical margin is gone. Tightened ~30% from the
+       previous clamp(40px,4.5vw,72px) — still a real, visible breathing
+       gap, just a smaller one — the founder section and divider were
+       reading as slightly disconnected. Top pause reduced further (not
+       just clamped down) at the 680px breakpoint below rather than left to
+       the same formula, so it still reads as intentional at phone width
+       without eating the screen. */
+    margin-block: clamp(28px, 3.15vw, 50px) 0;
     overflow: hidden;
   }
-  .gratitude__bg {
+  /* Same width formula as every other section on the page (.g8-container:
+     max-width 1240px, centred, page-gutter padding) — not a hand-matched
+     pixel value — so the band's outer edges land EXACTLY on the lower
+     cards' outer edges at every breakpoint, including the 680px gutter
+     swap, without needing to track two numbers in sync. Positioned
+     absolute/inset:0 (taken out of the flex row entirely, same as before
+     this pass) rather than stretched as a flex/grid track, since
+     g8-container's own auto inline margins — needed for centering — would
+     otherwise cancel a grid/flex "stretch" and collapse it to its padding
+     alone. Abs-pos + max-width + auto margins is the standard way to get a
+     capped-width, centered, full-height layer; .gratitude__card stays the
+     one real flex child, so its own centering is untouched. */
+  .gratitude__bg-wrap {
     position: absolute;
     inset: 0;
+  }
+  /* inset:0 aligns to the containing block's PADDING edge, not its content
+     edge — so .gratitude__bg-wrap's own padding-inline (inherited from
+     g8-container) has no effect on an abs-pos child sized with inset:0;
+     it would render at the wrap's full border-box width, undoing the
+     narrower divider. Insetting THIS layer by the same --g8-page-gutter
+     token instead reproduces g8-container's padding-inline directly, so
+     the visible band's edges land exactly where g8-container's content
+     edge (and therefore .split-panel) does, at every breakpoint. */
+  .gratitude__bg {
+    position: absolute;
+    inset: 0 var(--g8-page-gutter);
   }
   .gratitude__svg {
     display: block;
@@ -583,7 +682,11 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
      the site's 28px — and no offset shadow, which the homepage only ever
      puts on small elements (pill CTA, stats card). */
   .split-panel {
-    border-radius: var(--g8-radius-md);
+    /* Square top corners so this reads as one connected stack with the
+       Bauhaus band sitting flush above it (0px gap); bottom keeps the
+       site's medium radius. Order is top-left, top-right, bottom-right,
+       bottom-left. */
+    border-radius: 0 0 var(--g8-radius-md) var(--g8-radius-md);
     border: var(--g8-stroke) solid var(--g8-border-strong);
     overflow: hidden;
   }
@@ -602,6 +705,7 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
     font-size: 27px;
     line-height: 1.2;
     letter-spacing: -0.005em;
+    text-align: center;
   }
   .struggling-half .panel-heading { color: var(--g8-parchment); }
   .planting-half .panel-heading { color: var(--g8-deep-teal); }
@@ -638,6 +742,7 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
     margin-top: 92px;
     padding-top: 32px;
     border-top: 1px solid rgba(233, 216, 166, 0.32);
+    text-align: center;
   }
   .help__label {
     margin: 0 0 20px;
@@ -651,6 +756,7 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
   .help__links {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 12px;
   }
   /* Deck sets button labels in Helvetica Neue Medium → Inter 500. Site's own
@@ -662,12 +768,17 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
   }
 
   /* ── Proverb ──────────────────────────────────────────
-     Jost italic at body scale, set apart by space alone — the deck's own
-     device for an emphasis line. No rules, no box. */
+     Jost italic at body scale, centered as its own small editorial block
+     within the panel rather than run left with the surrounding paragraphs.
+     Pared back to just the line itself (no accent rules, no attribution)
+     to cut this panel's vertical bulk against If You're Struggling — the
+     italic voice alone is enough to read as a proverb, not a paragraph. */
   .proverb {
-    margin: 30px 0;
+    margin: 26px auto;
     padding: 0;
     border: 0;
+    max-width: 420px;
+    text-align: center;
   }
   .proverb__text {
     margin: 0;
@@ -677,21 +788,18 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
     font-size: 20px;
     line-height: 1.45;
     color: var(--g8-deep-teal);
-  }
-  .proverb__source {
-    margin: 12px 0 0;
-    font-weight: 400;
-    font-size: 14px;
-    color: rgba(1, 7, 21, 0.62);
+    text-align: center;
   }
 
-  .planting__mantra {
-    margin: 26px 0 0;
-    font-family: var(--g8-font-ui);
-    font-weight: 400;
-    font-style: italic;
-    font-size: 19px;
-    color: var(--g8-deep-teal);
+  /* Closing line: the panel's editorial sign-off, set apart from the rest
+     of the body copy — centered, bold, and pulled in narrower than the
+     column so it reads as a deliberate statement rather than one more
+     paragraph running the full measure. */
+  .planting__closing {
+    max-width: 340px;
+    margin: 34px auto 0;
+    font-weight: 700;
+    text-align: center;
   }
 
   @media (max-width: 900px) {
@@ -702,7 +810,12 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
     .about-eyebrow { align-items: flex-start; margin-top: 14px; }
     .g8-grid-2 { grid-template-columns: 1fr; }
     .founder__photo { max-width: 460px; margin-inline: auto; }
-    .founder__letter { padding-top: 0; }
+    /* The 620px reading-measure cap is a side-by-side-columns concern (see
+       .founder__letter above) — once stacked, the column is already
+       narrower than that on its own, and capping it here would leave the
+       text left-aligned and visibly narrower than the centered photo
+       above it. */
+    .founder__letter { padding-top: 0; max-width: none; }
     /* global.css hardcodes gap:32px on .g8-grid-2 at this breakpoint; the two
        halves must stay touching so the seam holds when stacked. */
     .split-panel .g8-grid-2 { gap: 0; }
@@ -725,10 +838,12 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
        geometric frame collapsing to a sliver. */
     .gratitude {
       height: clamp(220px, 66vw, 300px);
-      /* Proportionally smaller than desktop's clamp(56px,6vw,100px) — still
-         a deliberate pause, not the same generous editorial gap, which
-         would waste too much of a phone screen. */
-      margin-block: clamp(28px, 9vw, 48px);
+      /* Proportionally smaller than desktop's clamp(28px,3.15vw,50px) —
+         still a deliberate pause, not the same generous editorial gap,
+         which would waste too much of a phone screen. Tightened the same
+         ~30% as desktop, for the same reason. Top only — bottom stays 0 so
+         the band still touches the first lower panel here too. */
+      margin-block: clamp(14px, 4.2vw, 25px) 0;
     }
     .gratitude__svg--desktop { display: none; }
     .gratitude__svg--mobile { display: block; }

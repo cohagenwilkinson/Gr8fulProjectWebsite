@@ -41,21 +41,30 @@ const {
   imagePosition = '50% 50%',
   imageScale = 1,
   imageOffsetX = 0,
+  imageOffsetY = 0,
   imageContrast = 1,
   imageBrightness = 1,
   decorative = false,
 } = Astro.props as Props;
 
 // Scoped to just this one <img> — never the banner/name/overlay/Play button.
-// translateX is listed BEFORE scale() so it applies AFTER scaling (CSS
-// transform functions compose right-to-left) — a fixed-px shift of the
-// already-scaled image, independent of imageScale/imagePosition. That
-// independence is the point: imagePosition still sets the crop + the
-// scale's zoom anchor, but offsetX is a plain nudge on top, so it can't be
-// fought by re-deriving what percentage "means" once a scale is involved.
+// translateX/translateY are listed BEFORE scale() so they apply AFTER
+// scaling (CSS transform functions compose right-to-left) — a fixed-px
+// shift of the already-scaled image, independent of imageScale/
+// imagePosition. That independence is the point: imagePosition still sets
+// the crop + the scale's zoom anchor, but the offsets are a plain nudge on
+// top, so they can't be fought by re-deriving what a percentage "means"
+// once a scale/transform-origin is involved — this is exactly why
+// imageOffsetY exists alongside the original imageOffsetX: iterating
+// imagePosition's Y percentage to chase a specific rendered pixel target
+// (an eye-line match against another card) means re-deriving that
+// relationship after every change, since the same Y value also re-anchors
+// the scale's transform-origin. imageOffsetY is a literal, scale-immune
+// translateY in real px — set it directly from a measured pixel gap, no
+// percentage math involved.
 const photoTuningStyle =
   `object-position: ${imagePosition}; ` +
-  `transform: translateX(${imageOffsetX}px) scale(${imageScale}); transform-origin: ${imagePosition}; ` +
+  `transform: translateX(${imageOffsetX}px) translateY(${imageOffsetY}px) scale(${imageScale}); transform-origin: ${imagePosition}; ` +
   `filter: contrast(${imageContrast}) brightness(${imageBrightness});`;
 
 const isPublished = status === 'published';

@@ -46,6 +46,12 @@ interface Submission {
   email: string;
   /** Always a string — never parsed as a number, so "02138" never becomes "2138". */
   zip: string;
+  /**
+   * The modal's "Get invites and stay in touch" checkbox. Recorded in the
+   * notification email only (see sendNotification below) — never sent to
+   * Brevo Contacts/Lists, per this route's transactional-email-only scope.
+   */
+  invites: boolean;
 }
 
 function readSubmission(body: unknown): Submission {
@@ -54,6 +60,7 @@ function readSubmission(body: unknown): Submission {
     firstName: String(record.firstName ?? '').trim(),
     email: String(record.email ?? '').trim(),
     zip: String(record.zip ?? '').trim(),
+    invites: Boolean(record.invites),
   };
 }
 
@@ -80,12 +87,15 @@ async function sendNotification(submission: Submission): Promise<void> {
 
   const submittedAt = new Date().toISOString();
 
+  const stayInTouch = submission.invites ? 'Yes' : 'No';
+
   const textLines = [
     'New Gr8ful Project Pledge',
     '',
     `Name: ${submission.firstName}`,
     `Email: ${submission.email}`,
     `ZIP Code: ${submission.zip}`,
+    `Stay in Touch: ${stayInTouch}`,
     '',
     `Submitted: ${submittedAt}`,
   ];
@@ -95,7 +105,8 @@ async function sendNotification(submission: Submission): Promise<void> {
     '<p>',
     `Name: ${escapeHtml(submission.firstName)}<br>`,
     `Email: ${escapeHtml(submission.email)}<br>`,
-    `ZIP Code: ${escapeHtml(submission.zip)}`,
+    `ZIP Code: ${escapeHtml(submission.zip)}<br>`,
+    `Stay in Touch: ${stayInTouch}`,
     '</p>',
     `<p>Submitted: ${submittedAt}</p>`,
   ];
