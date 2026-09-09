@@ -232,15 +232,32 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
     </div>
 
     <div class="gratitude__card">
-      <p class="gratitude__text">
+      <!-- Invisible twin of the real attribution below, placed above the
+           quote — a standard "ghost element" balancing technique: it
+           occupies the exact same height/margin as the real one (same
+           class, same responsive font-size) at every viewport, so the
+           quote sits with EQUAL space above and below it — genuinely
+           centered, not just padded — without hardcoding a height or
+           guessing the attribution's rendered size. visibility:hidden
+           (not display:none) is what keeps it taking up that layout space
+           while rendering nothing; aria-hidden as a belt-and-suspenders
+           screen-reader skip alongside it. See .gratitude__attribution--
+           ghost below for why its margin is flipped (bottom, not top). -->
+      <p class="gratitude__attribution gratitude__attribution--ghost" aria-hidden="true">— RobbieDob</p>
+      <!-- Marks live OUTSIDE .gratitude__text now (position:absolute,
+           anchored to .gratitude__quote) instead of inline within the
+           centered paragraph — see the CSS note on .gratitude__quote for
+           why: text-align:center previously centered the mark+words as one
+           combined span, which visibly off-centers the WORDS themselves
+           whenever the mark only appears on one of the two lines. -->
+      <div class="gratitude__quote">
         <span class="gratitude__mark gratitude__mark--open" aria-hidden="true">&ldquo;</span>
-        Gratitude teaches us to<br />
-        <span class="gratitude__nowrap"
-          >live happier.<span class="gratitude__mark gratitude__mark--close" aria-hidden="true"
-            >&rdquo;</span
-          ></span
-        >
-      </p>
+        <p class="gratitude__text">
+          Gratitude teaches us to<br />
+          <span class="gratitude__nowrap">live happier.</span>
+        </p>
+        <span class="gratitude__mark gratitude__mark--close" aria-hidden="true">&rdquo;</span>
+      </div>
       <p class="gratitude__attribution">— RobbieDob</p>
     </div>
   </section>
@@ -609,6 +626,14 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
   .gratitude__bg {
     position: absolute;
     inset: 0 var(--g8-page-gutter);
+    /* Top corners only, rounded to the SAME radius as the founder photo
+       directly above it (.founder__photo, var(--g8-radius-lg)) — bottom
+       stays square since the band sits flush against the lower cards'
+       square top edges (0px gap, no rounding there). overflow:hidden is
+       what actually clips the two SVGs (edge-to-edge rects) to this
+       shape — border-radius alone doesn't clip children. */
+    border-radius: var(--g8-radius-lg) var(--g8-radius-lg) 0 0;
+    overflow: hidden;
   }
   .gratitude__svg {
     display: block;
@@ -636,44 +661,105 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
     border-radius: var(--g8-radius-sm);
     text-align: center;
   }
+  /* Wraps the text + the two decorative marks so the marks can be
+     positioned (via position:absolute) relative to this box's own edges,
+     completely OUTSIDE the text's own centering math. font-size set here
+     (not just on .gratitude__text) so the marks' 2.2em below still resolves
+     to the exact same rendered size as before — only WHERE they sit
+     changed, not their scale. */
+  .gratitude__quote {
+    position: relative;
+    font-size: clamp(22px, 2.6vw, 36px);
+  }
   .gratitude__text {
     margin: 0 auto;
     font-family: var(--g8-font-ui);
     font-weight: 600;
-    font-size: clamp(22px, 2.6vw, 36px);
+    font-size: inherit;
     line-height: 1.28;
     letter-spacing: -0.005em;
     color: var(--g8-deep-teal);
+    /* The ONLY content centered by this rule now is the words themselves —
+       no marks inside this element any more — so each line centers on its
+       own actual text width, not a mark+text combination that visibly
+       skews center toward whichever side the mark isn't on. */
+    text-align: center;
   }
-  /* "live happier." must never break across two lines, and the closing
-     quote mark stays glued to it (nested inside, not just adjacent) so it
-     can't end up orphaned on its own line either. */
+  /* "live happier." must never break across two lines. */
   .gratitude__nowrap { white-space: nowrap; }
   /* Decorative only — the quoted sentence itself carries the meaning, these
      are typographic flourishes. Instrument Serif is already loaded for
      --g8-font-display elsewhere on the site, so this borrows that rather
-     than adding a font asset just for two glyphs. Sized well past body
-     scale to read as an intentional mark, not typed punctuation, but held
-     under the quote's own line-height via a negative margin so it doesn't
-     force extra vertical space into the paragraph. */
+     than adding a font asset just for two glyphs. Positioned relative to
+     .gratitude__quote's own box (top-left / bottom-right), not inline with
+     the text, so they can never pull the centered words off true center —
+     the classic large-pull-quote convention of hanging the marks at the
+     corners of the passage, rather than gluing them to specific glyphs
+     (which would need per-breakpoint pixel tuning against fluid type to
+     stay glued). */
   .gratitude__mark {
+    position: absolute;
     font-family: var(--g8-font-display);
     font-size: 2.2em;
-    line-height: 0;
+    line-height: 1;
     color: var(--g8-golden-hour);
-    vertical-align: -0.32em;
   }
-  .gratitude__mark--open { margin-right: 0.05em; }
-  .gratitude__mark--close { margin-left: 0.05em; }
+  /* Pulled in from the container's edges (was left:-0.05em, sitting right
+     at .gratitude__quote's own boundary — far from the actual words and
+     reading as "floating near the card corner" rather than flanking the
+     sentence). Measured against the real rendered text: 0.236em lands the
+     mark's right edge ~12px before "Gratitude" starts. NOTE — em here is
+     relative to .gratitude__mark's OWN font-size (2.2em, i.e. 79.2px at
+     desktop), not .gratitude__quote's 36px; top/right/bottom/left always
+     resolve against the element's own font-size, not its parent's. Got
+     this wrong on the first pass (used the 36px basis), which put the
+     close mark 2x further in than intended, landing mid-word — that's
+     what's fixed below. */
+  .gratitude__mark--open {
+    top: -0.12em;
+    left: 0.236em;
+  }
+  /* Horizontal: same tightening as the open mark (was right:-0.05em) —
+     1.325em (mark's own font-size basis, see note above) lands its left
+     edge ~12px after "happier." ends.
+     Vertical: raised from bottom:-0.5em, which hung the mark ~37px below
+     "live happier."'s own bottom — read as dropped/detached rather than
+     part of the quote. -0.11em brings its bottom edge to within ~9px of
+     the line's bottom, mirroring how the open mark's top edge sits only
+     ~5-6px above "Gratitude"'s top — comparable, balanced overhang on
+     both ends instead of the close mark hanging noticeably lower. */
+  .gratitude__mark--close {
+    bottom: -0.3em;
+    right: 1.325em;
+  }
 
-  /* Attribution: deliberate third line, centered beneath the quote — not
-     beside it any more. Clearly subordinate via size/weight alone. */
+  /* Attribution: deliberate third line — offset right of the centered
+     quote (not centered beneath it any more) so it reads as a
+     deliberately-placed signature rather than a second centered line.
+     translateX increased (was 1.2em) so the final "b" in "RobbieDob"
+     roughly lands under the "o" in "to" closing the first line above —
+     an optical target measured against the real rendered text, not a
+     formula, so it doesn't need to move again if the copy changes. */
   .gratitude__attribution {
     margin: 12px 0 0;
     font-family: var(--g8-font-ui);
     font-weight: 500;
-    font-size: clamp(13px, 1.3vw, 16px);
+    font-size: clamp(15px, 1.5vw, 18px);
     color: var(--g8-golden-hour);
+    text-align: center;
+    transform: translateX(7.2em);
+  }
+  /* Ghost balancing element (see the markup comment above it) — same type
+     size/line-height as the real attribution, so it takes up an identical
+     amount of vertical space, but margin is flipped to bottom (the gap
+     needs to sit between the ghost and the quote below it, mirroring the
+     real attribution's gap sitting between the quote and itself). No
+     horizontal transform needed — it's invisible, so its own horizontal
+     position never matters, only its height/margin contribution to the
+     page's layout flow. */
+  .gratitude__attribution--ghost {
+    visibility: hidden;
+    margin: 0 0 12px;
   }
 
   /* ── Lower split ──────────────────────────────────────
@@ -683,10 +769,13 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
      puts on small elements (pill CTA, stats card). */
   .split-panel {
     /* Square top corners so this reads as one connected stack with the
-       Bauhaus band sitting flush above it (0px gap); bottom keeps the
-       site's medium radius. Order is top-left, top-right, bottom-right,
-       bottom-left. */
-    border-radius: 0 0 var(--g8-radius-md) var(--g8-radius-md);
+       Bauhaus band sitting flush above it (0px gap); bottom now matches
+       the founder photo's radius (var(--g8-radius-lg), was the smaller
+       --g8-radius-md) so the page's major rounded elements — photo,
+       divider top, these cards' bottom — all share one consistent value
+       instead of two visually-similar-but-different ones. Order is
+       top-left, top-right, bottom-right, bottom-left. */
+    border-radius: 0 0 var(--g8-radius-lg) var(--g8-radius-lg);
     border: var(--g8-stroke) solid var(--g8-border-strong);
     overflow: hidden;
   }
@@ -848,9 +937,17 @@ const inter = "'Inter', system-ui, -apple-system, sans-serif";
     .gratitude__svg--desktop { display: none; }
     .gratitude__svg--mobile { display: block; }
     .gratitude__card { width: min(340px, 82%); padding: 22px 20px; }
+    /* .gratitude__quote carries the font-size .gratitude__mark's em is
+       based on now (marks are its direct children, not .gratitude__text's
+       any more) — override it alongside .gratitude__text so the mark's
+       rendered size stays in step with the words at this breakpoint too. */
+    .gratitude__quote { font-size: 20px; }
     .gratitude__text { font-size: 20px; }
     .gratitude__mark { font-size: 1.9em; }
-    .gratitude__attribution { font-size: 13px; }
+    /* Smaller rightward offset than desktop's 1.2em — the card is much
+       narrower here (min(340px,82%) vs desktop's 600px), so the same
+       offset would read as too aggressive a shift. */
+    .gratitude__attribution { font-size: 14px; transform: translateX(0.6em); }
     .struggling-half,
     .planting-half { padding: 36px 26px; }
     .panel-heading { font-size: 23px; }

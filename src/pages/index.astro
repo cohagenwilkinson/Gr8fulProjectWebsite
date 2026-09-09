@@ -162,18 +162,18 @@ import { jamCards } from '../data/jams';
 
     {/*
       Card content/state lives in src/data/jams.ts; the card markup itself
-      is src/components/JamCard.astro (published vs. coming-soon — see the
-      "Jams cards" note in CLAUDE.md). All four still reuse the same
-      TEMPORARY PROTOTYPE MEDIA cropped from page 3 of the approved PDF —
-      the PDF itself repeats one placeholder performer pair (Andy Babb +
-      Lara Elle) across all four cards, which this reproduces deliberately,
-      not a live data source yet. Cards after the first are marked
-      `decorative` so the duplicate placeholder photos don't get announced
-      four times over.
+      is src/components/JamCard.astro — each card is one complete flattened
+      artwork image from Rob (photo(s), name band, and Play button if any
+      already baked in), not CSS-constructed from parts. All four are now
+      genuinely distinct artists/artwork, so none are marked `decorative`
+      any more (that was for an earlier pass where all four cards repeated
+      the same placeholder photo pair). The previous CSS-constructed card
+      design is preserved, not deleted — see JamCardLegacy.astro's header
+      comment for revert steps.
     */}
     <div class="jams-teaser__row">
-      {jamCards.map((card, i) => (
-        <JamCard {...card} decorative={i > 0} />
+      {jamCards.map((card) => (
+        <JamCard {...card} />
       ))}
     </div>
 
