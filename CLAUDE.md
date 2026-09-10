@@ -45,9 +45,11 @@ typecheck, and verify before you commit — every time.
 
 Astro static site deployed to Vercel, in the **`gr8ful` team** (not the account the Vercel
 MCP is signed into — see Tooling access gaps). The deployment URL is
-`gr8fulproject-site-nine.vercel.app`; `astro.config.mjs` sets `site` to
-`https://gr8fulproject.com`, so confirm with the operator which domain is actually serving
-before assuming.
+`gr8fulproject-site-nine.vercel.app`. The operator has confirmed the real production domain
+is **`https://www.gr8fulproject.org`** (not `.com`, and with the `www` — this superseded an
+earlier `gr8fulproject.com` value that was never actually confirmed); `astro.config.mjs`'s
+`site` is set to that. It's currently still served by the old Webflow site, not this one —
+see "Custom domain" below.
 
 **It is deployed but not launched.** Nobody is being sent to it yet, so a rough edge costs
 nothing today and there's room to leave things visibly unfinished. Don't argue for urgency
@@ -123,9 +125,8 @@ one gets closed.
 | **Latest-episode resolver** | `/api/latest-episode` should read the feed and redirect to the newest episode. Not built, so the three "Watch the latest episode" CTAs 404 today. **This is deliberate** — the operator chose to leave the gap visible rather than paper it over with a link elsewhere. Don't "fix" it by repointing the href; build the resolver once the feed exists. |
 | **Podcast platform links** | Only YouTube is real. Spotify, Apple Podcasts, and Pocket Casts point at each service's *homepage*, not the show, and the RSS chip points at an ungenerated `/feed.xml`. Same reasoning as above — left visible on purpose. |
 | **Three photos** | `/about` ("Rob and the van"), `/pbj` ("sandwich line"), and the homepage podcast card ("artist mid-taping") still render dashed `g8-placeholder` frames. Waiting on real images. |
-| **The van's story** | `/van` says "the real story is coming" over deliberately fake lore. Awaiting real copy. |
-| **Guest book** | `/van` has a "Coming soon" panel with nothing behind it. Would need storage and moderation — a real feature, not a stub to fill in. |
-| **Custom domain** | `gr8fulproject.com` is **not attached** to the Vercel project yet. Until it is, the site is only reachable at the `.vercel.app` URL. |
+| **`/van` (and `/jams`, `/podcast`, `/events`)** | These are no longer real pages — `src/pages/van.astro` etc. were deleted (git history has them) and each URL now 302s to `/` or a homepage section instead (see `redirects` in `astro.config.mjs`). Temporary, not permanent, since any of the four may become a real standalone page again — don't "fix" a 404 report for one of these by re-adding a page without checking whether a redirect already covers it on purpose. |
+| **Custom domain** | `www.gr8fulproject.org` is the confirmed production domain but is **not attached** to this Vercel project yet — still served by the old Webflow site. Until the DNS cutover happens, this site is only reachable at the `.vercel.app` URL. |
 
 ## Commands
 

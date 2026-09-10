@@ -29,7 +29,7 @@ const {
   ogImage = '/gr8ful-social-share.png',
 } = Astro.props;
 
-// Astro.site is the `site` value from astro.config.mjs (https://gr8fulproject.com)
+// Astro.site is the `site` value from astro.config.mjs (https://www.gr8fulproject.org)
 // — building absolute URLs off it rather than hardcoding the domain here.
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const socialImageURL = new URL(ogImage, Astro.site);
