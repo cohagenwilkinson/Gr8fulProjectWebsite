@@ -33,12 +33,20 @@ export default defineConfig({
   // already exist on index.astro's own sections, reused here rather than
   // duplicated. /events specifically goes to #seva per an explicit choice
   // (not #jams) — Seva is the section that now carries the calendar/event
-  // content /events used to.
+  // content /events used to. /service and /pbj also go to #seva for the
+  // same reason — /pbj was a real standalone page (src/pages/pbj.astro,
+  // now deleted; the underlying Luma "service" selector it used lives on in
+  // data/events.ts, dormant, in case the page comes back), while /service
+  // was never actually a src/pages/ route in this codebase (checked full
+  // git history) — its entry exists purely so the URL resolves once this
+  // deployment serves the production domain, rather than 404ing.
   redirects: {
     '/van': { status: 302, destination: '/' },
     '/jams': { status: 302, destination: '/#jams' },
     '/podcast': { status: 302, destination: '/#podcast' },
     '/events': { status: 302, destination: '/#seva' },
+    '/service': { status: 302, destination: '/#seva' },
+    '/pbj': { status: 302, destination: '/#seva' },
   },
 
   env: {

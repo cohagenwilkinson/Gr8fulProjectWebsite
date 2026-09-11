@@ -3,7 +3,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ColorRibbon from '../components/ColorRibbon.astro';
 ---
 
-<BaseLayout title="Nothing here — Gr8ful Project" description="That page doesn't exist. Tomorrow can be better than today.">
+{/* homeNav swaps in the homepage's own flat nav (Home/Podcast/Jams/Seva/About)
+    in place of the standard dropdown-based nav — same mechanism /about
+    already uses for a solid-background page — so this page's top menu stays
+    driven by the one current nav dataset instead of a second copy. */}
+<BaseLayout
+  title="Nothing here — Gr8ful Project"
+  description="That page doesn't exist. Tomorrow can be better than today."
+  homeNav
+>
   <div class="g8-band-dark notfound">
     <div class="g8-container g8-page" style="--pt:120px; --pb:128px">
       <h1 class="g8-display notfound__headline" style="--fs:88px; --lh:0.92">Nothing here.</h1>

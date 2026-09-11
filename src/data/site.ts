@@ -22,13 +22,12 @@ export interface NavLink {
 }
 
 /**
- * /podcast, the "Events" parent, and "Gr8ful Jams" all point at homepage
- * section anchors now (#podcast, #jams, #seva — see index.astro), not
- * their own former standalone pages, which are gone. "PB&J Service" is
- * unaffected — /pbj is still a real page. SiteHeader's own click handler
- * already knows how to scroll to a same-page anchor vs. navigate to one on
- * another page, driven generically off any href containing "#" — nothing
- * there needed to change for this.
+ * /podcast, the "Events" parent, "Gr8ful Jams", and "PB&J Service" all point
+ * at homepage section anchors now (#podcast, #jams, #seva — see
+ * index.astro), not their own former standalone pages, which are gone.
+ * SiteHeader's own click handler already knows how to scroll to a same-page
+ * anchor vs. navigate to one on another page, driven generically off any
+ * href containing "#" — nothing there needed to change for this.
  */
 export const navLinks: NavLink[] = [
   { label: 'Podcast', href: '/#podcast' },
@@ -37,7 +36,7 @@ export const navLinks: NavLink[] = [
     href: '/#seva',
     children: [
       { label: 'Gr8ful Jams', href: '/#jams' },
-      { label: 'PB&J Service', href: '/pbj' },
+      { label: 'PB&J Service', href: '/#seva' },
     ],
   },
   { label: 'About', href: '/about' },

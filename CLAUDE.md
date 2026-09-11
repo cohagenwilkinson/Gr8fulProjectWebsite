@@ -56,15 +56,17 @@ nothing today and there's room to leave things visibly unfinished. Don't argue f
 on that basis — but do treat the list below as the launch checklist, because the day it
 opens to the public those gaps stop being free.
 
-Mostly prerendered. **Four pages are server-rendered** because they show live Luma events —
+Mostly prerendered. **Two pages are server-rendered** because they show live Luma events —
 they carry `export const prerender = false`:
 
 - `/` (homepage events strip)
-- `/jams`
-- `/pbj`
 - `/pledge/thanks`
 
-Everything else builds to static HTML. `/api/pledge` is a server route too.
+`/jams` and `/pbj` used to be on this list too, back when they were their own standalone
+pages — both are gone now (see the legacy-routes row below), so their SSR event-fetching
+code moved with them: `/`'s event strip and `/pledge/thanks`'s "next event" line are what's
+left. Everything else builds to static HTML. `/api/pledge` and `/api/join-pledge` are server
+routes too.
 
 ```
 src/
@@ -123,9 +125,9 @@ one gets closed.
 | --- | --- |
 | **Podcast RSS feed** | Not published. Several things below wait on it. |
 | **Latest-episode resolver** | `/api/latest-episode` should read the feed and redirect to the newest episode. Not built, so the three "Watch the latest episode" CTAs 404 today. **This is deliberate** — the operator chose to leave the gap visible rather than paper it over with a link elsewhere. Don't "fix" it by repointing the href; build the resolver once the feed exists. |
-| **Podcast platform links** | Only YouTube is real. Spotify, Apple Podcasts, and Pocket Casts point at each service's *homepage*, not the show, and the RSS chip points at an ungenerated `/feed.xml`. Same reasoning as above — left visible on purpose. |
-| **Three photos** | `/about` ("Rob and the van"), `/pbj` ("sandwich line"), and the homepage podcast card ("artist mid-taping") still render dashed `g8-placeholder` frames. Waiting on real images. |
-| **`/van` (and `/jams`, `/podcast`, `/events`)** | These are no longer real pages — `src/pages/van.astro` etc. were deleted (git history has them) and each URL now 302s to `/` or a homepage section instead (see `redirects` in `astro.config.mjs`). Temporary, not permanent, since any of the four may become a real standalone page again — don't "fix" a 404 report for one of these by re-adding a page without checking whether a redirect already covers it on purpose. |
+| **Podcast platform links** | `podcastPlatforms` in `src/data/site.ts` (Spotify/Apple Podcasts/Pocket Casts homepages, plus an RSS chip pointing at an ungenerated `/feed.xml`) isn't rendered anywhere right now — its only consumer was the old standalone `/podcast` page, which is gone (see the legacy-routes row below). Left in place, dormant, for whenever podcast platform links come back; not a live broken link today. |
+| **Three photos** | `/about` ("Rob and the van") and the homepage podcast card ("artist mid-taping") still render dashed `g8-placeholder` frames. Waiting on real images. (The `/pbj` "sandwich line" placeholder lives on in `src/pages/pbj.astro`'s git history — not currently visible, since that page is retired; it'll matter again if `/pbj` is rebuilt.) |
+| **`/van`, `/jams`, `/podcast`, `/events`, `/service`, `/pbj`** | None of these are real pages any more — their `src/pages/*.astro` files were deleted (git history has them) and each URL now 302s to `/` or a homepage section instead (see `redirects` in `astro.config.mjs`). Temporary, not permanent, since any of them may become a real standalone page again — don't "fix" a 404 report for one of these by re-adding a page without checking whether a redirect already covers it on purpose. `/service` never had a page in this codebase to begin with; the rest did. |
 | **Custom domain** | `www.gr8fulproject.org` is the confirmed production domain but is **not attached** to this Vercel project yet — still served by the old Webflow site. Until the DNS cutover happens, this site is only reachable at the `.vercel.app` URL. |
 
 ## Commands
@@ -257,7 +259,7 @@ Most of what looks like site content isn't in this repo. Events live in Luma, si
 Brevo, past jams on YouTube — so adding an event is a Luma task, not a deploy. Say so when
 the operator asks how to change something; it's often not a code change at all.
 
-**Luma** (`src/data/events.ts`) — events are fetched at request time on the four SSR pages.
+**Luma** (`src/data/events.ts`) — events are fetched at request time on the two SSR pages.
 Calendar `cal-5Jvx9o7XeW0VVca`. Two API hosts are tried in order. `kind` (Gr8ful Jam vs PB&J
 Service) reads the event's Luma **tags** first and falls back to matching the title. Times
 format in the event's own timezone. If Luma is unreachable the page still renders with a
