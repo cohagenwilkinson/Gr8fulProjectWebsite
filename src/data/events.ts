@@ -196,7 +196,11 @@ export async function getService(limit = 4): Promise<LumaEvent[]> {
   return events.filter((event) => event.kind === 'PB&J Service').slice(0, limit);
 }
 
-/** /pledge/thanks — the single next thing to show up to. */
+/**
+ * Was used by /pledge/thanks — the single next thing to show up to. That
+ * page is retired now (see `redirects` in astro.config.mjs); left dormant
+ * here in case it or something like it comes back.
+ */
 export async function getNextEvent(): Promise<LumaEvent | undefined> {
   const events = await getEvents();
   return events[0];

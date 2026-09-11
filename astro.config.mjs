@@ -11,8 +11,8 @@ export default defineConfig({
   // serving domain with the operator rather than assuming it.
   site: 'https://www.gr8fulproject.org',
 
-  // The site stays static apart from the four pages showing Luma event
-  // cards; those opt out with `export const prerender = false`.
+  // The site stays static apart from the homepage's events strip, which
+  // opts out with `export const prerender = false` to fetch live Luma data.
   adapter: vercel(),
 
   // /van, /jams, /podcast, and /events are all old/legacy routes we don't
@@ -40,6 +40,15 @@ export default defineConfig({
   // was never actually a src/pages/ route in this codebase (checked full
   // git history) — its entry exists purely so the URL resolves once this
   // deployment serves the production domain, rather than 404ing.
+  //
+  // /pledge and /pledge/thanks both go to #join, not /join — #join
+  // (JoinProjectSection.astro) is the current "Join the Project" experience
+  // on the homepage, and is a genuinely separate, already-working signup
+  // path (posts to /api/join-pledge) from the retired pages' own form
+  // (PledgeForm.astro, posts to /api/pledge -> Brevo, which now also
+  // redirects there on success/failure — see that route) — none of that
+  // underlying form/API/Brevo code was removed; only the two standalone
+  // pages' routes are gone.
   redirects: {
     '/van': { status: 302, destination: '/' },
     '/jams': { status: 302, destination: '/#jams' },
@@ -47,6 +56,8 @@ export default defineConfig({
     '/events': { status: 302, destination: '/#seva' },
     '/service': { status: 302, destination: '/#seva' },
     '/pbj': { status: 302, destination: '/#seva' },
+    '/pledge': { status: 302, destination: '/#join' },
+    '/pledge/thanks': { status: 302, destination: '/#join' },
   },
 
   env: {

@@ -79,9 +79,11 @@ const socialImageURL = new URL(ogImage, Astro.site);
       can only be *used* if it is actually served; declaring Inter in CSS
       without loading it would silently fall back to a system face. Adding
       the family changes nothing on pages that don't ask for it — today only
-      /about does. Instrument Serif and Poppins stay because other routes
-      (/podcast, /van, /jams, /pledge, /privacy) still render with them; see
-      the note in CLAUDE.md about reconciling those with the Keynote.
+      /about does. Instrument Serif and Poppins stay because /privacy still
+      renders with them; see the note in CLAUDE.md about reconciling that
+      with the Keynote. (/podcast, /van, /jams, /pledge, and /pledge/thanks
+      are all retired now — this list used to name them, but none of them
+      render anything any more.)
     */}
     <link
       href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500&family=Jost:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap"

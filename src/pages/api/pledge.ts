@@ -3,9 +3,12 @@
  *
  * Serves both submission paths. With JavaScript the form sends JSON and gets
  * JSON back, so a failure can be shown inline without losing what was typed.
- * Without it, the browser posts the form natively and we redirect — to
- * /pledge/thanks on success, or the same page flagged with ?pledge=error so
- * nobody is told they're on the list when they aren't.
+ * Without it, the browser posts the form natively and we redirect — to the
+ * homepage's Join section on success, or the same with ?pledge=error so
+ * nobody is told they're on the list when they aren't. This used to redirect
+ * to /pledge/thanks; that standalone page (and /pledge itself) is retired,
+ * so this now points straight at #join instead of relying on that page's
+ * own redirect.
  *
  * The key and list IDs live in the Vercel project env.
  */
@@ -24,7 +27,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /** Brevo shouldn't be able to hold a submission open indefinitely. */
 const TIMEOUT_MS = 8000;
 
-const THANKS = '/pledge/thanks';
+const THANKS = '/#join';
 
 interface Submission {
   email: string;

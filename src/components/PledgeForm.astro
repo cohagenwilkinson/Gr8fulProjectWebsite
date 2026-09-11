@@ -124,7 +124,7 @@ const { validate = false } = Astro.props;
         const result = await response.json().catch(() => ({}));
 
         if (response.ok && result?.ok) {
-          window.location.assign('/pledge/thanks');
+          window.location.assign('/#join');
           return;
         }
 

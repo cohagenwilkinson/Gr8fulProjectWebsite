@@ -4,7 +4,7 @@ import { navLinks, type NavLink } from '../data/site';
 /**
  * Shared chrome — edit once, every page follows.
  * Desktop matches SiteHeader.dc.html exactly. Below 900px the nav collapses
- * behind a Menu toggle; the pledge CTA never leaves the bar.
+ * behind a Menu toggle; the CTA never leaves the bar.
  *
  * `transparent` is a homepage-only variant (passed via BaseLayout's
  * `transparentHeader` prop): the bar overlays the hero video instead of
@@ -18,8 +18,14 @@ import { navLinks, type NavLink } from '../data/site';
  * the overlay chrome — there's no hero video on these pages for a
  * transparent bar to sit over, and the overlay's white nav text would be
  * unreadable against a solid light bar, so it keeps the standard bar's
- * background and midnight text. Currently just /about. Homepage itself is
- * untouched either way.
+ * background and midnight text. Currently /about and 404. Homepage itself
+ * is untouched either way.
+ *
+ * Every route's CTA now reads "Join the Project" and points at `/#join` —
+ * `showJoinCta` only still picks between the two *styles* (outlined for
+ * `transparent`/`homeNav`, solid+shadow otherwise), not different
+ * destinations. Used to be "Take the Pledge" -> `/pledge` on the standard
+ * bar; that page is retired (see `redirects` in astro.config.mjs).
  */
 interface Props {
   transparent?: boolean;
@@ -30,12 +36,10 @@ const { transparent = false, homeNav = false } = Astro.props;
 
 /**
  * Flat homepage-hero nav — no Events dropdown, no Van, PDF-approved order.
- * Podcast/Jams/Seva point at their own homepage sections (not the standalone
- * /podcast, /jams, /pbj pages) per instruction — those pages are still
- * reachable via the section CTAs ("See all episodes →", "See all JAMS →")
- * and via the regular (non-transparent) header used on every other route,
- * which is untouched. Shared by both the homepage's transparent header and
- * any solid page opting in via `homeNav`.
+ * Podcast/Jams/Seva point at their own homepage sections, not the old
+ * standalone /podcast, /jams, /pbj pages (all retired now — see `redirects`
+ * in astro.config.mjs). Shared by both the homepage's transparent header
+ * and any solid page opting in via `homeNav`.
  */
 const heroNavLinks: NavLink[] = [
   { label: 'Home', href: '/' },
@@ -89,8 +93,8 @@ const showJoinCta = transparent || homeNav;
           Join the Project
         </a>
       ) : (
-        <a href="/pledge" class="g8-btn g8-btn--primary g8-btn--sm g8-btn--shadow header__cta">
-          Take the Pledge
+        <a href="/#join" class="g8-btn g8-btn--primary g8-btn--sm g8-btn--shadow header__cta">
+          Join the Project
         </a>
       )
     }
