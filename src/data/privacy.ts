@@ -6,12 +6,12 @@
  * real legal review before launch. Do not rewrite it here.
  */
 
-export const privacyLastUpdated = 'Last updated August 2026';
+export const privacyLastUpdated = 'Last updated September 2026';
 
 export const privacySections = [
   {
     heading: 'What we collect',
-    body: `Your email address, and whether you took the pledge. If you tell us you live around Boulder, we store that too, so we can let you know about events near you.`,
+    body: `Your first name, email address, ZIP code, and whether you took the pledge. If you'd like invites and updates, we store that preference too, so we know whether to keep you posted.`,
   },
   {
     heading: 'What we do with it',
