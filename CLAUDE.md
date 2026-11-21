@@ -48,66 +48,79 @@ MCP is signed into — see Tooling access gaps). The deployment URL is
 `gr8fulproject-site-nine.vercel.app`. The operator has confirmed the real production domain
 is **`https://www.gr8fulproject.org`** (not `.com`, and with the `www` — this superseded an
 earlier `gr8fulproject.com` value that was never actually confirmed); `astro.config.mjs`'s
-`site` is set to that. It's currently still served by the old Webflow site, not this one —
-see "Custom domain" below.
+`site` is set to that. **That domain is attached and serving this site** — checked
+2026-11-21: `www.gr8fulproject.org` answers from Vercel with the same build (identical asset
+hashes) as the `.vercel.app` URL, and `/van` redirects there. The old Webflow site no longer
+serves it. (This file used to say the opposite; the cutover happened without the note being
+updated.)
 
-**It is deployed but not launched.** Nobody is being sent to it yet, so a rough edge costs
-nothing today and there's room to leave things visibly unfinished. Don't argue for urgency
-on that basis — but do treat the list below as the launch checklist, because the day it
-opens to the public those gaps stop being free.
+**Launch status is unconfirmed.** This file used to say "deployed but not launched", written
+when only the `.vercel.app` URL existed. Now that the real domain serves it, ask the operator
+before assuming rough edges are free. Either way, treat "Not finished yet" below as the
+launch checklist.
 
-Mostly prerendered. **`/` is the only server-rendered page** — it shows live Luma events in
-its events strip, so it carries `export const prerender = false`.
-
-`/jams`, `/pbj`, and `/pledge/thanks` used to be on this list too, back when they were their
-own standalone pages — all three are gone now (see the legacy-routes row below), and their
-SSR event-fetching selectors (`getJams`, `getService`, `getNextEvent` in `data/events.ts`)
-are dormant, not deleted, in case any of those pages come back. Everything else builds to
-static HTML. `/api/pledge` and `/api/join-pledge` are server routes too.
+**Every page is prerendered to static HTML** — `/`, `/about`, `/privacy`, `/404`. The only
+server code is the two API routes, `/api/join-pledge` (live) and `/api/pledge` (dormant).
+The homepage used to be server-rendered to show live Luma events; the redesign dropped that
+strip, and nothing imports `data/events.ts` any more. The Luma code is dormant, not deleted,
+in case live events come back — and if they do, that page needs
+`export const prerender = false` again.
 
 ```
 src/
-  styles/tokens.css      design tokens (colours, spacing, shadows) — g8- prefix
-  styles/global.css      shared primitives: type, buttons, cards, grids
-  layouts/BaseLayout     head, fonts, header + footer
-  components/            SiteHeader, SiteFooter, ColorRibbon, EventCard,
-                         PledgeForm, PledgeQuote, JamCard
-  data/site.ts           nav, socials, YouTube playlist, podcast platforms
-  data/events.ts         Luma types, config, fetch, and the per-page selectors
-  data/jams.ts            homepage Jams card content — see "Jams cards" below
-  pages/api/pledge.ts    Brevo signup endpoint
+  styles/tokens.css        design tokens (colours, spacing, shadows) — g8- prefix
+  styles/global.css        shared primitives: type, buttons, cards, grids
+  layouts/BaseLayout       head, fonts, OG/Twitter tags, header + footer
+  pages/index.astro        homepage: hero, #podcast, #jams, #seva, then #join
+  pages/about.astro        founder letter
+  pages/privacy.astro      privacy page (copy shared with footer modal via data/privacy.ts)
+  pages/api/join-pledge.ts LIVE — Join modal → notification email via Brevo
+  pages/api/pledge.ts      DORMANT — Brevo mailing-list signup, nothing posts to it
+  components/              SiteHeader, SiteFooter, ColorRibbon, JamCard,
+                           JoinProjectSection (live);
+                           EventCard, PledgeForm, PledgeQuote, JamCardLegacy (dormant —
+                           not imported by any page)
+  data/site.ts             nav, socials, contact email, playlist IDs, podcast platforms
+  data/jams.ts             homepage Jams card content — see "Jams cards" below
+  data/jamsLegacy.ts       data for the dormant JamCardLegacy design
+  data/events.ts           DORMANT — Luma fetch and selectors
 ```
+
+**`design-reference/` is git-ignored** (94 MB: the approved mockup PDF
+`website-mockup-final.pdf` plus per-section assets). Comments throughout cite it as the
+source of measurements and colours, but it only exists on the machine it was copied to — a
+fresh clone won't have it. Ask the operator for a copy if you need it.
 
 ### Jams cards
 
 The four cards in the homepage Jams section (`.jams-teaser__row` in
-`src/pages/index.astro`) are data-driven, not hand-written markup. Content lives in
-`src/data/jams.ts`, an array of `{ artistName, image, secondaryImage?, status, videoUrl? }`
-objects; rendering/styling/behavior for both states lives in `src/components/JamCard.astro`.
-
-**To swap a card's content, all that's needed is:**
+`src/pages/index.astro`) are data-driven. Content lives in `src/data/jams.ts`; rendering in
+`src/components/JamCard.astro`. **Each card is one complete flattened artwork image** from
+Rob (photo, name band and — for a playable card — the Play button are all baked in), served
+as WebP beside its untouched PNG master in `public/`. All four are 787×1352; the component's
+`aspect-ratio` matches, so change both together if a future asset differs.
 
 ```
 artistName: Artist Name
-image: filename.jpg          (public/ path; reused for both photo halves
-                              unless a distinct secondaryImage is also given)
+image: /filename.webp         (the whole visible card)
 status: published | coming-soon
-videoUrl: https://...        (published only — omitting it leaves that
-                              card's Play button rendered but inert)
+videoUrl: https://...         (published only)
+hotspot: { left, top, width, height }
+                              (published only — percentages of the image's own
+                               natural size, locating the baked-in Play button)
 ```
 
-`status` drives everything else automatically:
+A published card with both `videoUrl` and `hotspot` gets a transparent, keyboard-reachable
+`target="_blank"` link over its Play button. Without both it's just artwork. Coming-soon
+artwork has no Play button, so it never gets a hotspot.
 
-- **`published`** — dark/navy border + artist banner, orange Play button. If `videoUrl` is
-  set, the Play button is a real `target="_blank"` link; if not, it still looks active but
-  is a disabled, non-clickable button (never points at a guessed URL).
-- **`coming-soon`** — gray border + banner (via the `--g8-inactive` token in
-  `tokens.css`, the one non-brand color in the palette, scoped to exactly this state), an
-  orange "Coming Soon" overlay on the lower photo, Play button gray and permanently disabled.
+Current state: card 1 (Andy Babb + Lara Elle) is published with a working video; Sierra
+Marin, Noah Proudfoot and Tubby Love are coming-soon. The Noah Proudfoot file is spelled
+`proudfood` — Rob's filename, kept as-is.
 
-All four cards currently ship as `published` with no `videoUrl`, reusing the same PDF-cropped
-placeholder photos (Andy Babb + Lara Elle) — real per-artist photos/names/status/links for
-cards 2-4 are still pending from the operator.
+The previous CSS-built design (separate photos, live text band, CSS Play button, gray
+coming-soon state via `--g8-inactive`) is `JamCardLegacy.astro` + `jamsLegacy.ts`, kept for
+revert — steps are in that component's header comment.
 
 ## Not finished yet
 
@@ -121,11 +134,17 @@ one gets closed.
 | Gap | State |
 | --- | --- |
 | **Podcast RSS feed** | Not published. Several things below wait on it. |
-| **Latest-episode resolver** | `/api/latest-episode` should read the feed and redirect to the newest episode. Not built, so the three "Watch the latest episode" CTAs 404 today. **This is deliberate** — the operator chose to leave the gap visible rather than paper it over with a link elsewhere. Don't "fix" it by repointing the href; build the resolver once the feed exists. |
+| **Latest-episode resolver** | `/api/latest-episode` should read the feed and redirect to the newest episode. Not built. `latestEpisodeUrl` in `site.ts` still points at it, but after the redesign **no page renders a "Watch the latest episode" CTA**, so nothing visibly 404s today. The operator's earlier choice was to leave such links pointing at the unbuilt route rather than somewhere else — don't repoint them; build the resolver once the feed exists. |
 | **Podcast platform links** | `podcastPlatforms` in `src/data/site.ts` (Spotify/Apple Podcasts/Pocket Casts homepages, plus an RSS chip pointing at an ungenerated `/feed.xml`) isn't rendered anywhere right now — its only consumer was the old standalone `/podcast` page, which is gone (see the legacy-routes row below). Left in place, dormant, for whenever podcast platform links come back; not a live broken link today. |
-| **Three photos** | `/about` ("Rob and the van") and the homepage podcast card ("artist mid-taping") still render dashed `g8-placeholder` frames. Waiting on real images. (The `/pbj` "sandwich line" placeholder lives on in `src/pages/pbj.astro`'s git history — not currently visible, since that page is retired; it'll matter again if `/pbj` is rebuilt.) |
+| **Podcast card image** | The homepage podcast card shows `podcast-still-prototype.jpg`, a crop from the mockup PDF flagged in code as temporary. Waiting on a real episode photo. (No page renders a dashed `g8-placeholder` frame any more; `/about` now uses `RobbieDob-about.png`.) |
+| **Seva stats** | "16 Events / 652 Lunches Served, As of August 25, 2026" is typed into `index.astro` by hand, not computed from Luma. Update it by hand. |
+| **Join pledges aren't on a mailing list** | `/api/join-pledge` only emails each pledge to `hello@gr8fulproject.org` (BCC `kbonomo@gr8fulproject.org`, marked in code as temporary testing). Nobody is added to a Brevo list automatically. Whether that's the intended process is unconfirmed. |
+| **No spam protection on `/api/join-pledge`** | No honeypot or rate limit, unlike `/api/pledge`. Anyone can script it to send unlimited emails through the Brevo account. |
+| **Dependencies** | `npm audit` (2026-11-21): 20 vulnerabilities, 1 critical (in `astro` 7.1.6; 7.4.13 available). Upgrade within the current majors, then build, check and click through. |
+| **Contact email** | `site.contactEmail` (footer and `/privacy`) is `hello@gr8fulproject.com`, while every other address is `.org`. Probably wrong — confirm with the operator. |
+| **Privacy copy** | Marked in `data/privacy.ts` as draft boilerplate needing legal review before launch. |
 | **`/van`, `/jams`, `/podcast`, `/events`, `/service`, `/pbj`, `/pledge`, `/pledge/thanks`** | None of these are real pages any more — their `src/pages/*.astro` files were deleted (git history has them) and each URL now 302s to `/` or a homepage section instead (see `redirects` in `astro.config.mjs`). Temporary, not permanent, since any of them may become a real standalone page again — don't "fix" a 404 report for one of these by re-adding a page without checking whether a redirect already covers it on purpose. `/service` never had a page in this codebase to begin with; the rest did. Retiring `/pledge` and `/pledge/thanks` did **not** touch `PledgeForm.astro`, `EventCard.astro`, or `/api/pledge` (Brevo) — all still intact, just no longer reachable via a standalone page; `/api/pledge`'s own success/failure redirect now points at `/#join` instead of the retired thanks page. The current homepage "Join the Project" experience (`#join`, `JoinProjectSection.astro`) is a separate, already-working flow posting to `/api/join-pledge`, unaffected either way. |
-| **Custom domain** | `www.gr8fulproject.org` is the confirmed production domain but is **not attached** to this Vercel project yet — still served by the old Webflow site. Until the DNS cutover happens, this site is only reachable at the `.vercel.app` URL. |
+| **Unused files in `public/`** | Not referenced by any source file: `Live_Happier.png`, `hero-540.{mp4,webm}`, `hero-720.{mp4,webm}`, `hero-poster.jpg`, `van-photo.jpg`, `join-still-pledge-prototype.jpg`, `join-still-welcome-prototype.jpg`. (The `jam_*.png` files are intentional masters for the WebP copies.) Ask before deleting — some may be wanted later. |
 
 ## Commands
 
@@ -151,7 +170,13 @@ session. This has happened.
 
 ## Environment limits — read before you trust a test
 
-This container's network policy blocks a lot. Diagnose with:
+**This section describes one specific environment** — the sandboxed cloud container most of
+this site was built in. Other setups differ: on the operator's Mac (checked 2026-11-21) the
+live site and `*.vercel.app` were reachable, there was no Playwright at the path below, and
+the `gh` CLI wasn't installed. Check what your own environment can do before relying on any
+of this. The webfont point applies everywhere a browser can't load Google Fonts.
+
+That container's network policy blocks a lot. Diagnose with:
 
 ```bash
 curl -sS "$HTTPS_PROXY/__agentproxy/status"
@@ -176,8 +201,10 @@ The consequences are easy to miss:
 
 **Chromium here has no H.264.** MP4 video will not play in tests and reports
 `readyState: 0`. AV1/WebM does work. This is a codec limitation, not a site bug — check
-`canPlayType` before concluding anything about video. The hero's H.264 fallbacks have been
-played on a real iPhone and are fine, so a `readyState: 0` on those files is the
+`canPlayType` before concluding anything about video. The redesigned hero now uses **only**
+H.264 MP4s (`hero-bw-portrait.mp4` under 768px, `hero-bw-landscape.mp4` above), so in that
+container it won't play at all. The earlier hero's H.264 fallbacks were played on a real
+iPhone and were fine, so a `readyState: 0` on those files is the
 environment, not a regression. If you need to test an MP4, have the operator open the file
 URL directly on a phone — that skips source selection and tests the file itself.
 
@@ -223,8 +250,8 @@ the same workflow; the branch decides the target.
 **Default to a branch and offer the preview link.** Push your work to a branch, wait for
 the run, pull the deployment URL out of it, and give it to the operator so they can look at
 the change on their phone before it ships. That matters more here than on most projects,
-because they can see things you can't — the live site and real webfonts are both unreachable
-from your container.
+because they can see things you can't — a real phone with real webfonts, and in some
+environments the live site itself.
 
 Getting the URL: the deploy step prints a `DEPLOY_URL=` line and writes the same URL to the
 run summary. Read it with `get_job_logs`. Hand over the link itself, not instructions for
@@ -238,10 +265,11 @@ explicitly. Don't propose adding protection.
 The flip side is real, though: nothing stands between a mistake and production, so the
 verification bar in "Before you commit" is the only safety net there is.
 
-**Env vars** — all in Vercel, and all four are set and working. They're optional in the
-schema so a missing one degrades a single feature instead of breaking the build:
-`LUMA_API_KEY`, `BREVO_API_KEY`, `BREVO_LIST_ID`, and `BREVO_BOULDER_LIST_ID` (which is
-live — "I live around Boulder" really does route to its own Brevo list).
+**Env vars** — all in Vercel, and all four were reported set and working. They're optional
+in the schema so a missing one degrades a single feature instead of breaking the build:
+`LUMA_API_KEY`, `BREVO_API_KEY`, `BREVO_LIST_ID`, and `BREVO_BOULDER_LIST_ID`. Today only
+`BREVO_API_KEY` is actually read by live code (`/api/join-pledge`); the Luma key and both
+list IDs belong to dormant code.
 
 > **Declare optional config as `envField.string`, never `envField.number`.** Astro validates
 > the entire env schema at startup, so one mistyped numeric value returns 500 on *every*
@@ -252,33 +280,46 @@ live — "I live around Boulder" really does route to its own Brevo list).
 
 ## Integrations
 
-Most of what looks like site content isn't in this repo. Events live in Luma, signups in
-Brevo, past jams on YouTube — so adding an event is a Luma task, not a deploy. Say so when
-the operator asks how to change something; it's often not a code change at all.
+Some of what looks like site content isn't in this repo — pledges arrive by email via
+Brevo, and the podcast and past jams live on YouTube. Say so when the operator asks how to
+change something; it's often not a code change at all. (Events used to come from Luma too;
+see below — today the only event-related content is the hand-typed Seva stats.)
 
-**Luma** (`src/data/events.ts`) — events are fetched at request time on `/`, the one SSR page.
-Calendar `cal-5Jvx9o7XeW0VVca`. Two API hosts are tried in order. `kind` (Gr8ful Jam vs PB&J
+**Brevo — Join pledge (live)** (`src/pages/api/join-pledge.ts`) — the `#join` modal in
+`JoinProjectSection.astro` posts JSON `{ firstName, email, zip, invites }`. The route sends
+**one transactional email** through Brevo's `/v3/smtp/email`: from
+`robbiedob@gr8fulproject.org` (a verified Brevo sender), to `hello@gr8fulproject.org`, BCC
+`kbonomo@gr8fulproject.org` (temporary), Reply-To the submitter. It never touches Brevo
+Contacts or Lists. ZIP stays a string so leading zeros survive; input is HTML-escaped; logs
+never include the submitter's details. JS-only — the modal has no native-form fallback. The
+welcome view opens only after the server confirms the send; **it must never tell someone
+they've pledged when the send failed.**
+
+**Luma (dormant)** (`src/data/events.ts`) — nothing imports this today; it fed the old
+homepage events strip and the retired `/jams` and `/pbj` pages. Calendar `cal-5Jvx9o7XeW0VVca`. Two API hosts are tried in order. `kind` (Gr8ful Jam vs PB&J
 Service) reads the event's Luma **tags** first and falls back to matching the title. Times
 format in the event's own timezone. If Luma is unreachable the page still renders with a
 short "see the full calendar" note rather than a 500 — **never make an outage look like an
 empty calendar without saying so.** Responses carry a CDN cache with
 `max-age=0, must-revalidate` so browsers always revalidate.
 
-**Brevo** (`src/pages/api/pledge.ts`) — pledge signups. Works **with and without
-JavaScript**: JS posts JSON and shows errors inline without losing what was typed; without
-JS the browser posts natively and gets a 303. Preserve both paths. On failure the thanks
-page says "Almost." with a mailto fallback — **it must never tell someone they're subscribed
-when they aren't.** There's a honeypot field guarding what is otherwise an open endpoint
-writing to a mailing list; keep it.
+**Brevo — mailing-list signup (dormant)** (`src/pages/api/pledge.ts`) — adds a Brevo
+contact to `BREVO_LIST_ID`, plus `BREVO_BOULDER_LIST_ID` for "near Boulder". Nothing posts
+to it today: its form, `PledgeForm.astro`, isn't rendered anywhere. If it's revived, keep
+what it already does: works **with and without JavaScript** (JSON with inline errors, or a
+native post that gets a 303 to `/#join`, with `?pledge=error` on failure), never reports
+success on failure, and has a honeypot field (`website`) — keep it.
 
 > Brevo offers API-key IP allowlisting. **Leave it off.** Vercel Hobby has no static egress
 > IP, so enabling it would break signups intermittently.
 
-**YouTube** — the past-jams playlist embeds from `youtube-nocookie.com` so no tracking
-cookies are set until someone presses play. Keep it that way, and keep the visible
-"watch on YouTube" link so the section is never a dead end if the embed fails.
+**YouTube** — any embed uses `youtube-nocookie.com` so no tracking cookies are set until
+someone presses play, and sits beside a visible link to YouTube so the section is never a
+dead end if the embed fails. Keep both. Jams card 1's hotspot opens video `iaSnPzfVWRY`, and
+"See all JAMS" links to playlist `PLJNrF11lrZ3g` (the old `/jams` page's embed of it is
+gone).
 
-The homepage Podcast card works the same way: the poster image + a real coded play button
+The homepage Podcast card: the poster image + a real coded play button
 (`data-podcast-play` in `index.astro`) swap in place for a `youtube-nocookie.com/embed/
 videoseries?list=PLJ06EoI7HZ1c` iframe, sized to the card via inline styles (see the scoped-
 CSS trap above for why). `autoplay=1` only ever fires from that click handler, never on page
@@ -301,6 +342,21 @@ Match the surrounding code's comment density and naming.
 
 **Naming rule:** always "Gr8ful Project", never "Gr8ful" alone. Product names keep their
 form: The Gr8ful Pledge, The Gr8ful Podcast, Gr8ful Jams, PB&J Service.
+
+**Fonts and the Keynote design.** The redesign came from a Keynote deck (exported as the
+mockup PDF in `design-reference/`). `BaseLayout.astro` loads Instrument Serif, Inter, Jost
+and Poppins from Google Fonts. Inter stands in for the deck's Helvetica Neue on interface
+chrome and is used on `/about`; Instrument Serif and Poppins remain because `/privacy` and
+shared primitives still use them. Reconciling those older faces with the Keynote's type is
+an open design question for the operator, not settled. `tokens.css` also names Yeseva One
+and Futura, which are **not** loaded and fall back to system fonts.
+
+**Some code comments are stale.** `JoinProjectSection.astro`'s header still calls the Join
+modal a local-only prototype that submits nowhere — it now posts to `/api/join-pledge` and
+sends real email. `site.ts` says the jams playlist is "embedded on /jams" (that page is
+gone) and that every "Watch the latest episode" CTA points at `latestEpisodeUrl` (none is
+rendered now). Trust the code over those comments, and fix them when you next touch the
+file.
 
 Two bugs bit repeatedly. Both are fixed globally — don't reintroduce them:
 
